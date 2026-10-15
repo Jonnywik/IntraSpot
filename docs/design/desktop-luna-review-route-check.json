@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"result\": {\n    \"checked\": 8148,\n    \"remaining\": 0,\n    \"missing\": [],\n    \"authorizedRouteChanges\": 20,\n    \"unexpectedRoutes\": [],\n    \"invalidGeometry\": [],\n    \"horizontalOverflow\": []\n  },\n  \"log\": \"\"\n}"
+    }
+  ]
+}

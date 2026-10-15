@@ -1,0 +1,1 @@
+return {file:penpot.currentFile.id,page:penpot.currentPage.id,pageName:penpot.currentPage.name,snapshotShapes:storage.finalReviewBaseline?.shapes?.length,boards:[...penpot.currentPage.root.children].filter(s=>s.type==='board'&&!s.hidden).map(s=>({id:s.id,name:s.name,width:s.width,height:s.height}))};

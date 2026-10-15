@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"result\": {\n    \"captions\": [\n      {\n        \"id\": \"ec34fcb8-3872-805c-8008-b571ba739518\",\n        \"state\": \"Default\"\n      },\n      {\n        \"id\": \"0790ece5-2133-80b3-8008-c5c66238144c\",\n        \"state\": \"Hover\"\n      },\n      {\n        \"id\": \"0790ece5-2133-80b3-8008-c5c66313cfd0\",\n        \"state\": \"Focus\"\n      },\n      {\n        \"id\": \"0790ece5-2133-80b3-8008-c5c663ead723\",\n        \"state\": \"Disabled\"\n      }\n    ]\n  },\n  \"log\": \"\"\n}"
+    }
+  ]
+}

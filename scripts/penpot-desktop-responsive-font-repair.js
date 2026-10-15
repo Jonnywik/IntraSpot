@@ -1,0 +1,3 @@
+const {walk}=storage.desktopFinal;const before=new Map(storage.responsiveBaseline.shapes.map(s=>[s.id,s]));let changed=0;
+for(const b of [...penpot.currentPage.root.children].filter(b=>b.type==='board'&&b.getPluginData('responsive-polish-v1'))){for(const s of walk(b)){if(s.type!=='text')continue;const old=before.get(s.id);if(old&&s.fontWeight!==old.fontWeight){const f=penpot.fonts.findByName(s.fontFamily);if(f)f.applyToText(s,f.variants.find(v=>v.fontWeight===old.fontWeight&&v.fontStyle==='normal'));changed++;}if(Number(s.lineHeight)>4){s.lineHeight='1.5';changed++;}}}
+return {repaired:changed};

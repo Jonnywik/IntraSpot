@@ -1,0 +1,10 @@
+const info = (await penpotUtils.getPages()).find(p => p.name === 'Mobile • Light');
+await penpot.openPage(info.id);
+const board = [...penpot.currentPage.root.children].find(b => b.name.startsWith('M12'));
+const old = [...board.children].find(s => s.name === 'Navigation / Chat / icon');
+old.hidden = true;
+const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 1-8 8H4l1.9-3.8A8 8 0 1 1 20 11.5Z" fill="none" stroke="#0E3473" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 11.5h7" stroke="#0E3473" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const icon = penpot.createShapeFromSvg(svg);
+icon.name = 'Final nav icon / Chat'; icon.x = board.x + 234; icon.y = board.y + 764;
+board.appendChild(icon);
+return { type: icon.type, width: icon.width, height: icon.height, id: icon.id };

@@ -1,0 +1,342 @@
+{
+  "date": "2026-10-11",
+  "originalBoards": 75,
+  "journeyBoards": 71,
+  "polished": 71,
+  "finished": 71,
+  "originalsChanged": [],
+  "checks": [
+    {
+      "from": "10",
+      "control": "Action / Open event details",
+      "to": "11",
+      "pass": true
+    },
+    {
+      "from": "11",
+      "control": "Action / Register",
+      "to": "12",
+      "pass": true
+    },
+    {
+      "from": "15",
+      "control": "Action / Confirm registration",
+      "to": "16",
+      "pass": true
+    },
+    {
+      "from": "16",
+      "control": "Action / View in My Events",
+      "to": "200",
+      "pass": true
+    },
+    {
+      "from": "10M",
+      "control": "Final / search hit",
+      "to": "10S",
+      "pass": true
+    },
+    {
+      "from": "10S",
+      "control": "Filter / label",
+      "to": "10CS",
+      "pass": true
+    },
+    {
+      "from": "10C",
+      "control": "Final / search hit",
+      "to": "10CS",
+      "pass": true
+    },
+    {
+      "from": "10GS",
+      "control": "Final / sample empty entry",
+      "to": "10GE",
+      "pass": true
+    },
+    {
+      "from": "10F",
+      "control": "Action / Register from feed",
+      "to": "15W",
+      "pass": true
+    },
+    {
+      "from": "15W",
+      "control": "Action / Confirm registration",
+      "to": "16W",
+      "pass": true
+    },
+    {
+      "from": "16W",
+      "control": "Action / View in My Events",
+      "to": "202",
+      "pass": true
+    },
+    {
+      "from": "201",
+      "control": "Action / Open event",
+      "to": "11C",
+      "pass": true
+    },
+    {
+      "from": "11C",
+      "control": "Action / Register",
+      "to": "53",
+      "pass": true
+    },
+    {
+      "from": "202",
+      "control": "Action / Open event",
+      "to": "11W",
+      "pass": true
+    }
+  ],
+  "ruleChecks": {
+    "facultyInclusive": true,
+    "studentRegistration": true,
+    "organizerDraft": true,
+    "approvedPublish": true,
+    "adminApproval": true,
+    "adminRejection": true,
+    "waitPosition": true,
+    "waitEstimate": true,
+    "seatCountsSeparate": true,
+    "archivedSameInbox": true
+  },
+  "invalidGeometry": [],
+  "horizontalOverflow": [],
+  "viewportOverflow": [],
+  "badTargets": [],
+  "appLoops": [],
+  "viewportChecks": [
+    {
+      "name": "8133 • Viewport / 34 / 1920×1080",
+      "w": 1920,
+      "h": 1080,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8132 • Viewport / 34 / 1440×900",
+      "w": 1440,
+      "h": 900,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8131 • Viewport / 34 / 1366×768",
+      "w": 1366,
+      "h": 768,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8130 • Viewport / 34 / 1280×720",
+      "w": 1280,
+      "h": 720,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8143 • Viewport / 40 / 1920×1080",
+      "w": 1920,
+      "h": 1080,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8142 • Viewport / 40 / 1440×900",
+      "w": 1440,
+      "h": 900,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8141 • Viewport / 40 / 1366×768",
+      "w": 1366,
+      "h": 768,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8140 • Viewport / 40 / 1280×720",
+      "w": 1280,
+      "h": 720,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8103 • Viewport / 10M / 1920×1080",
+      "w": 1920,
+      "h": 1080,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8102 • Viewport / 10M / 1440×900",
+      "w": 1440,
+      "h": 900,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8101 • Viewport / 10M / 1366×768",
+      "w": 1366,
+      "h": 768,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8100 • Viewport / 10M / 1280×720",
+      "w": 1280,
+      "h": 720,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8123 • Viewport / 53 / 1920×1080",
+      "w": 1920,
+      "h": 1080,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8122 • Viewport / 53 / 1440×900",
+      "w": 1440,
+      "h": 900,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8121 • Viewport / 53 / 1366×768",
+      "w": 1366,
+      "h": 768,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8120 • Viewport / 53 / 1280×720",
+      "w": 1280,
+      "h": 720,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8113 • Viewport / 11M / 1920×1080",
+      "w": 1920,
+      "h": 1080,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8112 • Viewport / 11M / 1440×900",
+      "w": 1440,
+      "h": 900,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8111 • Viewport / 11M / 1366×768",
+      "w": 1366,
+      "h": 768.0000000000005,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    },
+    {
+      "name": "8110 • Viewport / 11M / 1280×720",
+      "w": 1280,
+      "h": 720,
+      "header72": true,
+      "hasVerticalAccess": true,
+      "sheetWithinX": true,
+      "footerWithinHeight": true,
+      "sendWithinHeight": true
+    }
+  ],
+  "hoverWired": 473,
+  "hoverMismatch": [],
+  "disabledInteractive": [],
+  "presentationTesting": "Not executed through pointer or keyboard; MCP routes and exported PNGs are heuristic checks only",
+  "mobileComparison": {
+    "before": 3127,
+    "after": 3127,
+    "changed": 0,
+    "removed": 0,
+    "unchanged": true
+  },
+  "savedReview": {
+    "versionLabel": "Desktop responsive & motion review-ready • 2026-10-11",
+    "versionCreatedAt": "2026-10-11T02:32:29.122Z",
+    "versionIsAutosave": false,
+    "beforeVersionExists": true,
+    "file": "2714a049-ae7d-81a2-8008-b3966a11b138",
+    "page": "2714a049-ae7d-81a2-8008-b3966a11b139",
+    "qaIndex": "0790ece5-2133-80b3-8008-c576c8d773a6",
+    "originalJourneyBoards": 71,
+    "viewportCheckpoints": 20,
+    "fullHeightCompanions": 20,
+    "hoverOverlayAppearances": 94,
+    "eventSheetVariants": 9,
+    "componentStates": 8,
+    "participantTesting": "required",
+    "livePresentationTesting": "required",
+    "mobile": "unchanged — 3127 shapes compared"
+  }
+}

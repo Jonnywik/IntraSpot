@@ -1,0 +1,15 @@
+{
+  "method": "Real browser and scratch PostgreSQL, not participant validation",
+  "passed": [
+    "Guests read real public comments but cannot comment or react",
+    "All six reactions replace or clear without registering again",
+    "Lost comment response retries the same key and persisted text",
+    "Confirmed attendees send/poll real chat; personal hide/restore is reversible",
+    "Waitlisted attendee cannot read private event chat",
+    "Organization moderator removes content with a server-recorded decision and cleared evidence",
+    "Personal review pauses sending but keeps reads and seats; platform warning restores access",
+    "Mobile keeps four tabs and archived chat in the same list with countdown; expired chat is absent",
+    "Sanitized durable in-app notifications have persisted read feedback"
+  ],
+  "errors": []
+}

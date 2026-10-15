@@ -1,0 +1,4 @@
+if(penpot.currentPage.id!=='2714a049-ae7d-81a2-8008-b3966a11b139'||!storage.buttonCentering)throw Error('Desktop inspection required');
+const failed=[],routeChanges=[],missing=[];
+for(const p of storage.buttonCentering.pairs){const face=penpot.currentPage.getShapeById(p.face),label=penpot.currentPage.getShapeById(p.label);if(!face||!label){missing.push(p.labelName);continue;}if(label.align!=='center'||label.verticalAlign!=='center'||Math.abs(label.x+label.width/2-face.x-face.width/2)>.1||Math.abs(label.y+label.height/2-face.y-face.height/2)>.1)failed.push({board:p.boardName,label:p.labelName});const actions=label.interactions.map(i=>({trigger:i.trigger,type:i.action.type,d:i.action.destination?.id}));if(JSON.stringify(actions)!==JSON.stringify(p.actions))routeChanges.push(p.labelName);}
+return {labelsChecked:storage.buttonCentering.pairs.length,failed,routeChanges,missing,scope:'Desktop only; no mobile or application-code changes'};

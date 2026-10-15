@@ -1,0 +1,1 @@
+const q=[...penpot.currentPage.root.children].find(b=>b.name==='80 • QA / Responsive & Motion Guide');return {guide:q?{id:q.id,children:q.children.length,last:q.children.slice(-6).map(s=>s.name)}:null,components:penpot.currentPage.getPluginData('desktop-final-components'),helpers:!!storage.responsiveTools?.board};

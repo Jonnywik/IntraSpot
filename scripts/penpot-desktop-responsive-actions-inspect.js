@@ -1,0 +1,1 @@
+return [...penpot.currentPage.root.children].filter(b=>b.type==='board'&&b.name.startsWith('10M')).map(b=>({b:b.name,children:[...b.children].map(s=>({n:s.name,id:s.id,x:s.x-b.x,y:s.y-b.y,w:s.width,h:s.height,children:s.children?.length}))}));

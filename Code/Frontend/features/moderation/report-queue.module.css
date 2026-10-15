@@ -1,0 +1,63 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+  gap: 24px;
+}
+
+.list,
+.detail {
+  min-width: 0;
+}
+
+.reportList {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.reportButton {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  padding: 16px;
+  color: var(--ink);
+  text-align: left;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.reportButton:hover,
+.reportButton[aria-pressed='true'] {
+  border-color: var(--blue);
+  background: #f5f8ff;
+}
+
+.reportMeta {
+  color: var(--muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.evidence {
+  max-height: 360px;
+  overflow: auto;
+  padding: 16px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f7f8fb;
+  border-radius: 12px;
+}
+
+.auditList {
+  display: grid;
+  gap: 12px;
+  padding-left: 20px;
+}
+
+.identifier {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 13px;
+}

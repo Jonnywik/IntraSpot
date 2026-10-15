@@ -1,0 +1,2 @@
+const walk=s=>[s,...(s.children||[]).flatMap(walk)];
+return [...penpot.currentPage.root.children].filter(b=>b.type==='board'&&!b.hidden&&/^(50 |210|211|212|213)/.test(b.name)).map(b=>({name:b.name,items:walk(b).filter(s=>s.type!=='text'&&s.y-b.y>280||s.name==='Action / Open calendar event').map(s=>({name:s.name,type:s.type,x:s.x-b.x,y:s.y-b.y,w:s.width,h:s.height,image:s.fills?.some(f=>f.fillImage),routes:s.interactions?.map(i=>i.action?.destination?.name)}))}));

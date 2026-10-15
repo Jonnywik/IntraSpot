@@ -1,0 +1,2 @@
+const {by,walk}=storage.desktopFinal;
+return ['10M','11M','53'].map(p=>{const b=by(p);return {b:b.name,children:walk(b).filter(s=>/Responsive|Action \/(Register from feed|Open event details)|active subtitle|Filter \/|Search \/|Event card \/ shell|org avatar/.test(s.name)).map(s=>({n:s.name,p:s.parent.name,idx:s.parentIndex,x:s.x-b.x,y:s.y-b.y,w:s.width,h:s.height,hidden:s.hidden,fill:s.fills,children:s.children?.map(c=>({n:c.name,idx:c.parentIndex}))}))};});

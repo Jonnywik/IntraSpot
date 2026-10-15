@@ -1,0 +1,1 @@
+const {walk,by}=storage.responsiveTools;return ['40','41','8140'].map(p=>{const b=[...penpot.currentPage.root.children].find(b=>b.name.startsWith(p+' '));return {board:b.name,w:b.width,shapes:[...b.children].filter(s=>!s.name.startsWith('Responsive / Fixed')).map(s=>({n:s.name,x:s.x-b.x,y:s.y-b.y,w:s.width,h:s.height,type:s.type}))};});

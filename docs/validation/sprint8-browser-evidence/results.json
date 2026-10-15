@@ -1,0 +1,15 @@
+{
+  "method": "Real browser and scratch PostgreSQL, not participant validation",
+  "passed": [
+    "Guest browses approved clubs without applications, private rosters or anonymous membership",
+    "Non-PLM signed-in application can be approved by moderator, but member features remain locked",
+    "Lost application response retries one key; pending basic consent expires after categorized rejection",
+    "Rejection allows immediate reapplication; withdrawing then enforces the persisted 24-hour cooldown",
+    "Targeted invitation acceptance grants membership and refreshes composed My Clubs access without signing in again",
+    "Owner grants admin; another admin cannot remove that admin; owner removal persists",
+    "Leaving ends existing event participation and active/archived chat without deleting attendance history",
+    "Released membership departure seat promotes the public faculty waiter and persists an in-app notice",
+    "Mobile retains four tabs, readable membership status and no organization-management controls"
+  ],
+  "errors": []
+}

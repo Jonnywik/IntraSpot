@@ -1,0 +1,4 @@
+const page = (await penpotUtils.getPages()).find(p => p.name === 'Mobile • Light');
+await penpot.openPage(page.id);
+const boards = [...penpot.currentPage.root.children].filter(s => s.type === 'board');
+return boards.filter(b => /M1[1-3]/.test(b.name)).map(b => ({ name: b.name, items: [...b.children].filter(s => !/Navigation|Time|Status indicators|Brand/.test(s.name)).map(s => ({ name: s.name, type: s.type, x: Math.round(s.x-b.x), y: Math.round(s.y-b.y), w: Math.round(s.width), h: Math.round(s.height), text: s.type === 'text' ? s.characters : undefined, fontSize: s.type === 'text' ? s.fontSize : undefined, fontFamily: s.type === 'text' ? s.fontFamily : undefined, fontWeight: s.type === 'text' ? s.fontWeight : undefined, fills: s.fills, radius: s.type === 'rectangle' ? s.borderRadius : undefined })).slice(0,30) }));

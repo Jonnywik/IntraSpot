@@ -1,0 +1,10 @@
+const {walk}=storage.responsiveTools;
+const ids=new Set(storage.responsiveBaseline.shapes.filter(s=>s.type==='board'&&s.parent==='00000000-0000-0000-0000-000000000000'&&!s.hidden&&!/^(00|01|02|03) /.test(s.name)).map(s=>s.id));
+const app=[...penpot.currentPage.root.children].filter(b=>b.type==='board'&&!b.hidden&&ids.has(b.id));
+const cache=new Map([...penpot.currentPage.root.children].filter(b=>b.type==='board'&&!b.hidden&&b.getPluginData('desktop-sheet-source')).map(b=>[b.getPluginData('desktop-sheet-source'),b]));let made=0,wired=0;
+const eligible=app.filter(b=>/^(11[A-Z]?|49D) /.test(b.name)&&walk(b).some(s=>s.name==='Responsive / Right event sheet • 540 px'));
+for(const target of eligible){if(cache.has(target.id))continue;const source=walk(target).find(s=>s.name==='Responsive / Right event sheet • 540 px'),sheet=source.clone();penpot.currentPage.root.appendChild(sheet);sheet.name='89 • Sheet / '+target.name;sheet.x=26000+(cache.size%4)*660;sheet.y=11500+Math.floor(cache.size/4)*1050;sheet.resize(540,target.height);sheet.showInViewMode=false;sheet.setPluginData('desktop-sheet-source',target.id);
+ for(const s of walk(sheet)){if(s.name==='Action / Close panel'||s.name==='Action / Close panel / outline'){for(const i of [...s.interactions])i.remove();s.addInteraction('click',{type:'close-overlay',destination:sheet,animation:{type:'slide',way:'out',direction:'right',duration:180,easing:'ease-in'}});}}
+ cache.set(target.id,sheet);made++;if(made===3)break;}
+for(const b of app)for(const s of walk(b))for(const i of [...s.interactions]){if(i.trigger!=='click'||i.action.type!=='navigate-to'||s.name.startsWith('Action / Close'))continue;const dest=i.action.destination,o=cache.get(dest.id);if(!o)continue;const a={type:'open-overlay',destination:o,position:'top-right',closeWhenClickOutside:true,addBackgroundOverlay:true,animation:{type:'slide',way:'in',direction:'left',duration:240,easing:'ease-out'}};i.remove();s.addInteraction('click',a);s.setPluginData('desktop-canonical-destination',dest.id);wired++;}
+return {created:made,wired,sheets:cache.size,remaining:eligible.filter(b=>!cache.has(b.id)).length};

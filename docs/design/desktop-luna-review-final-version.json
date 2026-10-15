@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"result\": {\n    \"label\": \"Desktop • Luna reviewed and refined • 2026-10-11\",\n    \"createdAt\": \"2026-10-11T08:18:29.091Z\",\n    \"isAutosave\": false,\n    \"journeyBoards\": 71,\n    \"buttonLabelsChecked\": 900,\n    \"authorizedDraftRouteChanges\": 20,\n    \"unexpectedRouteChanges\": 0,\n    \"captionAlignment\": \"pass\",\n    \"presentationTesting\": \"Not performed: heuristic review and exported-image verification only\"\n  },\n  \"log\": \"\"\n}"
+    }
+  ]
+}

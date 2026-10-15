@@ -1,0 +1,17 @@
+graphify-out/
+**/.venv/
+**/.mvp-venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.env
+**/.env.*
+!**/.env.example
+**/.local/
+**/node_modules/
+**/.next/
+**/out/
+**/tsconfig.tsbuildinfo
+Code/Frontend/public/local-accounts.json
+Code/Backend/.cache/
+Code/Frontend/.cache/
+/NUL

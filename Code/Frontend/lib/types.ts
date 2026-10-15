@@ -1,0 +1,33 @@
+import type { components } from './api.generated';
+export type Actor = components['schemas']['MeResponse'];
+export type Profile = components['schemas']['ProfileResponse'];
+export type PublicEvent = components['schemas']['EventPublic'];
+export type PrivateEvent = components['schemas']['EventPrivate'];
+export type EventDraftInput = components['schemas']['EventDraftInput'];
+export type Registration = components['schemas']['RegistrationResult'];
+export type MyRegistration = components['schemas']['MyRegistration'];
+export type RegistrationReview = components['schemas']['RegistrationReview'];
+export type EventChangeInput = components['schemas']['EventChangeInput'];
+export type Workspace = components['schemas']['OrganizationWorkspaceOut'];
+export type OrganizationApplication = components['schemas']['OrganizationApplicationOut'];
+export type Organization = components['schemas']['OrganizationOut'];
+export type MyOrganizations = components['schemas']['MyOrganizationsOut'];
+export type Notification = components['schemas']['NotificationPublic'];
+export type ContentItem = components['schemas']['ContentItem'];
+export type ContentPage = components['schemas']['ContentPage'];
+export type ReactionSummary = components['schemas']['ReactionSummary'];
+export type ChatThread = components['schemas']['ChatThread'];
+export type ChatInboxItem = components['schemas']['ChatInboxItem'];
+export type ReportReceipt = components['schemas']['ReportReceipt'];
+export type ReportReview = components['schemas']['ReportReview'];
+export type MembershipApplicationOut = components['schemas']['MembershipApplicationOut'];
+export type MembershipApplicationReview = components['schemas']['MembershipApplicationReview'];
+export type MembershipApplicationInput = components['schemas']['MembershipApplicationInput'];
+export type MembershipKeyInput = components['schemas']['MembershipKeyInput'];
+export type MembershipInviteOut = components['schemas']['MembershipInviteOut'];
+export type MembershipSelfOut = components['schemas']['MembershipSelfOut'];
+export type MembershipRosterItem = components['schemas']['MembershipRosterItem'];
+export type MembershipChangeOut = components['schemas']['MembershipChangeOut'];
+export type MembershipAuditOut = components['schemas']['MembershipAuditOut'];
+
+export interface DemoAccount { label: string; token: string }

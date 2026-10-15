@@ -1,0 +1,54 @@
+export class ApiError extends Error {
+  status: number;
+  code: string;
+  constructor(status: number, code: string, message: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+  }
+}
+
+export function localDemoEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_LOCAL_DEMO === 'true' &&
+    typeof window !== 'undefined' && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+}
+
+export async function api<T>(path: string, options: {
+  token?: string | null; method?: string; body?: unknown;
+  idempotencyKey?: string; signal?: AbortSignal;
+} = {}): Promise<T> {
+  if (!path.startsWith('/') || path.startsWith('//')) {
+    throw new ApiError(0, 'invalid_api_path', 'An internal API path is required.');
+  }
+  let pathname: string;
+  try { pathname = decodeURIComponent(path.split(/[?#]/, 1)[0]); }
+  catch { throw new ApiError(0, 'invalid_api_path', 'An internal API path is required.'); }
+  if (pathname.includes('\\') || pathname.split('/').some(part => part === '.' || part === '..') || path.includes('#')) {
+    throw new ApiError(0, 'invalid_api_path', 'An internal API path is required.');
+  }
+  const base = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001');
+  if (base.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(base.hostname) || base.username || base.password) {
+    throw new ApiError(0, 'local_api_required', 'This MVP connects only to a local backend.');
+  }
+  const headers: Record<string, string> = {};
+  if (options.token) headers.Authorization = `Bearer ${options.token}`;
+  if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+  if (options.idempotencyKey) headers['Idempotency-Key'] = options.idempotencyKey;
+  let response: Response;
+  try {
+    response = await fetch(`${base.origin}/api/v1${path}`, {
+      method: options.method || 'GET', headers,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      signal: options.signal, cache: 'no-store', credentials: 'omit',
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') throw error;
+    throw new ApiError(0, 'connection_failed', 'Cannot reach the local backend. Check it is running, then retry.');
+  }
+  const body = await response.json().catch(() => null);
+  if (!response.ok) throw new ApiError(response.status,
+    body?.error?.code || 'request_failed',
+    body?.error?.message || 'The request could not be completed. Please retry.');
+  return body as T;
+}

@@ -1,0 +1,1 @@
+return {page:penpot.currentPage.name,done:!!storage.desktopFinal,boards:[...penpot.currentPage.root.children].filter(s=>s.type==='board'&&/^(10F|11F|15W|16W|16C|11C|11W|52 |53 |54 |60 |61 )/.test(s.name)).map(b=>({id:b.id,name:b.name,children:b.children.length}))};

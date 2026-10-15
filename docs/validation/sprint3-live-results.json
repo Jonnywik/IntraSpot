@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-13T02:06:49.746Z",
+  "method": "Live loopback HTTP plus distinct-instance restart; not participant testing",
+  "phase": "complete",
+  "checks": [
+    {
+      "check": "Local health, readiness and verified fictional identities",
+      "pass": true
+    },
+    {
+      "check": "Incomplete pending drafts save privately and cannot publish or leak into discovery",
+      "pass": true
+    },
+    {
+      "check": "Approved publishing still requires complete valid scheduled/instant event data",
+      "pass": true
+    },
+    {
+      "check": "Approved publishing returns safe public details, empty optional summary and separate seat/reaction counts",
+      "pass": true
+    },
+    {
+      "check": "Guest discovery searches literal titles and organization names, not venues; Upcoming/Newest compose",
+      "pass": true
+    },
+    {
+      "check": "Faculty My Clubs composes with search/sort; guests, ineligible accounts and nonmembers remain bounded",
+      "pass": true
+    },
+    {
+      "check": "Published events stay immutable; unsupported cancellation and cross-organization private access are denied",
+      "pass": true
+    },
+    {
+      "check": "Distinct-instance backend restart preserves published event fields/counts and incomplete private drafts",
+      "pass": true
+    },
+    {
+      "check": "Final source rejects capacity beyond PostgreSQL integer storage with a controlled error and no draft mutation",
+      "pass": true
+    },
+    {
+      "check": "Final live API denies registration against a private draft without changing its public visibility or private fields",
+      "pass": true
+    }
+  ]
+}

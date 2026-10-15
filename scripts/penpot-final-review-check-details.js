@@ -1,0 +1,8 @@
+const by=id=>penpot.currentPage.getShapeById(id),edits=[...(storage.finalReviewEditsA||[]),...(storage.finalReviewEditsB||[])];
+const buttonFailures=[];for(const p of storage.buttonCentering.pairs){const f=by(p.face),t=by(p.label);if(!f||!t||t.align!=='center'||t.verticalAlign!=='center'||Math.abs(t.x+t.width/2-f.x-f.width/2)>.1||Math.abs(t.y+t.height/2-f.y-f.height/2)>.1)buttonFailures.push(p.label);}
+const specimenIds=['ec34fcb8-3872-805c-8008-b571b9b83af4','ec34fcb8-3872-805c-8008-b571b9e3a5af','ec34fcb8-3872-805c-8008-b571ba14beb4','ec34fcb8-3872-805c-8008-b571ba44c802','ec34fcb8-3872-805c-8008-b571babbb3a7'];
+const specimenFailures=specimenIds.filter(id=>{const f=by(id);return [...f.children].some(t=>t.type==='text'&&(t.align!=='center'||t.verticalAlign!=='center'||Math.abs(t.x+t.width/2-f.x-f.width/2)>.1||Math.abs(t.y+t.height/2-f.y-f.height/2)>.1));});
+const header=by('0790ece5-2133-80b3-8008-c56eaa0e949d'),body=by('0790ece5-2133-80b3-8008-c56eaa0e9481'),helper=by('0790ece5-2133-80b3-8008-c572ecacc5c9');
+const disabledActions=edits.filter(e=>e.change==='Explicit unavailable message action').filter(e=>by(e.id).interactions.some(i=>['click','mouse-enter'].includes(i.trigger))).map(e=>e.id);
+const changed=edits.map(e=>{const s=by(e.id);return {...e,text:s.characters,size:s.fontSize,width:s.width,height:s.height,align:s.align,verticalAlign:s.verticalAlign,hidden:s.hidden};});
+const result={buttonLabelsChecked:storage.buttonCentering.pairs.length+specimenIds.length,buttonFailures,specimenFailures,disabledActions,headingFooterClearance:body.y+body.height-header.y-header.height,helperFitsTwoLines:helper.height>=Number(helper.fontSize)*Number(helper.lineHeight)*2,changed};storage.finalReviewDetails=result;return result;

@@ -1,0 +1,16 @@
+{
+  "method": "Live browser against real PostgreSQL scratch database; not participant testing",
+  "passed": [
+    "Guest discovery and public detail, distinct attendance counts",
+    "Incomplete student completes persisted profile, registers, finds My Events",
+    "Faculty eligibility and immediate/persisted waitlist position",
+    "Withdrawal promotes faculty waiter and persists an in-app notification",
+    "Owner membership supports My Clubs composed with organization search, not venue",
+    "Lost-response retry preserves idempotency key and one persisted registration",
+    "Pending organization saves incomplete private draft and cannot publish",
+    "Platform admin records authoritative offline accreditation decision",
+    "Approved organization publishes; newly created query route loads without rebuild",
+    "Five viewport fit checks; four mobile tabs; direct mobile manager editor unavailable"
+  ],
+  "browserErrors": []
+}

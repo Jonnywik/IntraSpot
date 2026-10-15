@@ -1,0 +1,8 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"result\": {\n    \"versionLabel\": \"Desktop responsive & motion review-ready • 2026-10-11\",\n    \"versionCreatedAt\": \"2026-10-11T02:32:29.122Z\",\n    \"versionIsAutosave\": false,\n    \"beforeVersionExists\": true,\n    \"file\": \"2714a049-ae7d-81a2-8008-b3966a11b138\",\n    \"page\": \"2714a049-ae7d-81a2-8008-b3966a11b139\",\n    \"qaIndex\": \"0790ece5-2133-80b3-8008-c576c8d773a6\",\n    \"originalJourneyBoards\": 71,\n    \"viewportCheckpoints\": 20,\n    \"fullHeightCompanions\": 20,\n    \"hoverOverlayAppearances\": 94,\n    \"eventSheetVariants\": 9,\n    \"componentStates\": 8,\n    \"participantTesting\": \"required\",\n    \"livePresentationTesting\": \"required\",\n    \"mobile\": \"unchanged — 3127 shapes compared\"\n  },\n  \"log\": \"\"\n}"
+    }
+  ]
+}

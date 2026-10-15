@@ -1,0 +1,1 @@
+return storage.desktopPolish.audit.filter(b=>/^(15 |16 |34 |50 )/.test(b.name)).map(b=>({name:b.name,id:b.id,text:b.text.filter(t=>t.y>90).map(t=>({name:t.name,text:t.text,x:t.x,y:t.y,w:t.w,h:t.h})),routes:b.routes.filter(r=>!/Nav|nav/.test(r.name))}));

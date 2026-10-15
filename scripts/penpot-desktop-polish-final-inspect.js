@@ -1,0 +1,3 @@
+const all=[...penpot.currentPage.root.children].filter(b=>b.type==='board'&&!b.hidden);
+const walk=s=>[s,...[...(s.children||[])].flatMap(walk)];
+return {newStates:all.filter(b=>/^(10S|10CS|10GS|10E|11D) /.test(b.name)).map(b=>({id:b.id,name:b.name,rootNames:[...b.children].map(s=>s.name),routes:walk(b).flatMap(s=>[...s.interactions].map(i=>({shape:s.name,to:i.action.destination?.name}))).filter(r=>!/Nav|nav|Utility|Final hit/.test(r.shape))})),fonts:[...new Set(all.flatMap(b=>walk(b).filter(s=>s.type==='text'&&!s.hidden).map(s=>s.fontFamily)))],waitColors:walk(all.find(b=>b.name.startsWith('16W'))).filter(s=>s.name.startsWith('Result / status')).map(s=>({name:s.name,fills:s.fills})),flows:penpot.currentPage.flows.map(f=>({name:f.name}))};

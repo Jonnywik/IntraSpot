@@ -1,0 +1,14 @@
+{
+  "method": "Live browser with isolated PostgreSQL; not participant testing",
+  "passed": [
+    "Guest can inspect an approval event without private review data",
+    "Student opts in per-event, reserves a seat and finds Pending in My Events",
+    "Faculty can request approval without sharing persona; full event waitlists next student",
+    "Owner approves both pending requests; only opted-in persona appears in staff review",
+    "Exact default removes the selected attendee only and reserves the remaining reconfirmation seat",
+    "Attendee accepts current material revision and returns to Confirmed",
+    "Explicit pool option cancels the newest confirmation, not every selected candidate",
+    "Mobile declines safely with four tabs; moderator cannot edit material event fields"
+  ],
+  "errors": []
+}

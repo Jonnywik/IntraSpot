@@ -1,0 +1,1 @@
+const {walk,by}=storage.responsiveTools;const b=[...penpot.currentPage.root.children].find(s=>s.name.startsWith('8120 '));return walk(b).filter(s=>/Final \/ (sender|bubble|message)|Message scroll/.test(s.name)).map(s=>({n:s.name,x:s.x-b.x,y:s.y-b.y,w:s.width,h:s.height,parent:s.parent.name,text:s.characters}));
