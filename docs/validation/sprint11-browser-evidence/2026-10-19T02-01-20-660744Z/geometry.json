@@ -1,0 +1,214 @@
+{
+  "geometry": [
+    {
+      "width": 320,
+      "height": 844,
+      "navHeight": 70.75,
+      "measuredHeight": 70.75
+    },
+    {
+      "width": 360,
+      "height": 844,
+      "navHeight": 70.75,
+      "measuredHeight": 70.75
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "navHeight": 70.75,
+      "measuredHeight": 70.75
+    },
+    {
+      "width": 430,
+      "height": 844,
+      "navHeight": 70.75,
+      "measuredHeight": 70.75
+    },
+    {
+      "width": 390,
+      "height": 568,
+      "navHeight": 70.75,
+      "measuredHeight": 70.75
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "navHeight": 70.75,
+      "measuredHeight": 70.75
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "discover",
+      "width": 320,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "discover",
+      "width": 360,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "discover",
+      "width": 390,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "discover",
+      "width": 430,
+      "height": 844,
+      "localized": true,
+      "navHeight": 70.75
+    },
+    {
+      "surface": "detail",
+      "width": 320,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "detail",
+      "width": 360,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "detail",
+      "width": 390,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "detail",
+      "width": 430,
+      "height": 844,
+      "localized": true,
+      "navHeight": 70.75
+    },
+    {
+      "surface": "my-events",
+      "width": 320,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "my-events",
+      "width": 360,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "my-events",
+      "width": 390,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "my-events",
+      "width": 430,
+      "height": 844,
+      "localized": true,
+      "navHeight": 70.75
+    },
+    {
+      "surface": "chat",
+      "width": 320,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "chat",
+      "width": 360,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "chat",
+      "width": 390,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "chat",
+      "width": 430,
+      "height": 844,
+      "localized": true,
+      "navHeight": 70.75
+    },
+    {
+      "surface": "profile",
+      "width": 320,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "profile",
+      "width": 360,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "profile",
+      "width": 390,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "profile",
+      "width": 430,
+      "height": 844,
+      "localized": true,
+      "navHeight": 70.75
+    },
+    {
+      "surface": "inbox",
+      "width": 320,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "inbox",
+      "width": 360,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "inbox",
+      "width": 390,
+      "height": 844,
+      "localized": true,
+      "navHeight": 89.5
+    },
+    {
+      "surface": "inbox",
+      "width": 430,
+      "height": 844,
+      "localized": true,
+      "navHeight": 70.75
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "stage": "registration eligibility and profile completion",
+  "pathname": "/profile",
+  "browserErrors": [],
+  "errorName": "Error",
+  "errorMessage": "locator.waitFor: Error: strict mode violation: getByRole('alert') resolved to 2 elements:"
+}

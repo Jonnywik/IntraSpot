@@ -1,5 +1,87 @@
 # IntraSpot local MVP
 
+## Current work — Sprint 15 isolated Google development sign-in
+
+Sprint 15 is in progress, not complete. The selected Supabase development
+project is connected; Google OAuth client/provider setup and live sign-in remain
+pending. See the [project connection checkpoint](../validation/sprint15-project-connection-2026-10-19.md).
+Supabase is used for Auth only; application data stays in a
+separate local PostgreSQL database. No live Google or PLM-account pass has been
+claimed. The normal fictional demo remains on 3000/8001; the separate real-auth
+profile is designed for 3001/8011 and never uses fictional seed identities.
+See the [verified local progress record](../validation/sprint-15-progress-2026-10-19.md),
+[frozen contract](Sprint-15.md) and
+[private-credential-safe setup guide](sprint15-setup-guide.md). Do not run the real
+profile with placeholder project settings or describe mocked protocol checks as
+live OAuth. Production/deployment and Sprint 16 remain out of scope.
+
+### Historical checkpoint through Sprint 14
+
+Sprint 14 organization announcements and reactions is complete locally
+(2026-10-19). Public/current-member posts live in existing organization profiles;
+approved owner/admin desktop workspaces manage versioned posts and history.
+Readers use the same six aggregate reactions. A dedicated platform queue handles
+announcement reports with exact bounded evidence, audited decisions and durable
+expiry. Four mobile destinations and prior event/person rules are unchanged.
+See [Sprint 14 contract](Sprint-14.md),
+[acceptance evidence](../validation/sprint-14-acceptance-2026-10-19.md), and
+[interaction handoff](../design/sprint14-interaction-handoff.md).
+Apply the reviewed additive `mvp_0010` migration explicitly, never at startup.
+Sprint 15 isolated real development sign-in is next, not implemented. This remains
+local and fictional; participant/native-device/security/release checks and
+long-term revision/deleted-content retention remain separate gates. No deployment
+or commit/push was performed.
+
+### Historical checkpoint through Sprint 13
+
+Sprint 13 Flash events is complete locally (2026-10-18). The existing editor
+supports Scheduled/Flash; Flash uses instant registration and a start within
+24 hours of publication. Matching-area For You priority lasts three hours or
+until start, inside existing club groups. The saved Show Flash events switch
+defaults on and affects discovery only; existing participation stays available.
+See [Sprint 13 contract](Sprint-13.md),
+[acceptance evidence](../validation/sprint-13-acceptance-2026-10-18.md), and
+[interaction handoff](../design/sprint13-interaction-handoff.md).
+Apply the reviewed additive `mvp_0009` migration explicitly, never at startup.
+Sprint 14 announcements/reactions is next, not implemented. This remains local
+and fictional; participant/native-device validation and real-user release are
+deferred. No deployment or commit was performed.
+
+### Historical checkpoint through Sprint 12
+
+Sprint 12 explainable For You discovery is implemented locally (2026-10-17).
+Signed-in users default to server-ranked For You; guests keep Upcoming. Private
+Settings inputs add optional broad-area and recurring Manila availability;
+interests reuse Profile tags. Event drafts support optional public tags/area.
+Search/My Clubs and explicit Upcoming/Newest still compose, and registration,
+privacy and accreditation rules are unchanged. See [Sprint 12 contract](Sprint-12.md),
+[acceptance evidence](../validation/sprint-12-acceptance-2026-10-17.md) and
+[interaction handoff](../design/sprint12-interaction-handoff.md). The reviewed
+additive migration is `mvp_0008`; apply migrations explicitly, never at startup.
+Sprint 13 Flash events is next, not implemented. This remains a local fictional
+MVP; participant/native-device validation and real-user release are deferred.
+
+### Historical checkpoint through Sprint 11
+
+Sprint 11 mobile attendee completion is complete locally (2026-10-17). The four
+attendee destinations, focused mobile chat, profile feedback, saved registration
+outcomes and safe-area sizing passed developer checks. See the
+[Sprint 11 contract](Sprint-11.md),
+[acceptance evidence](../validation/sprint-11-acceptance-2026-10-17.md), and
+[interaction handoff](../design/sprint11-interaction-handoff.md). Sprint 12
+explainable For You discovery is next, not implemented here. Participant and
+physical-device checks remain deferred. No deployment or commit was performed.
+
+### Historical checkpoint through Sprint 10
+
+Sprint 10 desktop management, safe draft autosave and the organized inbox are
+complete locally (2026-10-16). See [Sprint 10 contract](Sprint-10.md),
+[acceptance evidence](../validation/sprint-10-acceptance-2026-10-16.md) and
+[interaction handoff](../design/sprint10-interaction-handoff.md). The actual
+desktop browser gate passed 18 groups, and the communication/safety regression
+passed nine groups. Sprint 11 mobile attendee closure is next; participant review
+remains deferred. No new database migration or deployment is part of Sprint 10.
+
 Fictional data only. No cloud connections, real Google sign-in or participant/deployment approval. Backend is `127.0.0.1:8001`; frontend is `localhost:3000`. Penpot database is not used.
 
 ## Setup (PowerShell, project root)
@@ -18,10 +100,18 @@ rtk proxy .mvp-venv/Scripts/python.exe -m app.local_identities
 rtk proxy .mvp-venv/Scripts/python.exe -m app.local_organizations
 rtk proxy .mvp-venv/Scripts/python.exe -m app.local_events
 rtk proxy .mvp-venv/Scripts/python.exe -m app.local_communication
+rtk proxy .mvp-venv/Scripts/python.exe -m app.local_flash
+rtk proxy .mvp-venv/Scripts/python.exe -m app.local_announcements
 rtk proxy .mvp-venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --no-access-log --log-level warning
 ```
 
 Sprint 8 local membership lifecycle is implemented and verified as of 2026-10-15. The main chat coordinated non-overlapping Luna/max workers and independent quality review; all workers are closed. See [Sprint 8 contracts and decisions](Sprint-8.md) and [acceptance evidence](../validation/sprint-8-acceptance-2026-10-15.md). Earlier milestone notes remain historical acceptance records.
+
+Sprint 9 desktop attendee polish and persistent preferences are complete locally
+as of 2026-10-16. See [Sprint 9 contract](Sprint-9.md),
+[acceptance evidence](../validation/sprint-9-acceptance-2026-10-16.md), and
+[interaction handoff](../design/sprint9-interaction-handoff.md). Participant review
+remains deferred; organizer/mobile follow-up sprints and deployment are not implied.
 
 `app.local_identities` idempotently creates 15 fixed fictional User records only and generates ignored `Code/Backend/.local/accounts.json`, an array of `{label,token}` entries. Tokens expire in 8 hours. Rerun the same command to renew tokens; existing profiles and privileges are not overwritten. It accepts no user/subject arguments and rejects non-local or test-database execution. It creates no organizations, events or frontend files. Never publish the manifest or expose these services beyond loopback.
 
@@ -34,7 +124,11 @@ In `Code/Frontend`, copy `.env.example` to ignored `.env.local` only if the latt
 does not exist, then run `rtk proxy npm.cmd run build` and `rtk proxy npm.cmd start`.
 Open `http://127.0.0.1:3000`. The static server binds only to loopback. Guest browsing
 needs no account; select a fixed fictional account in the labeled local-MVP bar.
-Authentication is memory-only and intentionally clears on a hard reload.
+Tokens remain memory-only. Sprint 9 remembers only the selected fictional account
+label in this tab's session storage; a hard reload obtains its existing local
+catalog token and verifies `/me` again before restoring account preferences.
+Continue as guest clears that remembered label. No token is stored in browser
+storage, and this is not a real sign-in mechanism.
 
 The backend must run on port 8001 after reviewed migrations. Renew expired local
 tokens with `app.local_identities`; do not paste or publish them. The catalog is
@@ -67,6 +161,38 @@ approval-before-eligibility, temporary basic persona sharing, rejected-request
 reapplication, withdrawal cooldown, targeted invitations, staff hierarchy,
 departures, waitlist promotion, archived chat revocation and mobile navigation.
 
+For Sprint 9, use the isolated build and `RUN_SPRINT9_BROWSER=1` with
+`tests/shared/test_sprint9_quality.py`. It checks preference persistence, account
+isolation, failed-save retries, Filipino interface text, system/dark themes,
+reduced motion, keyboard sheets and responsive desktop sidebars. Run serially.
+
+## Desktop preferences (Sprint 9)
+
+Sprint 13 adds strict boolean `show_flash`, default true, to these private
+preferences. Partial writes preserve it; old guest records/responses missing the
+field default on. The discovery switch composes with search, sorting and My
+Clubs through `include_flash=false` before pagination. It does not mute
+notifications or hide public detail, My Events or chat. The additive local
+Flash fixture helper never overwrites existing events or renews publication
+times; create a fresh valid draft when an old fixture has ended.
+
+`GET/PATCH /api/v1/me/preferences` stores only the current verified account's
+language, theme, text size, high contrast, reduced motion and decoration pause.
+Defaults are English, light, standard text and all three booleans false. A default
+read creates no row; partial writes preserve other fields. Migration `mvp_0007`
+is explicit and additive; rollback refuses to erase saved preferences.
+
+Guest choices use a versioned browser-local record, never seed an account, and
+can be reset if that record is corrupt. Signed-in saves are serialized, show
+failure/retry feedback and remain scoped to their original account. System
+reduced motion always overrides animation choices. User-written event/chat
+content and organization names are not translated.
+
+The accepted Quiet Heritage A layout uses existing authorized club shortcuts and
+upcoming-registration data in desktop sidebars, retaining a single <=680px feed.
+Three columns become two below 1180px and feed-only below 1000px. Mobile retains
+the existing four tabs; dedicated mobile polish is deferred to Sprint 11.
+
 ## Club membership (local fictional demo)
 
 Open **Clubs** on desktop, or **Settings → Clubs and membership** on mobile.
@@ -98,6 +224,38 @@ replace the prior role, with admin grants controlled by the owner. Departures ca
 current organization-event participation, release/promote seats, and revoke retained
 chat access without deleting ended attendance or rewriting original retry outcomes.
 Departure does not create a permanent ban on otherwise-public registration.
+
+## Organization announcements (Sprint 14)
+
+Open the existing **Clubs** organization profile (on mobile: Settings → Clubs
+and membership). Guests see approved organizations' public posts. Current
+eligible active members can also read members-only posts. Six aggregate reactions
+do not register attendance. Eligible signed-in readers can report accessible
+content from another author; private receipts do not reveal retained evidence.
+
+The desktop organization workspace gives approved eligible owners/admins
+publish/edit/remove/history controls with explicit audience selection, protected
+retries, version conflicts and load-older actions. Moderators/members do not
+author. Platform admins use the separate announcement safety queue on desktop;
+they do not gain ordinary member-only access solely from platform privileges.
+
+After the explicit migration, `app.local_announcements` additively creates two
+fictional samples in Fictional Phase 2 Approved Organization (Fictional student 4
+owns it). Existing edits, roles, memberships, removals and history are preserved.
+It accepts no arbitrary identities or content and refuses non-local/test execution.
+Do not invoke the broad seed or publish the ignored fictional-account manifest.
+
+Announcement reports retain exact open-case snapshots until the 14-day deadline
+or decision, then purge them. Reporting never automatically hides or restricts
+an author. Only the case that hid a post can restore it; removed posts remain
+removed. The existing explicit deadline worker catches up expiry after restart.
+Local revision history is not an approved indefinite production-retention policy.
+
+For the Sprint 14 Edge gate, use the isolated API-8002 frontend export, renew the
+ignored fictional catalog with the guarded helper, and set `RUN_SPRINT14_BROWSER=1`
+while running `tests/shared/test_sprint14_quality.py`. Keep port 3000 free and run
+database/browser suites serially. Rebuild for normal API 8001 afterward. These
+automated checks do not constitute participant or native-device validation.
 
 ## Local communication and safety
 
@@ -208,7 +366,7 @@ Then `rtk proxy .mvp-venv/Scripts/python.exe -m app.local_events` adds one fixed
 
 **Historical Sprint 1 verification:** Root independently ran `tests/identity` and `tests/shared/test_foundation.py`: **32 passed, 1 dependency deprecation warning in 10.46 seconds** (2026-10-11). This covers trusted fictional identities, token validation, database-derived eligibility/privileges, private self-profiles, local configuration/CORS, sanitized metadata logging, migration readiness, test isolation, and commit-before-success behavior. Identity organization-grant serialization is fixed with attribute-based response validation.
 
-PostgreSQL 17 uses the separate `intraspot-mvp` project and `intraspot_mvp` database on loopback port 5433. Readiness now requires `mvp_0006`: additive membership lifecycle tables, event-access revocation cutoffs and organization notification context. `mvp_0005` adds communication/safety and notification read state. Apply reviewed migrations explicitly with `python -m alembic upgrade head`; they do not run at startup. Downgrade refuses to discard lifecycle history, revocations or organization notification context rather than silently losing them.
+PostgreSQL 17 uses the separate `intraspot-mvp` project and `intraspot_mvp` database on loopback port 5433. Readiness requires the reviewed current head, `mvp_0010`: organization announcements, reactions, revision history and event-independent safety reports. `mvp_0009` adds Flash and its saved discovery switch; `mvp_0008` adds discovery metadata/preferences; `mvp_0007` adds display preferences; `mvp_0006` adds membership lifecycle; `mvp_0005` adds communication/safety. Apply reviewed migrations explicitly with `python -m alembic upgrade head`; they do not run at startup. Downgrades refuse to discard new announcements/history, discovery data, preferences or lifecycle history rather than silently losing them.
 
 **Historical Sprint 1 checkpoint:** at that stop, Sprints 2–5 and frontend were paused. Their existing code was preliminary, not accepted. Phase 2 now evaluates the organization domain and its draft/publication authorization boundary only; it does not accept all event/registration/notification code. Participant/security release gates remain closed.
 

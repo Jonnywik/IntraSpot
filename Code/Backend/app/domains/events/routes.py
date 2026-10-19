@@ -1,7 +1,7 @@
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Header, Query, Response
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
@@ -12,10 +12,17 @@ from app.core.communication import require_communication_allowed
 from app.db.models import now
 from app.db.session import get_db
 from app.domains.events.models import Event
-from app.domains.events.schemas import EventChangeInput, EventDraftInput, EventPrivate, EventPublic
+from app.domains.events.recommendations import (
+    for_you_statement,
+    matched_reason_codes,
+    normalized_profile_tags,
+)
+from app.domains.events.schemas import EventChangeInput, EventDraftInput, EventPrivate, EventPublic, EventReviewSummary
 from app.domains.events.service import (
     create_draft,
+    draft_version,
     publish,
+    require_draft_version,
     update_draft,
     validate_material_change,
 )
@@ -87,6 +94,7 @@ def _public_projection(
     organization_name: str,
     confirmed: int | None = None,
     reserved: int | None = None,
+    recommendation_reasons: list[str] | None = None,
 ) -> EventPublic:
     if confirmed is None:
         confirmed = _confirmed_count(db, event.id)
@@ -99,6 +107,8 @@ def _public_projection(
         organization_name=organization_name,
         title=event.title,
         summary=event.summary,
+        tags=event.tags or [],
+        coarse_area=event.coarse_area,
         description=event.description,
         starts_at=event.starts_at,
         ends_at=event.ends_at,
@@ -113,9 +123,11 @@ def _public_projection(
         cost_label=event.cost_label,
         registration_mode=event.registration_mode,
         review_window_minutes=event.review_window_minutes,
+        event_type=event.event_type or "scheduled",
         material_revision=event.material_revision,
         status="published",
         published_at=event.published_at,
+        recommendation_reasons=recommendation_reasons or [],
     )
 
 
@@ -130,6 +142,8 @@ def _private_projection(db: Session, event: Event, organization_name: str) -> Ev
             "organization_name": organization_name,
             "title": event.title,
             "summary": event.summary,
+            "tags": event.tags or [],
+            "coarse_area": event.coarse_area,
             "description": event.description,
             "starts_at": event.starts_at,
             "ends_at": event.ends_at,
@@ -144,12 +158,14 @@ def _private_projection(db: Session, event: Event, organization_name: str) -> Ev
             "cost_label": event.cost_label,
             "registration_mode": event.registration_mode,
             "review_window_minutes": event.review_window_minutes,
+            "event_type": event.event_type or "scheduled",
             "material_revision": event.material_revision,
             "status": "draft",
             "published_at": None,
         }
     values["created_by"] = event.created_by
     values["created_at"] = event.created_at
+    values["draft_version"] = draft_version(event)
     return EventPrivate.model_validate(values)
 
 
@@ -161,22 +177,49 @@ DISCOVERY_MAX_LIMIT = 100
 
 @router.get("/events", response_model=list[EventPublic])
 def list_events(
+    response: Response,
     db: Session = Depends(get_db, scope="function"),
     actor: Actor | None = Depends(optional_actor),
     q: str | None = Query(default=None, max_length=200),
-    sort: Literal["upcoming", "newest"] = "upcoming",
+    sort: Literal["upcoming", "newest", "for_you"] = "upcoming",
     my_clubs: bool = False,
+    include_flash: bool = True,
     limit: int = Query(default=DISCOVERY_DEFAULT_LIMIT, ge=1, le=DISCOVERY_MAX_LIMIT),
     offset: int = Query(default=0, ge=0),
 ):
+    personalized = sort == "for_you" and actor is not None
+    effective_sort = "upcoming" if sort == "for_you" and actor is None else sort
+    if sort == "for_you":
+        response.headers["Cache-Control"] = "private, no-store"
+        response.headers["Vary"] = "Authorization"
+
     club_ids: list[str] | None = None
+    ranking_club_ids: list[str] = []
     if my_clubs:
         if actor is None:
             raise DomainError("authentication_required", "Sign in to view organization events.", 401)
         actor = require_eligible(actor)
-        club_ids = active_club_ids(db, actor)
+        ranking_club_ids = active_club_ids(db, actor)
+        club_ids = ranking_club_ids
         if not club_ids:
             return []
+    elif personalized and actor is not None and actor.eligible:
+        ranking_club_ids = active_club_ids(db, actor)
+
+    profile_tags: set[str] = set()
+    preferred_area: str | None = None
+    availability: list[dict] = []
+    if personalized and actor is not None:
+        from app.domains.identity.discovery_models import UserDiscoveryPreferences
+        from app.domains.identity.models import User
+
+        profile_tags = normalized_profile_tags(
+            db.scalar(select(User.tags).where(User.id == actor.user_id)) or []
+        )
+        preferences = db.get(UserDiscoveryPreferences, actor.user_id)
+        if preferences is not None:
+            preferred_area = preferences.coarse_area
+            availability = preferences.availability or []
 
     # Single clock source: compute the discovery boundary once in Python with the
     # app now() (UTC, tz-aware) instead of DB func.now(). This removes
@@ -189,6 +232,8 @@ def list_events(
         .join(Organization, Organization.id == Event.org_id)
         .where(Event.status == "published", Event.ends_at > boundary)
     )
+    if not include_flash:
+        statement = statement.where(Event.event_type == "scheduled")
     if club_ids is not None:
         statement = statement.where(Event.org_id.in_(club_ids))
     query_text = q.strip() if q else ""
@@ -200,15 +245,32 @@ def list_events(
                 Organization.name.ilike(pattern, escape="\\"),
             )
         )
-    if sort == "newest":
+    reason_codes_by_event: dict[str, list[str]] = {}
+    if effective_sort == "newest":
         statement = statement.order_by(Event.published_at.desc(), Event.id.asc())
+        rows = db.execute(statement.limit(limit).offset(offset)).all()
+    elif effective_sort == "for_you" and personalized:
+        ranked_rows = db.execute(
+            for_you_statement(
+                statement,
+                active_clubs=ranking_club_ids,
+                profile_tags=profile_tags,
+                coarse_area=preferred_area,
+                availability=availability,
+                request_now=boundary,
+            ).limit(limit).offset(offset)
+        ).all()
+        rows = [(row[0], row[1]) for row in ranked_rows]
+        reason_codes_by_event = {
+            row[0].id: matched_reason_codes(row[2], row[3], row[4], row[5], row[6])
+            for row in ranked_rows
+        }
     else:
         # Upcoming is start/id asc; starts_at is non-null for published events and
         # explicit nulls_last() keeps org/me lists and discovery identical if a
         # legacy row ever lacks one.
         statement = statement.order_by(Event.starts_at.asc().nulls_last(), Event.id.asc())
-
-    rows = db.execute(statement.limit(limit).offset(offset)).all()
+        rows = db.execute(statement.limit(limit).offset(offset)).all()
     if not rows:
         return []
     from app.domains.registrations.models import Registration
@@ -235,6 +297,7 @@ def list_events(
             organization_name,
             confirmed_counts.get(event.id, 0),
             reserved_counts.get(event.id, 0),
+            reason_codes_by_event.get(event.id, []),
         )
         for event, organization_name in rows
     ]
@@ -287,6 +350,44 @@ def create_organization_event(
     return _private_projection(db, event, organization.name)
 
 
+@router.get("/organizations/{org_id}/review-events", response_model=list[EventReviewSummary])
+def list_review_events(
+    org_id: UUID,
+    db: Session = Depends(get_db, scope="function"),
+    actor: Actor = Depends(current_actor),
+):
+    from app.domains.memberships.policy import require_staff
+    from app.domains.registrations.models import Registration
+
+    organization, _ = require_staff(db, actor.user_id, str(org_id))
+    events = list(db.scalars(select(Event).where(
+        Event.org_id == organization.id, Event.status == "published",
+    ).order_by(Event.starts_at, Event.id)))
+    if not events:
+        return []
+    counts = {event.id: {"confirmed": 0, "reserved": 0, "pending": 0, "deadline": None}
+              for event in events}
+    rows = db.execute(select(Registration.event_id, Registration.status,
+                             func.count(Registration.id), func.min(Registration.review_deadline))
+                      .where(Registration.event_id.in_(counts),
+                             Registration.status.in_(("confirmed", "pending", "reconfirmation_required")))
+                      .group_by(Registration.event_id, Registration.status)).all()
+    for event_id, status, count, deadline in rows:
+        summary = counts[event_id]
+        if status == "confirmed":
+            summary["confirmed"] = count
+        else:
+            summary["reserved"] += count
+        if status == "pending":
+            summary.update(pending=count, deadline=deadline)
+    return [EventReviewSummary(
+        **_public_projection(db, event, organization.name, counts[event.id]["confirmed"],
+                             counts[event.id]["reserved"]).model_dump(),
+        pending_registration_count=counts[event.id]["pending"],
+        next_review_deadline=counts[event.id]["deadline"],
+    ) for event in events]
+
+
 @router.get("/events/{event_id}/draft", response_model=EventPrivate)
 def get_event_draft(
     event_id: UUID,
@@ -304,11 +405,13 @@ def patch_event_draft(
     payload: EventDraftInput,
     db: Session = Depends(get_db, scope="function"),
     actor: Actor = Depends(current_actor),
+    if_match: str | None = Header(default=None, max_length=128),
 ):
     event = _event_or_404(db, str(event_id))
     organization = require_manager(db, actor, event.org_id, lock=True)
     _require_draft_writable(organization)
     db.refresh(event, with_for_update=True)
+    require_draft_version(event, if_match)
     fields = payload.model_dump(exclude_unset=True)
     event = update_draft(db, event, fields)
     return _private_projection(db, event, organization.name)
@@ -372,6 +475,7 @@ def publish_event(
     event_id: UUID,
     db: Session = Depends(get_db, scope="function"),
     actor: Actor = Depends(current_actor),
+    if_match: str | None = Header(default=None, max_length=128),
 ):
     event = _event_or_404(db, str(event_id))
     organization = require_publishing(db, actor, event.org_id)
@@ -379,8 +483,10 @@ def publish_event(
     # Event may have been loaded before waiting for that lock. Refresh it under a
     # row lock so a second publisher observes the first transaction's terminal state.
     db.refresh(event, with_for_update=True)
+    require_draft_version(event, if_match)
     require_communication_allowed(db, actor.user_id, lock=True)
-    event = publish(db, event)
+    publication_time = now()
+    event = publish(db, event, at=publication_time)
     # Publish is a write path: counts reflect the just-sealed (still empty)
     # registration set; the projection's aggregate query reads it read-only.
     return _public_projection(db, event, organization.name)

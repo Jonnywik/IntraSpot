@@ -1,0 +1,9 @@
+{
+  "method": "Isolated PostgreSQL/browser developer check, not participant validation",
+  "passed": [
+    "Complete representative card fits 1440x900; hover animates surface/art without moving target; keyboard focus visible"
+  ],
+  "problems": [
+    "submit is obscured at 1280x720: {\"textarea\":{\"x\":483.609375,\"y\":590,\"width\":692.890625,\"height\":72,\"top\":590,\"right\":1176.5,\"bottom\":662,\"left\":483.609375},\"submit\":{\"x\":1042.96875,\"y\":674,\"width\":133.53125,\"height\":48,\"top\":674,\"right\":1176.5,\"bottom\":722,\"left\":1042.96875},\"thread\":{\"x\":466.609375,\"y\":269,\"width\":741.890625,\"height\":440,\"top\":269,\"right\":1208.5,\"bottom\":709,\"left\":466.609375},\"heading\":{\"x\":483.609375,\"y\":374,\"width\":454.703125,\"height\":35,\"top\":374,\"right\":938.3125,\"bottom\":409,\"left\":483.609375},\"log\":{\"x\":483.609375,\"y\":479.40625,\"width\":692.890625,\"height\":48,\"top\":479.40625,\"right\":1176.5,\"bottom\":527.40625,\"left\":483.609375},\"height\":720,\"scrollY\":0}"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "method": "Isolated PostgreSQL, local static frontend, and Microsoft Edge; not participant or physical-device validation",
+  "passed": [
+    "Guest default, Upcoming fallback, search, and public API parity",
+    "Guest Show Flash choice persists locally and changes discovery only",
+    "Signed-in For You order, transient Flash boost, and controlled reason chips",
+    "Upcoming/Newest overrides and My Clubs compose with organization search",
+    "Flash UI registration and capacity waitlist use existing participation routes",
+    "Hidden Flash stays in My Events by title with confirmed/waitlist states and detail access",
+    "Show Flash and theme remain isolated when switching fictional accounts",
+    "Scheduled approval draft converts to Flash instant/null before publish; non-manager denied",
+    "320px/390px mobile and Filipino extra-large layouts retain four attendee tabs"
+  ],
+  "browserErrorCount": 117,
+  "browserErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "screenshots": [
+    "guest-flash-hidden-viewport.png",
+    "guest-flash-hidden-fullpage.png",
+    "desktop-flash-discover-1440-viewport.png",
+    "desktop-flash-discover-1440-fullpage.png",
+    "english-flash-discover-390-viewport.png",
+    "english-flash-discover-390-fullpage.png",
+    "filipino-xl-discover-390-viewport.png",
+    "filipino-xl-discover-390-fullpage.png"
+  ],
+  "geometry": [
+    {
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1425,
+      "navCount": 4
+    },
+    {
+      "width": 320,
+      "height": 700,
+      "scrollWidth": 305,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "navCount": 4
+    },
+    {
+      "width": 320,
+      "height": 700,
+      "scrollWidth": 305,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "navCount": 4
+    }
+  ]
+}

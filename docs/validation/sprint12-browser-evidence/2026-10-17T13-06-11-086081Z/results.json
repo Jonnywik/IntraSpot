@@ -1,0 +1,83 @@
+{
+  "method": "Isolated PostgreSQL with local Microsoft Edge; not participant or physical-device validation",
+  "passed": [
+    "Guest Upcoming fallback and title search",
+    "Signed-in For You default, collapsed explainer, and matched reason groups",
+    "Settings area/windows save, reload, clear, reset ranking, and preserve theme",
+    "Discovery preferences stay isolated between accounts",
+    "Upcoming and Newest override For You ranking and reasons",
+    "My Clubs composes with organization-name search",
+    "Draft metadata saves and publishes owner-only without exposing private preferences",
+    "Mobile Settings and discovery preferences at 320px and 390px",
+    "Mobile discovery at 320px and 390px",
+    "Filipino extra-large discovery at 390px",
+    "Desktop discovery at 1440px"
+  ],
+  "browserErrorCount": 0,
+  "screenshots": [
+    "mobile-settings-320-viewport.png",
+    "mobile-settings-320-fullpage.png",
+    "mobile-settings-390-viewport.png",
+    "mobile-settings-390-fullpage.png",
+    "mobile-discover-320-viewport.png",
+    "mobile-discover-320-fullpage.png",
+    "mobile-discover-390-viewport.png",
+    "mobile-discover-390-fullpage.png",
+    "mobile-settings-filipino-xl-390-viewport.png",
+    "mobile-settings-filipino-xl-390-fullpage.png",
+    "mobile-discover-filipino-xl-390-viewport.png",
+    "mobile-discover-filipino-xl-390-fullpage.png",
+    "desktop-discover-1440-viewport.png",
+    "desktop-discover-1440-fullpage.png"
+  ],
+  "geometry": [
+    {
+      "width": 320,
+      "height": 700,
+      "innerWidth": 320,
+      "scrollWidth": 305,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "innerWidth": 390,
+      "scrollWidth": 375,
+      "navCount": 4
+    },
+    {
+      "width": 320,
+      "height": 700,
+      "innerWidth": 320,
+      "scrollWidth": 305,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "innerWidth": 390,
+      "scrollWidth": 375,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "innerWidth": 390,
+      "scrollWidth": 375,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "innerWidth": 390,
+      "scrollWidth": 375,
+      "navCount": 4
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1425,
+      "desktopNav": 4
+    }
+  ]
+}

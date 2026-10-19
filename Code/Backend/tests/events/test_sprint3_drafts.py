@@ -57,9 +57,9 @@ def test_capacity_is_bounded_by_postgres_integer_storage():
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [("event_type", "flash")],
+    [("event_type", "unrecognized")],
 )
-def test_draft_schema_rejects_unsupported_event_modes(field, value):
+def test_draft_schema_rejects_unknown_event_modes(field, value):
     with pytest.raises(ValidationError):
         EventDraftInput.model_validate({field: value})
 

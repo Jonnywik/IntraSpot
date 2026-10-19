@@ -4,27 +4,33 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '@/lib/api';
 import { formatDate, formatTime } from '@/lib/date';
+import { useT } from '@/lib/i18n';
+import { usePreferences } from '@/lib/preferences';
 import { useSession } from '@/lib/session';
 import type { ChatInboxItem, ChatThread, ContentItem } from '@/lib/types';
+import attendeeStyles from '@/features/attendee-pages.module.css';
 import { ContentSafetyControls } from './ContentSafetyControls';
 import styles from './communication.module.css';
+import mobileStyles from './mobile-chat.module.css';
 
-function countdown(deletesAt: string, now: number) {
+type Translate = ReturnType<typeof useT>;
+
+function countdown(deletesAt: string, now: number, t: Translate) {
   const difference = Date.parse(deletesAt) - now;
-  if (!Number.isFinite(difference)) return 'Deletion time unavailable';
-  if (difference <= 0) return 'Chat access has ended';
+  if (!Number.isFinite(difference)) return t('Deletion time unavailable');
+  if (difference <= 0) return t('Chat access has ended');
   const seconds = Math.floor(difference / 1000);
   const days = Math.floor(seconds / 86_400);
   const hours = Math.floor((seconds % 86_400) / 3_600);
   const minutes = Math.floor((seconds % 3_600) / 60);
   const remainingSeconds = seconds % 60;
   const parts = [
-    days ? `${days}d` : null,
-    hours || days ? `${hours}h` : null,
-    minutes || hours || days ? `${minutes}m` : null,
-    !days ? `${remainingSeconds}s` : null,
+    days ? t('{count}d', { count: days }) : null,
+    hours || days ? t('{count}h', { count: hours }) : null,
+    minutes || hours || days ? t('{count}m', { count: minutes }) : null,
+    !days ? t('{count}s', { count: remainingSeconds }) : null,
   ].filter(Boolean);
-  return `Deletes in ${parts.join(' ')}`;
+  return t('Deletes in {time}', { time: parts.join(' ') });
 }
 
 function inboxErrorText(error: unknown) {
@@ -61,6 +67,8 @@ function applyRemovedIds(items: ContentItem[], removedIds: string[]) {
 }
 
 export function ChatWorkspace({ eventId }: { eventId: string | null }) {
+  const t = useT();
+  const { preferences: { language } } = usePreferences();
   const { actor, token, authLoading, version } = useSession();
   const requestKey = `${version}:${token ?? 'guest'}`;
   const [now, setNow] = useState<number | null>(null);
@@ -68,6 +76,11 @@ export function ChatWorkspace({ eventId }: { eventId: string | null }) {
   const [inboxError, setInboxError] = useState<{ key: string; message: string } | null>(null);
   const [inboxLoadingKey, setInboxLoadingKey] = useState<string | null>(null);
   const [refreshInbox, setRefreshInbox] = useState(0);
+  const inboxHeading = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!eventId && window.matchMedia('(max-width: 767px)').matches) inboxHeading.current?.focus();
+  }, [eventId]);
 
   useEffect(() => {
     const initial = window.setTimeout(() => setNow(Date.now()), 0);
@@ -119,7 +132,7 @@ export function ChatWorkspace({ eventId }: { eventId: string | null }) {
   }, [token, requestKey, refreshInbox]);
 
   const inboxItems = inboxState?.key === requestKey ? inboxState.items : null;
-  const currentInboxError = inboxError?.key === requestKey ? inboxError.message : null;
+  const currentInboxError = inboxError?.key === requestKey ? t(inboxError.message) : null;
   const inboxLoading = Boolean(token && inboxItems === null && (inboxLoadingKey === requestKey || !currentInboxError));
   const selected = eventId ? inboxItems?.find((item) => item.event_id === eventId) ?? null : null;
   const selectedExpired = Boolean(selected && now !== null && Date.parse(selected.deletes_at) <= now);
@@ -138,39 +151,39 @@ export function ChatWorkspace({ eventId }: { eventId: string | null }) {
   }, [inboxItems, now]);
 
   return (
-    <section className="stack">
+    <section className={`stack ${attendeeStyles.chatPage} ${mobileStyles.mobileChatPage}`}>
       <header className="page-heading">
-        <p className="eyebrow">YOUR EVENTS</p>
-        <h1>Event chats</h1>
+        <p className="eyebrow">{t('YOUR EVENTS')}</p>
+        <h1>{t('Event chats')}</h1>
       </header>
-      {authLoading && !actor ? <p className="panel muted" role="status">Checking your account…</p> : null}
-      {!authLoading && (!actor || !token) ? <p className="panel muted">Sign in with an eligible PLM account to view confirmed event chats.</p> : null}
+      {authLoading && !actor ? <p className="panel muted" role="status">{t('Checking your account…')}</p> : null}
+      {!authLoading && (!actor || !token) ? <p className="panel muted">{t('Sign in with an eligible PLM account to view confirmed event chats.')}</p> : null}
       {actor && token ? (
-        <div className={styles.chatLayout} data-has-selection={Boolean(eventId)}>
-          <aside className={styles.inbox} id="chat-inbox" aria-labelledby="chat-inbox-heading">
+        <div className={`${styles.chatLayout} ${attendeeStyles.chatLayout} ${mobileStyles.mobileChatLayout}`} data-has-selection={Boolean(eventId)}>
+          <aside className={`${styles.inbox} ${attendeeStyles.chatInbox} ${mobileStyles.mobileInbox}`} id="chat-inbox" aria-labelledby="chat-inbox-heading">
             <div className={styles.chatHeading}>
               <div>
-                <h2 id="chat-inbox-heading">All event chats</h2>
-                <p className={styles.muted}>Active and archived chats appear together.</p>
+                <h2 ref={inboxHeading} tabIndex={-1} id="chat-inbox-heading">{t('All event chats')}</h2>
+                <p className={styles.muted}>{t('Active and archived chats appear together.')}</p>
               </div>
               <button className={styles.smallButton} type="button" onClick={() => setRefreshInbox((value) => value + 1)} disabled={inboxLoading}>
-                Refresh
+                {t('Refresh')}
               </button>
             </div>
-            {inboxLoading ? <p className={styles.muted} role="status">Loading chats…</p> : null}
+            {inboxLoading ? <p className={styles.muted} role="status">{t('Loading chats…')}</p> : null}
             {currentInboxError ? (
               <div>
                 <p className={styles.errorText} role="alert">{currentInboxError}</p>
                 <button className={styles.smallButton} type="button" onClick={() => setRefreshInbox((value) => value + 1)}>
-                  Retry chat list
+                  {t('Retry chat list')}
                 </button>
               </div>
             ) : null}
             {inboxItems && visibleItems.length === 0 && !inboxLoading && !currentInboxError ? (
-              <p className={styles.muted}>No confirmed event chats are available.</p>
+              <p className={styles.muted}>{t('No confirmed event chats are available.')}</p>
             ) : null}
             {inboxItems && visibleItems.length > 0 ? (
-              <nav className={styles.inboxList} aria-label="Event chat list">
+              <nav className={styles.inboxList} aria-label={t('Event chat list')}>
                 {visibleItems.map((item) => {
                   const ended = item.status === 'archived' || (now !== null && Date.parse(item.ends_at) <= now);
                   return (
@@ -182,17 +195,17 @@ export function ChatWorkspace({ eventId }: { eventId: string | null }) {
                     >
                       <span className={styles.inboxItemHeader}>
                         <strong>{item.organization_name}</strong>
-                        {ended ? <span className={styles.archivedBadge}>Archived</span> : null}
+                        {ended ? <span className={styles.archivedBadge}>{t('Archived')}</span> : null}
                       </span>
                       <h3>{item.event_title}</h3>
                       {ended ? (
-                        <span className={styles.muted} role="status">{now === null ? 'Calculating retention window…' : countdown(item.deletes_at, now)}</span>
+                        <span className={styles.muted} role="status">{now === null ? t('Calculating retention window…') : countdown(item.deletes_at, now, t)}</span>
                       ) : (
-                        <span className={styles.muted}>Event ends {formatDate(item.ends_at)} · {formatTime(item.ends_at)}</span>
+                        <span className={styles.muted}>{t('Event ends {date} · {time}', { date: formatDate(item.ends_at, language), time: formatTime(item.ends_at, language) })}</span>
                       )}
                       {item.latest_at ? (
-                        <span className={styles.muted}>Latest activity {formatDate(item.latest_at)} · {formatTime(item.latest_at)}</span>
-                      ) : <span className={styles.muted}>No messages yet</span>}
+                        <span className={styles.muted}>{t('Latest activity {date} · {time}', { date: formatDate(item.latest_at, language), time: formatTime(item.latest_at, language) })}</span>
+                      ) : <span className={styles.muted}>{t('No messages yet')}</span>}
                     </Link>
                   );
                 })}
@@ -203,23 +216,26 @@ export function ChatWorkspace({ eventId }: { eventId: string | null }) {
           {eventId ? selected && !selectedExpired ? (
             <ChatThreadView key={`${requestKey}:${eventId}`} item={selected} actor={actor} token={token} version={version} now={now} />
           ) : selectedExpired ? (
-            <section className={styles.thread} aria-labelledby="chat-expired-heading">
-              <h2 id="chat-expired-heading">Chat access ended</h2>
-              <p className={styles.muted}>Access ends 72 hours after the event’s scheduled end.</p>
+            <section className={`${styles.thread} ${attendeeStyles.chatThread} ${mobileStyles.mobileThread}`} aria-labelledby="chat-expired-heading">
+              <Link href="/chat" className={styles.linkButton}>{t('All event chats')}</Link>
+              <h2 id="chat-expired-heading">{t('Chat access ended')}</h2>
+              <p className={styles.muted}>{t('Access ends 72 hours after the event’s scheduled end.')}</p>
             </section>
           ) : inboxItems ? (
-            <section className={styles.thread} aria-labelledby="chat-unavailable-heading">
-              <h2 id="chat-unavailable-heading">Chat unavailable</h2>
-              <p className={styles.muted}>This event chat is not available to this account. Confirmed registration is required.</p>
+            <section className={`${styles.thread} ${attendeeStyles.chatThread} ${mobileStyles.mobileThread}`} aria-labelledby="chat-unavailable-heading">
+              <Link href="/chat" className={styles.linkButton}>{t('All event chats')}</Link>
+              <h2 id="chat-unavailable-heading">{t('Chat unavailable')}</h2>
+              <p className={styles.muted}>{t('This event chat is not available to this account. Confirmed registration is required.')}</p>
             </section>
           ) : (
-            <section className={styles.thread} aria-live="polite">
-              <p className={styles.muted}>{inboxLoading ? 'Checking chat access…' : 'Refresh the chat list to check access.'}</p>
+            <section className={`${styles.thread} ${attendeeStyles.chatThread} ${mobileStyles.mobileThread}`} aria-live="polite">
+              <Link href="/chat" className={styles.linkButton}>{t('All event chats')}</Link>
+              <p className={styles.muted}>{inboxLoading ? t('Checking chat access…') : t('Refresh the chat list to check access.')}</p>
             </section>
           ) : (
-            <section className={styles.thread} aria-labelledby="chat-prompt-heading">
-              <h2 id="chat-prompt-heading">Choose an event chat</h2>
-              <p className={styles.muted}>Open a chat from your confirmed event registrations. Chats become read-only at the scheduled event end and remain available for 72 hours.</p>
+            <section className={`${styles.thread} ${attendeeStyles.chatThread} ${mobileStyles.mobileThread}`} aria-labelledby="chat-prompt-heading">
+              <h2 id="chat-prompt-heading">{t('Choose an event chat')}</h2>
+              <p className={styles.muted}>{t('Open a chat from your confirmed event registrations. Chats become read-only at the scheduled event end and remain available for 72 hours.')}</p>
             </section>
           )}
         </div>
@@ -241,6 +257,8 @@ function ChatThreadView({
   version: number;
   now: number | null;
 }) {
+  const t = useT();
+  const { preferences: { language } } = usePreferences();
   const [thread, setThread] = useState<ChatThread | null>(null);
   const [threadLoading, setThreadLoading] = useState(true);
   const [threadError, setThreadError] = useState<string | null>(null);
@@ -253,6 +271,7 @@ function ChatThreadView({
   const [sending, setSending] = useState(false);
   const [refreshThread, setRefreshThread] = useState(0);
   const threadRef = useRef<ChatThread | null>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
   const pollController = useRef<AbortController | null>(null);
   const olderController = useRef<AbortController | null>(null);
   const sendController = useRef<AbortController | null>(null);
@@ -266,6 +285,10 @@ function ChatThreadView({
     thread?.can_send && now !== null && !ended && !expired &&
     Number.isFinite(endAt) && now < endAt && Number.isFinite(deleteAt) && now < deleteAt,
   );
+
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 767px)').matches) heading.current?.focus();
+  }, []);
 
   const replaceThread = useCallback((next: ChatThread | null) => {
     threadRef.current = next;
@@ -481,65 +504,65 @@ function ChatThreadView({
   const localCutoff = ended || expired;
 
   return (
-    <section className={styles.thread} aria-labelledby="chat-thread-heading">
+    <section className={`${styles.thread} ${attendeeStyles.chatThread} ${mobileStyles.mobileThread}`} aria-labelledby="chat-thread-heading">
       <header className={styles.chatHeading}>
         <div>
-          <Link href="#chat-inbox" className={styles.linkButton}>All event chats</Link>
+          <Link href="/chat" className={styles.linkButton}>{t('All event chats')}</Link>
           <p className={styles.muted}>{item.organization_name}</p>
-          <h2 id="chat-thread-heading">{item.event_title}</h2>
+          <h2 ref={heading} tabIndex={-1} id="chat-thread-heading">{item.event_title}</h2>
         </div>
-        {ended || item.status === 'archived' ? <span className={styles.archivedBadge}>Archived</span> : null}
+        {ended || item.status === 'archived' ? <span className={styles.archivedBadge}>{t('Archived')}</span> : null}
       </header>
       <div className={styles.chatMeta}>
-        <p>Scheduled end: <time dateTime={item.ends_at}>{formatDate(item.ends_at)} · {formatTime(item.ends_at)}</time></p>
-        <p role="status">{now === null ? 'Calculating retention window…' : countdown(item.deletes_at, now)}</p>
+        <p><span>{t('Scheduled end: {date}', { date: '' })}</span> <time dateTime={item.ends_at}>{formatDate(item.ends_at, language)} · {formatTime(item.ends_at, language)}</time></p>
+        <p role="status">{now === null ? t('Calculating retention window…') : countdown(item.deletes_at, now, t)}</p>
       </div>
-      {threadLoading && !thread ? <p className={styles.muted} role="status">Loading conversation…</p> : null}
+      {threadLoading && !thread ? <p className={styles.muted} role="status">{t('Loading conversation…')}</p> : null}
       {threadError ? (
         <div>
-          <p className={styles.errorText} role={accessDenied ? 'alert' : 'status'}>{threadError}</p>
+          <p className={styles.errorText} role={accessDenied ? 'alert' : 'status'}>{t(threadError)}</p>
           <button className={styles.smallButton} type="button" onClick={() => {
             setThreadError(null);
             setAccessDenied(false);
             setThreadLoading(true);
             setRefreshThread((value) => value + 1);
           }} disabled={threadLoading}>
-            Retry conversation
+            {t('Retry conversation')}
           </button>
         </div>
       ) : null}
-      {expired ? <p className={styles.readOnlyNotice} role="status">Chat access has ended. Messages are no longer available.</p> : null}
-      {ended && !expired ? <p className={styles.readOnlyNotice} role="status">This chat is archived and read-only after its scheduled end.</p> : null}
+      {expired ? <p className={styles.readOnlyNotice} role="status">{t('Chat access has ended. Messages are no longer available.')}</p> : null}
+      {ended && !expired ? <p className={styles.readOnlyNotice} role="status">{t('This chat is archived and read-only after its scheduled end.')}</p> : null}
       {thread && !thread.can_send && !localCutoff ? (
         <p className={styles.readOnlyNotice} role="status">
           {personalReviewPending
-            ? 'Sending is paused while this account is under personal review. Existing messages remain readable.'
+            ? t('Sending is paused while this account is under personal review. Existing messages remain readable.')
             : actor.communication_restricted
-            ? 'Sending is temporarily paused for this account. Existing registrations remain unchanged.'
-            : 'Sending is currently unavailable. Messages remain readable while this chat is active.'}
+            ? t('Sending is temporarily paused for this account. Existing registrations remain unchanged.')
+            : t('Sending is currently unavailable. Messages remain readable while this chat is active.')}
         </p>
       ) : null}
       {thread?.next_before !== null && thread?.next_before !== undefined && !expired ? (
         <button className={styles.secondaryButton} type="button" onClick={() => void loadOlder()} disabled={loadingOlder || threadLoading}>
-          {loadingOlder ? 'Loading older messages…' : 'Load older messages'}
+          {loadingOlder ? t('Loading older messages…') : t('Load older messages')}
         </button>
       ) : null}
       {thread && !expired ? (
-        <div className={styles.chatItems} role="log" aria-label="Messages in this event chat" aria-live="polite" aria-relevant="additions text">
-          {thread.items.length === 0 ? <p className={styles.muted}>No messages yet.</p> : null}
+        <div className={`${styles.chatItems} ${attendeeStyles.chatLog} ${mobileStyles.mobileChatLog}`} role="log" aria-label={t('Messages in this event chat')} aria-live="polite" aria-relevant="additions text">
+          {thread.items.length === 0 ? <p className={styles.muted}>{t('No messages yet.')}</p> : null}
           {thread.items.map((message) => (
             <article className={`${styles.chatMessage} ${message.mine ? styles.mine : ''}`} key={message.id}>
               <header className={styles.itemHeader}>
-                <strong>{message.mine ? 'You' : ended ? 'PLM member' : message.author_label}</strong>
-                <time dateTime={message.created_at}>{formatDate(message.created_at)} · {formatTime(message.created_at)}</time>
+                <strong>{message.mine ? t('You') : ended ? t('PLM member') : message.author_label}</strong>
+                <time dateTime={message.created_at}>{formatDate(message.created_at, language)} · {formatTime(message.created_at, language)}</time>
               </header>
               {message.removed
-                ? <p className={`${styles.itemBody} ${styles.muted}`}>This message was removed.</p>
+                ? <p className={`${styles.itemBody} ${styles.muted}`}>{t('This message was removed.')}</p>
                 : message.locally_hidden
-                  ? <p className={`${styles.itemBody} ${styles.muted}`}>This message is hidden for you.</p>
+                  ? <p className={`${styles.itemBody} ${styles.muted}`}>{t('This message is hidden for you.')}</p>
                   : message.body !== null
                     ? <p className={styles.itemBody}>{message.body}</p>
-                    : <p className={`${styles.itemBody} ${styles.muted}`}>This message is unavailable.</p>}
+                    : <p className={`${styles.itemBody} ${styles.muted}`}>{t('This message is unavailable.')}</p>}
               {!message.removed ? (
                 <ContentSafetyControls
                   eventId={item.event_id}
@@ -556,8 +579,8 @@ function ChatThreadView({
         </div>
       ) : null}
       {canSend ? (
-        <form className={styles.form} onSubmit={(event) => { event.preventDefault(); void sendMessage(); }}>
-          <label htmlFor={`chat-message-${item.event_id}`}>Write a message</label>
+        <form className={`${styles.form} ${attendeeStyles.chatComposer} ${mobileStyles.mobileChatComposer}`} onSubmit={(event) => { event.preventDefault(); void sendMessage(); }}>
+          <label htmlFor={`chat-message-${item.event_id}`}>{t('Write a message')}</label>
           <textarea
             className={styles.textarea}
             id={`chat-message-${item.event_id}`}
@@ -571,19 +594,19 @@ function ChatThreadView({
             <span className={styles.muted}>{(pendingMessage?.body ?? draft).trim().length}/2000</span>
             {pendingMessage ? (
               <button className={styles.primaryButton} type="button" onClick={() => void sendMessage(pendingMessage)} disabled={sending || !canSend}>
-                {sending ? 'Sending…' : 'Retry unchanged message'}
+                {sending ? t('Sending…') : t('Retry unchanged message')}
               </button>
             ) : (
               <button className={styles.primaryButton} type="submit" disabled={sending || !draft.trim()}>
-                {sending ? 'Sending…' : 'Send message'}
+                {sending ? t('Sending…') : t('Send message')}
               </button>
             )}
           </div>
-          {sendError ? <p className={styles.errorText} role="alert">{sendError}</p> : null}
-          {pendingMessage ? <p className={styles.muted}>The pending message is locked so a retry uses the same text and request key.</p> : null}
+          {sendError ? <p className={styles.errorText} role="alert">{t(sendError)}</p> : null}
+          {pendingMessage ? <p className={styles.muted}>{t('The pending message is locked so a retry uses the same text and request key.')}</p> : null}
         </form>
       ) : null}
-      {readOnly && pendingMessage ? <p className={styles.muted}>This chat is read-only, so the pending message cannot be retried.</p> : null}
+      {readOnly && pendingMessage ? <p className={styles.muted}>{t('This chat is read-only, so the pending message cannot be retried.')}</p> : null}
     </section>
   );
 }

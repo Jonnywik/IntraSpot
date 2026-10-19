@@ -1,0 +1,8 @@
+{
+  "method": "Isolated PostgreSQL/browser developer check, not participant validation",
+  "passed": [
+    "Complete representative card fits 1440x900; hover animates surface/art without moving target; keyboard focus visible",
+    "Confirmed attendee chat header, messages, composer and send action visible without overlap at 1280x720 and 1440x900"
+  ],
+  "problems": []
+}

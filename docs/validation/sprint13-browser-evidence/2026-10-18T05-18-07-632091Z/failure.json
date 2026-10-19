@@ -1,0 +1,8 @@
+{
+  "stage": "Flash registration and waitlist before hiding discovery",
+  "pathname": "/events",
+  "errorType": "PlaywrightError",
+  "message": "locator.waitFor: Error: strict mode violation: getByRole('heading', { name: 'Fictional Sprint 13 QA Expired Area Flash', exact: true }) resolved to 2 elements:\n    1) <h1>Fictional Sprint 13 QA Expired Area Flash</h1> aka locator('h1')\n    2) <h2>Fictional Sprint 13 QA Expired Area Flash</h2> aka getByRole('article').getByRole('heading', { name: 'Fictional Sprint 13 QA' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('heading', { name: 'Fictional Sprint 13 QA Expired Area Flash', exact: true }) to be visible\u001b[22m\n",
+  "browserErrorCount": 40,
+  "passedCount": 4
+}

@@ -1,0 +1,271 @@
+.eventsPage,
+.profilePage,
+.chatPage {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.eventsPage {
+  max-width: 58rem;
+}
+
+.profilePage {
+  max-width: 46rem;
+}
+
+.profileHeading {
+  max-width: 42rem;
+}
+
+.profileNotice {
+  border-inline-start: 4px solid var(--blue);
+  padding: 0.9rem 1rem;
+  background: var(--surface-alt);
+  line-height: 1.55;
+}
+
+.profileNotice p {
+  margin: 0;
+}
+
+.profileForm {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+  background: var(--surface);
+  gap: 1.25rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.registrationTabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  background: var(--surface-alt);
+}
+
+.registrationTab {
+  display: flex;
+  min-width: 0;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 650;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.registrationTab[aria-selected="true"] {
+  border-color: var(--selected-border);
+  border-bottom: 4px solid var(--gold);
+  background: var(--selected-bg);
+  box-shadow: var(--shadow-rest);
+}
+
+.registrationTab:focus-visible,
+.registrationPanel:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.tabCount {
+  display: inline-grid;
+  min-width: 1.55rem;
+  min-height: 1.55rem;
+  place-items: center;
+  border-radius: 999px;
+  padding-inline: 0.35rem;
+  background: var(--selected-bg);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.registrationPanel {
+  min-width: 0;
+  scroll-margin-block-start: 1rem;
+}
+
+.statusBadge {
+  display: inline-flex;
+  min-height: 1.8rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-size: 0.83rem;
+  font-weight: 700;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+  white-space: normal;
+}
+
+.eventsPage .statusBadge:global(.confirmed) {
+  border-color: var(--success-ink);
+  background: var(--success-bg);
+  color: var(--success-ink);
+}
+
+.eventsPage .statusBadge:global(.waitlisted) {
+  border-style: dotted;
+  border-color: var(--line);
+  background: var(--surface-alt);
+  color: var(--ink);
+}
+
+.eventsPage .statusBadge:global(.pending),
+.eventsPage .statusBadge:global(.reconfirmation_required) {
+  border-style: dashed;
+  border-color: var(--pending-ink);
+  background: var(--pending-bg);
+  color: var(--pending-ink);
+}
+
+.eventsPage .statusBadge:global(.cancelled),
+.eventsPage .statusBadge:global(.rejected) {
+  border-color: var(--danger-ink);
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+}
+
+.chatPage {
+  max-width: 100%;
+}
+
+.chatPage .chatLayout {
+  height: calc(100dvh - 296px);
+  min-height: 440px;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.chatPage .chatInbox,
+.chatPage .chatThread {
+  position: sticky;
+  top: 0.75rem;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  align-content: start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.chatPage .chatLog {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 48px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.chatPage .chatComposer {
+  position: static;
+  flex-shrink: 0;
+  margin: 0;
+  border-top: 1px solid var(--line);
+  padding: 0.75rem 0 0;
+  background: var(--surface);
+}
+
+.chatPage .chatThread {
+  display: flex;
+  flex-direction: column;
+}
+
+.chatThread > * {
+  flex-shrink: 0;
+}
+
+.chatPage .chatThread > header p,
+.chatPage .chatThread > header h2 {
+  margin: 0;
+}
+
+.chatComposer textarea {
+  min-height: 64px;
+  height: 72px;
+}
+
+@media (max-width: 44rem) {
+  .registrationTabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .registrationTab {
+    justify-content: space-between;
+  }
+
+  .eventsPage :global(.event-card) > header {
+    align-items: flex-start;
+  }
+
+  .eventsPage :global(.event-card) > header > div {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .eventsPage :global(.event-card) p {
+    margin-bottom: 0;
+  }
+
+  .chatPage .chatLayout {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    grid-template-rows: auto;
+    align-items: start;
+  }
+
+  .chatPage .chatInbox,
+  .chatPage .chatThread {
+    position: static;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    scrollbar-gutter: auto;
+  }
+
+  .chatPage .chatLog {
+    max-height: 58vh;
+  }
+
+  .chatPage .chatComposer {
+    position: static;
+    margin: 0;
+    border-top: 0;
+    padding: 0;
+  }
+}
+
+@media (max-height: 42rem) and (min-width: 44.01rem) {
+  .chatPage .chatLog {
+    max-height: 32dvh;
+  }
+}

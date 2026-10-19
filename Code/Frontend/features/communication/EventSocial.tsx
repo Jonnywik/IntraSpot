@@ -4,12 +4,16 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '@/lib/api';
 import { formatDate, formatTime } from '@/lib/date';
+import { useT } from '@/lib/i18n';
+import { usePreferences } from '@/lib/preferences';
 import { useSession } from '@/lib/session';
 import type { Actor, ContentItem, ContentPage, ReactionSummary } from '@/lib/types';
 import { ContentSafetyControls } from './ContentSafetyControls';
 import styles from './communication.module.css';
 
 type ReactionKind = NonNullable<ReactionSummary['mine']>;
+type LocalizedMessage = { literal: string; values?: Record<string, string | number> };
+type Translate = ReturnType<typeof useT>;
 
 const REACTIONS: { kind: ReactionKind; label: string; icon: string }[] = [
   { kind: 'interested' as ReactionKind, label: 'Interested', icon: '⭐' },
@@ -20,11 +24,17 @@ const REACTIONS: { kind: ReactionKind; label: string; icon: string }[] = [
   { kind: 'relate' as ReactionKind, label: 'Relate', icon: '🤗' },
 ];
 
-function requestMessage(error: unknown, action: string) {
-  if (error instanceof ApiError && error.status === 401) return 'Your sign-in expired. Sign in again, then retry.';
-  if (error instanceof ApiError && error.status === 403) return 'This action is unavailable for this account.';
-  if (error instanceof ApiError && error.status === 404) return 'This event is no longer available.';
-  return `${action} could not be completed. Check your connection and retry.`;
+function requestMessage(error: unknown, action: string): LocalizedMessage {
+  if (error instanceof ApiError && error.status === 401) return { literal: 'Your sign-in expired. Sign in again, then retry.' };
+  if (error instanceof ApiError && error.status === 403) return { literal: 'This action is unavailable for this account.' };
+  if (error instanceof ApiError && error.status === 404) return { literal: 'This event is no longer available.' };
+  return { literal: '{action} could not be completed. Check your connection and retry.', values: { action } };
+}
+
+function translateMessage(message: LocalizedMessage, t: Translate) {
+  const values = message.values && { ...message.values };
+  if (values && typeof values.action === 'string') values.action = t(values.action);
+  return t(message.literal, values);
 }
 
 function mergeComments(existing: ContentItem[], added: ContentItem[]) {
@@ -69,20 +79,22 @@ function EventSocialSession({
   token: string | null;
   onReactionChanged?: () => void;
 }) {
+  const t = useT();
+  const { preferences } = usePreferences();
   const startsAtMs = Date.parse(startsAt);
   const [now, setNow] = useState<number | null>(null);
   const [summary, setSummary] = useState<ReactionSummary | null>(null);
-  const [reactionError, setReactionError] = useState<string | null>(null);
+  const [reactionError, setReactionError] = useState<LocalizedMessage | null>(null);
   const [reactionPending, setReactionPending] = useState<ReactionKind | null | undefined>(undefined);
   const [reactionBusy, setReactionBusy] = useState(false);
   const [comments, setComments] = useState<ContentItem[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(true);
-  const [commentsError, setCommentsError] = useState<string | null>(null);
+  const [commentsError, setCommentsError] = useState<LocalizedMessage | null>(null);
   const [nextBefore, setNextBefore] = useState<number | null>(null);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [draft, setDraft] = useState('');
   const [pendingComment, setPendingComment] = useState<{ body: string; clientKey: string } | null>(null);
-  const [commentError, setCommentError] = useState<string | null>(null);
+  const [commentError, setCommentError] = useState<LocalizedMessage | null>(null);
   const [commentBusy, setCommentBusy] = useState(false);
   const reactionController = useRef<AbortController | null>(null);
   const commentsController = useRef<AbortController | null>(null);
@@ -175,7 +187,7 @@ function EventSocialSession({
     if (!token || !canReact || reactionBusy) return;
     if (!Number.isFinite(startsAtMs) || clientClockNow() >= startsAtMs) {
       setNow(clientClockNow());
-      setReactionError('Reactions close when the event starts.');
+      setReactionError({ literal: 'Reactions close when the event starts.' });
       return;
     }
     const controller = new AbortController();
@@ -208,7 +220,7 @@ function EventSocialSession({
     if (!token || !canComment || commentMutation.current) return;
     if (!Number.isFinite(startsAtMs) || clientClockNow() >= startsAtMs) {
       setNow(clientClockNow());
-      setCommentError('Comments close when the event starts.');
+      setCommentError({ literal: 'Comments close when the event starts.' });
       return;
     }
     const request = payload ?? (draft.trim()
@@ -277,81 +289,87 @@ function EventSocialSession({
   return (
     <section className={styles.social} aria-labelledby={`social-heading-${eventId}`}>
       <div className={styles.sectionHeading}>
-        <p className={styles.muted}>Event conversation</p>
-        <h2 id={`social-heading-${eventId}`}>Reactions and comments</h2>
+        <p className={styles.muted}>{t('Event conversation')}</p>
+        <h2 id={`social-heading-${eventId}`}>{t('Reactions and comments')}</h2>
       </div>
 
       <fieldset className={styles.reactionGroup}>
-        <legend>React to this event</legend>
+        <legend>{t('React to this event')}</legend>
         <div className={styles.reactionPicker}>
           {REACTIONS.map(({ kind, label, icon }) => (
             <button
               key={kind}
               className={styles.reactionButton}
               type="button"
-              aria-label={`${summary?.mine === kind ? 'Remove' : 'Choose'} ${label} reaction (${summary?.counts[kind] ?? 0})`}
+              aria-label={t('{action} {reaction} reaction ({count})', {
+                action: t(summary?.mine === kind ? 'Remove' : 'Choose'),
+                reaction: t(label),
+                count: summary?.counts[kind] ?? 0,
+              })}
               aria-pressed={summary?.mine === kind}
               disabled={!canReact || reactionBusy || reactionPending !== undefined}
               onClick={() => void setReaction(summary?.mine === kind ? null : kind)}
             >
               <span className={styles.reactionIcon} aria-hidden="true">{icon}</span>
-              <span>{label}</span>
+              <span>{t(label)}</span>
               <span>{summary?.counts[kind] ?? 0}</span>
             </button>
           ))}
         </div>
         <p className={styles.muted}>
-          {summary ? `${summary.total} reactions. Reactions show interest and do not reserve a seat.` : 'Loading reactions…'}
+          {summary
+            ? t('{count} reactions. Reactions show interest and do not reserve a seat.', { count: summary.total })
+            : t('Loading reactions…')}
         </p>
         {reactionError ? (
           <div>
-            <p className={styles.errorText} role="alert">{reactionError}</p>
+            <p className={styles.errorText} role="alert">{translateMessage(reactionError, t)}</p>
             {reactionPending !== undefined ? (
               <button className={styles.smallButton} type="button" onClick={() => void setReaction(reactionPending)} disabled={reactionBusy}>
-                Retry reaction update
+                {t('Retry reaction update')}
               </button>
             ) : null}
           </div>
         ) : null}
-        {!beforeStart && now !== null ? <p className={styles.muted}>Reactions are read-only after the event starts.</p> : null}
-        {!actor && beforeStart ? <p className={styles.muted}>Sign in with an eligible PLM account to react.</p> : null}
-        {actor && !actor.eligible ? <p className={styles.muted}>Reactions are available to eligible PLM stakeholders.</p> : null}
+        {!beforeStart && now !== null ? <p className={styles.muted}>{t('Reactions are read-only after the event starts.')}</p> : null}
+        {!actor && beforeStart ? <p className={styles.muted}>{t('Sign in with an eligible PLM account to react.')}</p> : null}
+        {actor && !actor.eligible ? <p className={styles.muted}>{t('Reactions are available to eligible PLM stakeholders.')}</p> : null}
       </fieldset>
 
       <div className={styles.sectionHeading}>
-        <h3>Comments</h3>
-        <p className={styles.muted}>Comments are public to visitors of this published event.</p>
+        <h3>{t('Comments')}</h3>
+        <p className={styles.muted}>{t('Comments are public to visitors of this published event.')}</p>
       </div>
       {commentsError ? (
         <div>
-          <p className={styles.errorText} role="alert">{commentsError}</p>
+          <p className={styles.errorText} role="alert">{translateMessage(commentsError, t)}</p>
           <button className={styles.smallButton} type="button" onClick={() => void loadComments()} disabled={commentsLoading}>
-            Retry loading comments
+            {t('Retry loading comments')}
           </button>
         </div>
       ) : null}
-      {commentsLoading && comments.length === 0 ? <p className={styles.muted} role="status">Loading comments…</p> : null}
-      {!commentsLoading && comments.length === 0 && !commentsError ? <p className={styles.muted}>No comments yet.</p> : null}
+      {commentsLoading && comments.length === 0 ? <p className={styles.muted} role="status">{t('Loading comments…')}</p> : null}
+      {!commentsLoading && comments.length === 0 && !commentsError ? <p className={styles.muted}>{t('No comments yet.')}</p> : null}
 
-      <div className={styles.commentList} aria-label="Event comments">
+      <div className={styles.commentList} aria-label={t('Event comments')}>
         {comments.map((item) => (
           <article className={styles.comment} key={item.id}>
             <header className={styles.itemHeader}>
               <strong>{item.author_label}</strong>
-              <time dateTime={item.created_at}>{formatDate(item.created_at)} · {formatTime(item.created_at)}</time>
+              <time dateTime={item.created_at}>{formatDate(item.created_at, preferences.language)} · {formatTime(item.created_at, preferences.language)}</time>
             </header>
             {item.removed
-              ? <p className={`${styles.itemBody} ${styles.muted}`}>This comment was removed.</p>
+              ? <p className={`${styles.itemBody} ${styles.muted}`}>{t('This comment was removed.')}</p>
               : item.locally_hidden
-                ? <p className={`${styles.itemBody} ${styles.muted}`}>This comment is hidden for you.</p>
+                ? <p className={`${styles.itemBody} ${styles.muted}`}>{t('This comment is hidden for you.')}</p>
                 : item.body !== null
                   ? <p className={styles.itemBody}>{item.body}</p>
-                  : <p className={`${styles.itemBody} ${styles.muted}`}>This comment is unavailable.</p>}
+                  : <p className={`${styles.itemBody} ${styles.muted}`}>{t('This comment is unavailable.')}</p>}
             {!item.removed ? (
               <>
                 {item.mine && beforeStart && token ? (
                   <button className={styles.smallButton} type="button" onClick={() => void removeComment(item)}>
-                    Remove my comment
+                    {t('Remove my comment')}
                   </button>
                 ) : null}
                 <ContentSafetyControls
@@ -370,13 +388,13 @@ function EventSocialSession({
       </div>
       {nextBefore !== null ? (
         <button className={styles.secondaryButton} type="button" onClick={() => void loadComments(nextBefore)} disabled={loadingOlder || commentsLoading}>
-          {loadingOlder ? 'Loading older comments…' : 'Load older comments'}
+          {loadingOlder ? t('Loading older comments…') : t('Load older comments')}
         </button>
       ) : null}
 
       {canComment ? (
         <form className={styles.form} onSubmit={(event) => { event.preventDefault(); void sendComment(); }}>
-          <label htmlFor={`comment-input-${eventId}`}>Add a comment</label>
+          <label htmlFor={`comment-input-${eventId}`}>{t('Add a comment')}</label>
           <textarea
             className={styles.textarea}
             id={`comment-input-${eventId}`}
@@ -390,25 +408,25 @@ function EventSocialSession({
             <span className={styles.muted}>{(pendingComment?.body ?? draft).trim().length}/2000</span>
             {pendingComment ? (
               <button className={styles.primaryButton} type="button" onClick={() => void sendComment(pendingComment)} disabled={commentBusy}>
-                {commentBusy ? 'Sending…' : 'Retry unchanged comment'}
+                {commentBusy ? t('Sending…') : t('Retry unchanged comment')}
               </button>
             ) : (
               <button className={styles.primaryButton} type="submit" disabled={commentBusy || !draft.trim()}>
-                {commentBusy ? 'Sending…' : 'Post comment'}
+                {commentBusy ? t('Sending…') : t('Post comment')}
               </button>
             )}
           </div>
-          {commentError ? <p className={styles.errorText} role="alert">{commentError}</p> : null}
-          {pendingComment ? <p className={styles.muted}>The pending comment is locked so a retry sends the same text with the same request key.</p> : null}
+          {commentError ? <p className={styles.errorText} role="alert">{translateMessage(commentError, t)}</p> : null}
+          {pendingComment ? <p className={styles.muted}>{t('The pending comment is locked so a retry sends the same text with the same request key.')}</p> : null}
         </form>
       ) : !beforeStart && now !== null ? (
-        <p className={styles.muted}>Comments remain readable, but new comments close when the event starts.</p>
+        <p className={styles.muted}>{t('Comments remain readable, but new comments close when the event starts.')}</p>
       ) : actor?.communication_restricted ? (
-        <p className={styles.muted}>Posting comments is temporarily unavailable for this account. Existing registrations remain unchanged.</p>
+        <p className={styles.muted}>{t('Posting comments is temporarily unavailable for this account. Existing registrations remain unchanged.')}</p>
       ) : !actor && beforeStart ? (
-        <p className={styles.muted}>Sign in with an eligible PLM account to comment.</p>
+        <p className={styles.muted}>{t('Sign in with an eligible PLM account to comment.')}</p>
       ) : actor && !actor.eligible ? (
-        <p className={styles.muted}>Comments are available to eligible PLM stakeholders.</p>
+        <p className={styles.muted}>{t('Comments are available to eligible PLM stakeholders.')}</p>
       ) : null}
     </section>
   );
@@ -421,6 +439,7 @@ export function EventSocialPreview({ eventId }: { eventId: string }) {
 }
 
 function EventSocialPreviewSession({ eventId, token }: { eventId: string; token: string | null }) {
+  const t = useT();
   const [state, setState] = useState<{
     preview: { summary: ReactionSummary; comments: ContentItem[] } | null;
     failed: boolean;
@@ -444,14 +463,14 @@ function EventSocialPreviewSession({ eventId, token }: { eventId: string; token:
   }, [eventId, token]);
 
   return (
-    <section className={`${styles.social} ${styles.socialCompact}`} aria-label="Event social preview">
-      {state.failed ? <p className={styles.muted}>Event conversation preview is unavailable.</p> : null}
-      {state.loading ? <p className={styles.muted} role="status">Loading event conversation…</p> : null}
+    <section className={`${styles.social} ${styles.socialCompact}`} aria-label={t('Event social preview')}>
+      {state.failed ? <p className={styles.muted}>{t('Event conversation preview is unavailable.')}</p> : null}
+      {state.loading ? <p className={styles.muted} role="status">{t('Loading event conversation…')}</p> : null}
       {state.preview ? (
         <>
-          <div className={styles.previewCounts} role="group" aria-label="Reaction counts">
+          <div className={styles.previewCounts} role="group" aria-label={t('Reaction counts')}>
             {REACTIONS.map(({ kind, label, icon }) => (
-              <span key={kind} role="img" aria-label={`${label}: ${state.preview?.summary.counts[kind] ?? 0}`}>
+              <span key={kind} role="img" aria-label={t('{reaction}: {count}', { reaction: t(label), count: state.preview?.summary.counts[kind] ?? 0 })}>
                 <span aria-hidden="true">{icon}</span> {state.preview?.summary.counts[kind] ?? 0}
               </span>
             ))}
@@ -459,11 +478,15 @@ function EventSocialPreviewSession({ eventId, token }: { eventId: string; token:
           {state.preview.comments.map((item) => (
             <article className={styles.previewComment} key={item.id}>
               <strong>{item.author_label}</strong>
-              <p>{item.removed ? 'This comment was removed.' : item.locally_hidden ? 'This comment is hidden for you.' : item.body ?? 'This comment is unavailable.'}</p>
+              <p>{item.removed
+                ? t('This comment was removed.')
+                : item.locally_hidden
+                  ? t('This comment is hidden for you.')
+                  : item.body ?? t('This comment is unavailable.')}</p>
             </article>
           ))}
           <Link className={styles.linkButton} href={`/events?eventId=${encodeURIComponent(eventId)}`}>
-            Open event comments
+            {t('Open event comments')}
           </Link>
         </>
       ) : null}

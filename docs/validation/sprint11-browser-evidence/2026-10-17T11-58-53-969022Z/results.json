@@ -1,0 +1,10 @@
+{
+  "method": "Isolated test PostgreSQL with local Edge; not participant/device validation",
+  "passed": [
+    "Guest global search, four mobile destinations, keyboard skip link, and header utilities",
+    "Guest device preferences persist through reload in Filipino, dark, XL, high contrast, and reduced motion",
+    "Account preferences stay separate from guest storage; My Clubs narrows member search"
+  ],
+  "browserErrors": [],
+  "contrastRatio": null
+}

@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "method": "Mocked browser protocol using the pinned Supabase Auth JS SDK and coordinator-built out-real static export.",
+  "authOrigin": "https://sprint15-test.supabase.co (intercepted; fictional only)",
+  "apiOrigin": "http://127.0.0.1:8011 (intercepted; no API server contact)",
+  "liveGoogleOrSupabase": false,
+  "unexpectedExternalRequests": 0,
+  "unexpectedAuthRequests": 0,
+  "cases": [
+    "actual SDK PKCE success uses persisted verifier once; session/provider/user data stay memory-only and reload requires sign-in",
+    "provider cancellation is generic; callback URL and only the project PKCE slot are cleared",
+    "SDK PKCE exchange error is recoverable and does not disclose provider response content",
+    "backend 401 clears the in-memory session; no Auth user or error body is shown",
+    "API-unavailable retry delayed across logout is discarded; scoped PKCE cleanup preserves unrelated storage"
+  ],
+  "viewportChecks": [
+    {
+      "width": 1280,
+      "scrollWidth": 1265,
+      "mainRegions": 1,
+      "mobileDestinations": 4
+    },
+    {
+      "width": 390,
+      "scrollWidth": 375,
+      "mainRegions": 1,
+      "mobileDestinations": 4
+    }
+  ]
+}

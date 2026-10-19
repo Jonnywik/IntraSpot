@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import type { PrivateEvent, PublicEvent } from "@/lib/types";
+import { useT } from '@/lib/i18n';
 
 type ArtworkEvent =
   | Pick<PublicEvent, "banner_key" | "title">
@@ -16,8 +17,9 @@ const colors = {
   event: { background: "#eee8dc", accent: "#645d53", soft: "#c9bca6" },
 };
 
-export function EventArtwork({ event }: { event: ArtworkEvent }) {
+export function EventArtwork({ event, priority=false }: { event: ArtworkEvent; priority?: boolean }) {
   const [heritageImageFailed, setHeritageImageFailed] = useState(false);
+  const t = useT();
   const key = event.banner_key ?? "event";
   const title = event.title || "event";
 
@@ -26,10 +28,11 @@ export function EventArtwork({ event }: { event: ArtworkEvent }) {
       <div className="artwork-crop"><Image
         className="event-art"
         src="/artwork/heritage.jpg"
-        alt={"Local heritage fixture artwork for " + title}
+        alt={t('Sample event artwork for {title}', {title})}
         width={1000}
         height={350}
         unoptimized
+        loading={priority ? 'eager' : 'lazy'}
         onError={() => setHeritageImageFailed(true)}
       /></div>
     );
@@ -42,7 +45,7 @@ export function EventArtwork({ event }: { event: ArtworkEvent }) {
     <div
       className="event-art"
       role="img"
-      aria-label={"Local " + key + " fixture illustration for " + title}
+      aria-label={t('Sample event artwork for {title}', {title})}
     >
       <svg viewBox="0 0 1000 350" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
         <rect width="1000" height="350" fill={palette.background} />

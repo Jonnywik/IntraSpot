@@ -1,0 +1,17 @@
+{
+  "method": "Local browser and isolated scratch PostgreSQL; not participant validation",
+  "passed": [
+    "Corrupt guest preferences reset to a valid default record and load successfully after reload in an isolated context",
+    "Guest device preferences are not copied into the first signed-in account",
+    "Account preferences persist across reload; Filipino updates the root language and sidebar privacy remains intact",
+    "A second account starts with its own defaults rather than the first account private settings"
+  ],
+  "pageErrors": [
+    "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.",
+    "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.",
+    "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.",
+    "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.",
+    "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.",
+    "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'."
+  ]
+}

@@ -1,0 +1,15 @@
+export const eventMessages: Record<string, string> = {
+  'View event': 'Tingnan ang event',
+  'A valid idempotency key is required.': 'Kailangan ng wastong idempotency key.',
+  'This idempotency key was already used for another event.': 'Nagamit na ang idempotency key na ito para sa ibang event.',
+  'This idempotency key was already used with a different persona-sharing choice.': 'Nagamit na ang idempotency key na ito sa ibang pagpili tungkol sa pagbabahagi ng persona.',
+  'The event could not be found.': 'Hindi nahanap ang event.',
+  'The registration request could not be completed.': 'Hindi nakumpleto ang kahilingan sa pagpaparehistro.',
+  'The registration request is still processing. Retry with the same idempotency key.': 'Pinoproseso pa ang kahilingan sa pagpaparehistro. Subukan muli gamit ang parehong idempotency key.',
+  'The event review window is not configured.': 'Hindi naka-configure ang panahon ng pagsusuri ng event.',
+  'An eligible active account is required to register.': 'Kailangan ng aktibo at kwalipikadong account upang magparehistro.',
+  'Complete your nickname, age range, and at least one interest before registering.': 'Kumpletuhin ang palayaw, pangkat ng edad, at kahit isang interes bago magparehistro.',
+  'The event is not accepting registrations.': 'Hindi tumatanggap ng pagpaparehistro ang event na ito.',
+  'This earlier registration attempt ended with your organization membership. Submit a new request to register again.': 'Natapos ang nauna mong pagtatangkang magparehistro kasabay ng pagtatapos ng membership mo sa organisasyon. Magsumite ng bagong kahilingan upang magparehistro muli.',
+  'You are on the waitlist. No estimated wait time is available.': 'Nasa waitlist ka. Walang available na tinatayang oras ng paghihintay.',
+};

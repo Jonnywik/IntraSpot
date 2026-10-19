@@ -1,0 +1,14 @@
+{
+  "method": "Isolated PostgreSQL with local Microsoft Edge; not participant or physical-device validation",
+  "passed": [
+    "Guest Upcoming fallback and title search",
+    "Signed-in For You default, collapsed explainer, and matched reason groups",
+    "Settings area/windows save, reload, clear, reset ranking, and preserve theme",
+    "Discovery preferences stay isolated between accounts",
+    "Upcoming and Newest override For You ranking and reasons",
+    "My Clubs composes with organization-name search"
+  ],
+  "browserErrorCount": 0,
+  "screenshots": [],
+  "geometry": []
+}

@@ -34,6 +34,9 @@ def _actor_from_authorization(authorization: str | None, db: Session, *, require
         return None
 
     settings = get_settings()
+    if settings.auth_provider == 'supabase':
+        from app.domains.identity.supabase_auth import actor_from_supabase_token
+        return actor_from_supabase_token(db, token, settings)
     try:
         claims = jwt.decode(
             token,

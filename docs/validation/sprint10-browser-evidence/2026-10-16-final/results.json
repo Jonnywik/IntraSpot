@@ -1,0 +1,64 @@
+{
+  "suite": "Sprint 10 browser regression",
+  "classification": "developer-only; not participant validation",
+  "browserBaseline": "Microsoft Edge (Chromium) via Playwright",
+  "status": "passed",
+  "failureName": null,
+  "navigationApiAvailable": true,
+  "passed": [
+    "owner draft editor with dark theme, extra-large text, and high contrast fits all four desktop viewports",
+    "Typing during a held save remains editable and the newest title persists after reload",
+    "Pending-owner edits survive a failed autosave, a declined account switch, retry, and reload; publish stays gated",
+    "Dismissing browser back from a workspace-linked draft retains the pending owner and unsaved title",
+    "platform accreditation review with dark theme, extra-large text, and high contrast fits all four desktop viewports",
+    "Platform admin approval is confirmed and appears in the decision result",
+    "Filipino platform review with dark theme and extra-large text fits all four desktop viewports",
+    "Filipino management copy stays readable at all desktop sizes and language changes independently",
+    "Approved publish succeeds with If-Match and does not expose the private draft version",
+    "approved-owner draft editor with dark theme, extra-large text, and high contrast fits all four desktop viewports",
+    "Two-tab stale publish and autosave return draft_conflict, preserve edits, and offer an explicit reload",
+    "notification inbox with dark theme, extra-large text, and high contrast fits all four desktop viewports",
+    "Inbox filters, read feedback, event/club/chat destinations, and mobile fit are verified",
+    "moderator review workspace fits all four desktop viewports",
+    "Moderator notification opens a scoped review workspace and an authorized registration decision completes",
+    "platform safety review workspace fits all four desktop viewports",
+    "Member cannot open staff workspace data; platform safety notification routes to admin review",
+    "Draft creation stays unavailable on mobile"
+  ],
+  "screenshots": [
+    "default-light-management-1440x900.png",
+    "default-light-draft-1440x900.png",
+    "extreme-dark-xl-high-contrast-draft-1440x900.png",
+    "default-light-admin-1440x900.png",
+    "extreme-dark-xl-high-contrast-admin-1440x900.png",
+    "filipino-dark-xl-admin-1440x900.png",
+    "extreme-dark-xl-high-contrast-approved-draft-1440x900.png",
+    "default-light-inbox-1440x900.png",
+    "extreme-dark-xl-high-contrast-inbox-1440x900.png",
+    "extreme-dark-xl-high-contrast-moderator-workspace-1440x900.png"
+  ],
+  "screenshotViewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "desktopViewports": [
+    {
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "fallbackLimitation": "Only the Edge Navigation API traversal path is exercised. Browsers without Navigation API support are not validated for preserving the in-app draft view; they rely on the native beforeunload fallback.",
+  "participantValidation": false
+}

@@ -12,6 +12,8 @@ async function inspect(folder) {
     if (/\.(json|js|html|txt|pem|map)$/i.test(entry.name)) {
       const text = await readFile(target, 'utf8');
       if (/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/.test(text)
+          || /sb_secret_[A-Za-z0-9_-]{10,}/.test(text)
+          || /GOCSPX-[A-Za-z0-9_-]{10,}/.test(text)
           || text.includes('-----BEGIN PRIVATE KEY-----')) {
         throw new Error('Refusing to export signed credentials or signing keys.');
       }

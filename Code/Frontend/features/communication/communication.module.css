@@ -55,11 +55,26 @@
   border: 1px solid var(--line);
   border-radius: 0.7rem;
   padding: 0.45rem 0.75rem;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   font: inherit;
   line-height: 1.25;
   cursor: pointer;
+  text-align: center;
+  transition: background 140ms, box-shadow 140ms;
+}
+
+.reactionButton:hover:not(:disabled),
+.smallButton:hover:not(:disabled),
+.secondaryButton:hover:not(:disabled),
+.linkButton:hover {
+  background: var(--surface-alt);
+  box-shadow: var(--shadow-rest);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--button-hover);
+  box-shadow: var(--shadow-hover);
 }
 
 .reactionButton {
@@ -72,7 +87,7 @@
 
 .reactionButton[aria-pressed="true"] {
   border-color: var(--blue);
-  background: #edf2fb;
+  background: var(--selected-bg);
   color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--blue);
 }
@@ -115,10 +130,10 @@
   width: 100%;
   min-height: 5.5rem;
   resize: vertical;
-  border: 1px solid #c7ccda;
+  border: 1px solid var(--control-border);
   border-radius: 0.75rem;
   padding: 0.75rem;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   font: inherit;
   line-height: 1.45;
@@ -173,7 +188,7 @@
   border: 1px solid var(--line);
   border-radius: 0.85rem;
   padding: 0.85rem;
-  background: #fff;
+  background: var(--surface);
 }
 
 .comment,
@@ -228,7 +243,7 @@
   border: 1px solid var(--line);
   border-radius: 0.75rem;
   padding: 0.8rem;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 0.5rem 1.5rem rgb(20 30 23 / 12%);
 }
 
@@ -260,21 +275,21 @@
 .select {
   width: 100%;
   min-height: 2.5rem;
-  border: 1px solid #c7ccda;
+  border: 1px solid var(--control-border);
   border-radius: 0.55rem;
   padding: 0.4rem 0.55rem;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   font: inherit;
 }
 
 .statusText {
-  color: #205c37;
+  color: var(--success-ink);
   font-size: 0.9rem;
 }
 
 .errorText {
-  color: var(--burgundy);
+  color: var(--danger-ink);
   font-size: 0.92rem;
 }
 
@@ -335,7 +350,7 @@
   border: 1px solid var(--line);
   border-radius: 1rem;
   padding: 1rem;
-  background: #fff;
+  background: var(--surface);
 }
 
 .chatHeading {
@@ -373,7 +388,7 @@
   flex: 0 0 auto;
   border-radius: 999px;
   padding: 0.2rem 0.5rem;
-  background: #edf2fb;
+  background: var(--surface-alt);
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 700;
@@ -397,8 +412,8 @@
 }
 
 .chatMessage.mine {
-  border-color: #c7ccda;
-  background: #eff3fa;
+  border-color: var(--control-border);
+  background: var(--surface-alt);
 }
 
 .readOnlyNotice {
@@ -409,6 +424,28 @@
 
 .readOnlyNotice p {
   margin: 0;
+}
+
+@media (max-width: 767px) {
+  .reportSummary,
+  .reportChoice,
+  .select {
+    min-height: 44px;
+  }
+
+  .reportDetails,
+  .reportPanel {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .reactionButton,
+  .primaryButton,
+  .secondaryButton,
+  .linkButton {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
 }
 
 @media (max-width: 44rem) {

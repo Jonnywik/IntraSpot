@@ -6,6 +6,7 @@ import { ApiError, api } from '@/lib/api';
 import { formatDate, formatTime } from '@/lib/date';
 import { useApiResource } from '@/lib/use-api-resource';
 import { useSession } from '@/lib/session';
+import { AnnouncementReader } from '@/features/announcements/AnnouncementReader';
 import type { Organization, MembershipApplicationOut, MembershipInviteOut, MembershipSelfOut,
   MembershipApplicationInput, MembershipKeyInput } from '@/lib/types';
 import styles from './member-portal.module.css';
@@ -373,6 +374,14 @@ function MemberPortalView({
                 </div>
               )}
             </section>
+          ) : null}
+          {selectedOrganization?.accreditation_status === 'approved' ? (
+            <AnnouncementReader
+              key={`${selectedOrganization.id}:${token ?? 'guest'}`}
+              orgId={selectedOrganization.id}
+              token={token}
+              eligible={Boolean(token && actor?.eligible)}
+            />
           ) : null}
         </div>
 

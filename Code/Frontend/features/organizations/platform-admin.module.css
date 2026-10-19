@@ -1,0 +1,413 @@
+.page {
+  display: grid;
+  gap: clamp(1.25rem, 2vw, 1.75rem);
+  min-width: 0;
+}
+
+.heading,
+.sectionHeading,
+.recordedHeading,
+.applicationHeader,
+.queueHeading,
+.historyHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.heading {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.heading h1,
+.heading p,
+.sectionHeading h2,
+.sectionHeading p,
+.recordedHeading h2,
+.recordedHeading p,
+.applicationHeader h3,
+.applicationHeader p {
+  margin: 0;
+}
+
+.muted,
+.submitted,
+.resultCount {
+  color: var(--muted);
+}
+
+.mobileNotice {
+  max-width: 48rem;
+  margin-inline: auto;
+}
+
+.assessmentNote {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-inline-start: 4px solid var(--gold);
+  border-radius: 14px;
+}
+
+.assessmentNote h2 {
+  margin: 0 0 0.65rem;
+  font-size: 1.25rem;
+}
+
+.assessmentNote p {
+  max-width: 76ch;
+  margin: 0.45rem 0 0;
+  line-height: 1.6;
+}
+
+.recordedDecision,
+.applicationsPanel {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.recordedHeading {
+  align-items: center;
+}
+
+.recordedHeading > div {
+  min-width: 0;
+}
+
+.sectionHeading {
+  align-items: end;
+}
+
+.sectionHeading h2 {
+  margin-top: 0.2rem;
+}
+
+.resultCount {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(14rem, 0.8fr);
+  align-items: end;
+  gap: 1rem;
+  min-width: 0;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.filterGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.filterButton {
+  min-height: 44px;
+  padding: 0.55rem 0.85rem;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--control-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.filterButton span {
+  font-variant-numeric: tabular-nums;
+}
+
+.filterButton:hover {
+  background: var(--surface-alt);
+}
+
+.searchField input:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.filterSelected {
+  color: var(--ink);
+  font-weight: 700;
+  background: var(--selected-bg);
+  border-color: var(--selected-border);
+}
+
+.searchField {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.searchField input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0.6rem 0.75rem;
+  color: var(--ink);
+  font: inherit;
+  background: var(--surface);
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+}
+
+.applicationGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 27rem), 1fr));
+  gap: 1rem;
+  min-width: 0;
+}
+
+.applicationCard {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  min-width: 0;
+  padding: clamp(1rem, 1.6vw, 1.35rem);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-rest);
+}
+
+.applicationHeader {
+  align-items: flex-start;
+}
+
+.organizationHeading {
+  min-width: 0;
+}
+
+.organizationHeading h3 {
+  overflow-wrap: anywhere;
+}
+
+.submitted {
+  margin-top: 0.4rem !important;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.description {
+  margin: 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 700;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.pending {
+  color: var(--pending-ink);
+  background: var(--pending-bg);
+  border-color: var(--pending-ink);
+}
+
+.approved {
+  color: var(--success-ink);
+  background: var(--success-bg);
+  border-color: var(--success-ink);
+}
+
+.rejected {
+  color: var(--danger-ink);
+  background: var(--danger-bg);
+  border-color: var(--danger-ink);
+}
+
+.history {
+  min-width: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+
+.history h4 {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+}
+
+.historyList {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.historyList li {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.historyHeading {
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+}
+
+.historyList time {
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.identifier {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+.applicationActions,
+.dialogActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  min-width: 0;
+  padding-top: 0.25rem;
+}
+
+.applicationActions > button,
+.dialogActions > button {
+  min-height: 44px;
+  white-space: normal;
+}
+
+.applicationActions > button {
+  flex: 1 1 12rem;
+}
+
+.errorPanel,
+.inlineFeedback {
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.errorPanel,
+.inlineFeedback[role='alert'] {
+  color: var(--danger-ink);
+  background: var(--danger-bg);
+  border-color: var(--danger-ink);
+}
+
+.errorPanel p,
+.inlineFeedback p {
+  margin: 0;
+}
+
+.confirmDialog {
+  width: min(42rem, calc(100vw - 2rem));
+  max-width: 42rem;
+  max-height: calc(100vh - 2rem);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  overflow: auto;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow-hover);
+}
+
+.confirmDialog::backdrop {
+  background: var(--overlay);
+}
+
+.dialogContent {
+  display: grid;
+  gap: 1rem;
+}
+
+.dialogContent > * {
+  min-width: 0;
+  margin-block: 0;
+}
+
+.dialogContent h2 {
+  margin-top: -0.35rem;
+}
+
+.confirmationSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.confirmationSummary strong {
+  overflow-wrap: anywhere;
+}
+
+.dialogActions {
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
+
+.dialogActions > button {
+  flex: 0 1 auto;
+}
+
+.filterButton:focus-visible,
+.applicationActions button:focus-visible,
+.dialogActions button:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .sectionHeading,
+  .recordedHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .resultCount {
+    text-align: start;
+  }
+
+  .applicationHeader {
+    flex-direction: column-reverse;
+  }
+
+  .dialogActions > button {
+    flex: 1 1 100%;
+  }
+}

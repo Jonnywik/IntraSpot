@@ -1,0 +1,180 @@
+.panel {
+  width: min(100%, 760px);
+  min-width: 0;
+  margin: 0 auto 48px;
+  padding: 24px;
+  gap: 24px;
+}
+
+.heading {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.45rem;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin: -12px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.form {
+  display: grid;
+  min-width: 0;
+  gap: 24px;
+}
+
+.section {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sectionHeading {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.2rem;
+  overflow-wrap: anywhere;
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.field input,
+.field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 9px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.midnight input:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.help {
+  min-width: 0;
+  margin: 0;
+  color: var(--muted);
+  font-size: .95rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.windows {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+}
+
+.window {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.window legend {
+  max-width: 100%;
+  padding: 0 5px;
+  color: var(--ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.fields {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.midnight {
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.midnight input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  margin: 0;
+  accent-color: var(--blue);
+}
+
+.feedback {
+  min-width: 0;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.errorActions,
+.actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.errorActions > *,
+.actions > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.errorActions > :global(.button),
+.actions > :global(.button) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .panel {
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .fields {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions > .button {
+    width: 100%;
+  }
+}

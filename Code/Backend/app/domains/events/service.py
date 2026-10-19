@@ -1,4 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from hashlib import sha256
+import json
 
 from sqlalchemy.orm import Session
 
@@ -11,6 +13,8 @@ from app.domains.organizations.models import Organization
 EVENT_VALIDATION_FIELDS = (
     "title",
     "summary",
+    "tags",
+    "coarse_area",
     "description",
     "starts_at",
     "ends_at",
@@ -33,7 +37,30 @@ MATERIAL_EVENT_FIELDS = (
 )
 
 
+def draft_version(event: Event) -> str:
+    fields = {name: getattr(event, name) for name in EVENT_VALIDATION_FIELDS}
+    for name in ("starts_at", "ends_at"):
+        value = fields[name]
+        fields[name] = value.astimezone(timezone.utc).isoformat() if value else None
+    fields.update(id=event.id, status=event.status)
+    return sha256(json.dumps(fields, sort_keys=True, ensure_ascii=False,
+                             separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def require_draft_version(event: Event, if_match: str | None) -> None:
+    # Compare only after acquiring the event lock, including on publish.
+    if if_match is not None and if_match != f'"{draft_version(event)}"':
+        raise DomainError("draft_conflict",
+                          "This draft changed in another window. Reload the saved draft before continuing.",
+                          409)
+
+
 def create_draft(db: Session, organization: Organization, created_by: str, fields: dict) -> Event:
+    _validate_flash_draft_settings(
+        fields.get("event_type", "scheduled"),
+        fields.get("registration_mode", "instant"),
+        fields.get("review_window_minutes"),
+    )
     event = Event(id=uid(), org_id=organization.id, created_by=created_by, **fields)
     db.add(event)
     db.flush()
@@ -43,6 +70,13 @@ def create_draft(db: Session, organization: Organization, created_by: str, field
 def update_draft(db: Session, event: Event, fields: dict) -> Event:
     if event.status != "draft":
         raise DomainError("published_event_immutable", "Published events cannot be edited.", 409)
+    proposed = {name: getattr(event, name) for name in EVENT_VALIDATION_FIELDS}
+    proposed.update(fields)
+    _validate_flash_draft_settings(
+        proposed["event_type"],
+        proposed["registration_mode"],
+        proposed["review_window_minutes"],
+    )
     for name, value in fields.items():
         setattr(event, name, value)
     db.flush()
@@ -56,7 +90,29 @@ def validate_publishable(event: Event, at: datetime | None = None) -> None:
     )
 
 
-def _validate_event_values(fields: dict, at: datetime | None = None) -> None:
+def _validate_flash_draft_settings(
+    event_type: str,
+    registration_mode: str,
+    review_window_minutes: int | None,
+) -> None:
+    if event_type != "flash":
+        return
+    if registration_mode != "instant":
+        raise DomainError("event_mode_invalid", "Flash events require instant registration.", 422)
+    if review_window_minutes is not None:
+        raise DomainError(
+            "event_review_window_invalid",
+            "Flash events cannot have a review window.",
+            422,
+        )
+
+
+def _validate_event_values(
+    fields: dict,
+    at: datetime | None = None,
+    flash_window_at: datetime | None = None,
+) -> None:
+    validation_time = at or now()
     if len(fields["summary"] or "") > SUMMARY_MAX_LENGTH:
         raise DomainError("event_summary_too_long", "The event summary is too long.", 422)
     required = (
@@ -89,7 +145,7 @@ def _validate_event_values(fields: dict, at: datetime | None = None) -> None:
         raise DomainError("event_datetime_timezone_required", "Event times must include a timezone.", 422)
     starts_at_utc = starts_at.astimezone(timezone.utc)
     ends_at_utc = ends_at.astimezone(timezone.utc)
-    if starts_at_utc <= (at or now()):
+    if starts_at_utc <= validation_time.astimezone(timezone.utc):
         raise DomainError("event_start_must_be_future", "The event must start in the future.", 422)
     if ends_at_utc <= starts_at_utc:
         raise DomainError("event_end_must_follow_start", "The event end must follow its start.", 422)
@@ -99,12 +155,24 @@ def _validate_event_values(fields: dict, at: datetime | None = None) -> None:
         raise DomainError("event_banner_invalid", "Choose an available event banner.", 422)
     registration_mode = fields["registration_mode"]
     review_window_minutes = fields["review_window_minutes"]
-    if registration_mode not in {"instant", "approval"} or fields["event_type"] != "scheduled":
+    if registration_mode not in {"instant", "approval"} or fields["event_type"] not in {"scheduled", "flash"}:
         raise DomainError(
             "event_mode_invalid",
-            "Only scheduled events with instant or approval registration are available.",
+            "Choose a supported event type and registration mode.",
             422,
         )
+    if fields["event_type"] == "flash":
+        _validate_flash_draft_settings(
+            fields["event_type"], registration_mode, review_window_minutes
+        )
+        window_start = flash_window_at or validation_time
+        window_start_utc = window_start.astimezone(timezone.utc)
+        if starts_at_utc <= window_start_utc or starts_at_utc > window_start_utc + timedelta(hours=24):
+            raise DomainError(
+                "event_flash_start_window_invalid",
+                "Flash events must start within 24 hours of publication.",
+                422,
+            )
     if registration_mode == "instant" and review_window_minutes is not None:
         raise DomainError(
             "event_review_window_invalid",
@@ -139,7 +207,11 @@ def validate_material_change(
             422,
         )
     proposed.update(changes)
-    _validate_event_values(proposed, at=validation_time)
+    _validate_event_values(
+        proposed,
+        at=validation_time,
+        flash_window_at=event.published_at if event.event_type == "flash" else None,
+    )
 
     if reconfirm_deadline.tzinfo is None or reconfirm_deadline.utcoffset() is None:
         raise DomainError(
@@ -158,16 +230,17 @@ def validate_material_change(
     return {name: proposed[name] for name in MATERIAL_EVENT_FIELDS}
 
 
-def publish(db: Session, event: Event) -> Event:
+def publish(db: Session, event: Event, at: datetime | None = None) -> Event:
     if event.status != "draft":
         raise DomainError("published_event_immutable", "Published events cannot be changed.", 409)
-    validate_publishable(event)
+    publication_time = at or now()
+    validate_publishable(event, at=publication_time)
     # Seal interrupted attempts made while private, atomically with publication.
     # Runtime import preserves the existing Events/Registrations module boundary.
     from app.domains.registrations.service import reject_draft_receipts
 
     reject_draft_receipts(db, event.id)
     event.status = "published"
-    event.published_at = now()
+    event.published_at = publication_time
     db.flush()
     return event

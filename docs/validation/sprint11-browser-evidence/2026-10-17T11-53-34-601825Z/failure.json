@@ -1,0 +1,7 @@
+{
+  "stage": "active chat send, retry, and archived read-only",
+  "pathname": "/chat",
+  "browserErrors": [],
+  "errorName": "AssertionError",
+  "errorMessage": "The lost-response retry persists only one message"
+}

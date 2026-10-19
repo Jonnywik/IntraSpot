@@ -4,9 +4,12 @@ import { useState, type FormEvent } from 'react';
 import { Feedback } from '@/components/feedback';
 import { api } from '@/lib/api';
 import { formatDate, formatTime, fromUtcToManila, toUtcFromManila } from '@/lib/date';
+import { useT, type Translate } from '@/lib/i18n';
+import { usePreferences } from '@/lib/preferences';
 import { useSession } from '@/lib/session';
 import { useApiResource } from '@/lib/use-api-resource';
 import type { EventChangeInput, PrivateEvent, RegistrationReview as RegistrationReviewItem } from '@/lib/types';
+import styles from './workspace-page.module.css';
 
 type SelectionMode = EventChangeInput['selection_mode'];
 type ChangeForm = {
@@ -26,32 +29,36 @@ function isSeatHolder(status: string) {
   return status === 'confirmed' || status === 'pending' || status === 'reconfirmation_required';
 }
 
-function manilaDate(value: string) {
-  if (!value) return 'Not set';
+function manilaDate(value: string, t: Translate, language: 'en' | 'fil') {
+  if (!value) return t('Not set');
   try {
     const utc = toUtcFromManila(value);
-    return `${formatDate(utc)} · ${formatTime(utc)} (Manila)`;
+    return `${formatDate(utc, language)} · ${formatTime(utc, language)} (${t('Manila time')})`;
   } catch {
-    return 'Enter a valid Manila date and time';
+    return t('Enter a valid Manila date and time');
   }
 }
 
-function validateProposedSchedule(startsAt: string, endsAt: string, reconfirmDeadline: string) {
+function validateProposedSchedule(startsAt: string, endsAt: string, reconfirmDeadline: string, t: Translate) {
   const startsAtMs = Date.parse(startsAt);
   const endsAtMs = Date.parse(endsAt);
   const deadlineMs = Date.parse(reconfirmDeadline);
   const now = Date.now();
-  if (startsAtMs <= now) throw new Error('The proposed event start must be in the future.');
-  if (endsAtMs <= startsAtMs) throw new Error('The event end must be after its start.');
+  if (startsAtMs <= now) throw new Error(t('The proposed event start must be in the future.'));
+  if (endsAtMs <= startsAtMs) throw new Error(t('The event end must be after its start.'));
   if (deadlineMs <= now || deadlineMs >= startsAtMs) {
-    throw new Error('The reconfirmation deadline must be in the future and before the proposed event start.');
+    throw new Error(t('The reconfirmation deadline must be in the future and before the proposed event start.'));
   }
 }
 
-export function EventChanges({event, onChanged}: {
+export function EventChanges({event, onChanged, isOpen: requestedOpen, onOpenChange}: {
   event: PrivateEvent;
   onChanged: () => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
+  const t = useT();
+  const {preferences: {language}} = usePreferences();
   const {token} = useSession();
   const [currentEvent, setCurrentEvent] = useState<PrivateEvent>(event);
   const [form, setForm] = useState<ChangeForm>(() => ({
@@ -65,7 +72,8 @@ export function EventChanges({event, onChanged}: {
   }));
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('exact');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [open, setOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = requestedOpen ?? localOpen;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState('');
@@ -110,14 +118,14 @@ export function EventChanges({event, onChanged}: {
     setMessage('');
 
     try {
-      if (!capacityValid || proposedCapacity === null) throw new Error('Capacity must be a positive whole number.');
-      if (!form.startsAt || !form.endsAt) throw new Error('Set both a future start and end time.');
-      if (!form.reconfirmDeadline) throw new Error('Set a reconfirmation deadline in Manila time.');
+      if (!capacityValid || proposedCapacity === null) throw new Error(t('Capacity must be a positive whole number.'));
+      if (!form.startsAt || !form.endsAt) throw new Error(t('Set both a future start and end time.'));
+      if (!form.reconfirmDeadline) throw new Error(t('Set a reconfirmation deadline in Manila time.'));
 
       const startsAt = toUtcFromManila(form.startsAt);
       const endsAt = toUtcFromManila(form.endsAt);
       const reconfirmDeadline = toUtcFromManila(form.reconfirmDeadline);
-      validateProposedSchedule(startsAt, endsAt, reconfirmDeadline);
+      validateProposedSchedule(startsAt, endsAt, reconfirmDeadline, t);
 
       const fields: MaterialFields = {};
       if (form.startsAt !== originalStart) fields.starts_at = startsAt;
@@ -126,19 +134,19 @@ export function EventChanges({event, onChanged}: {
       if (form.venueAddress !== originalVenueAddress) fields.venue_address = form.venueAddress.trim() || null;
       if (capacityChanged && proposedCapacity !== null) fields.capacity = proposedCapacity;
       if (form.costLabel !== currentEvent.cost_label) fields.cost_label = form.costLabel.trim();
-      if (!Object.keys(fields).length) throw new Error('Change at least one material event field before submitting.');
+      if (!Object.keys(fields).length) throw new Error(t('Change at least one material event field before submitting.'));
 
       if (capacityReduced) {
-        if (occupied.loading) throw new Error('Wait for the current occupied registrations to load.');
-        if (occupied.error || occupied.data === null) throw new Error('Refresh the occupied registrations before reducing capacity.');
+        if (occupied.loading) throw new Error(t('Wait for the current occupied registrations to load.'));
+        if (occupied.error || occupied.data === null) throw new Error(t('Refresh the occupied registrations before reducing capacity.'));
         if (seatsToRemove > 0) {
           const enoughSelected = selectionMode === 'exact'
             ? selectedCurrentIds.length === seatsToRemove
             : selectedCurrentIds.length >= seatsToRemove;
           if (!enoughSelected) {
             throw new Error(selectionMode === 'exact'
-              ? `Select exactly ${seatsToRemove} occupied registration${seatsToRemove === 1 ? '' : 's'}.`
-              : `Select at least ${seatsToRemove} occupied registration${seatsToRemove === 1 ? '' : 's'} for the pool.`);
+              ? t('Select exactly {count} occupied registrations.', {count: seatsToRemove})
+              : t('Select at least {count} occupied registrations for the pool.', {count: seatsToRemove}));
           }
         }
       }
@@ -166,51 +174,59 @@ export function EventChanges({event, onChanged}: {
         reconfirmDeadline: '',
       });
       setSelectedIds([]);
-      setMessage('Material changes submitted. Confirmed attendees and anyone already reconfirming must respond to the new revision; pending reviews remain pending.');
+      setMessage(t('Material changes submitted. Confirmed attendees and anyone already reconfirming must respond to the new revision; pending reviews remain pending.'));
       occupied.reload();
       onChanged();
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'The material change could not be submitted.');
+      setError(requestError instanceof Error ? requestError.message : t('The material change could not be submitted.'));
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <details className="panel" onToggle={event => setOpen(event.currentTarget.open)}>
-      <summary>Propose a material event change</summary>
+    <details
+      className={`panel ${styles.toolDetails}`}
+      open={open}
+      onToggle={event => {
+        const nextOpen = event.currentTarget.open;
+        setLocalOpen(nextOpen);
+        onOpenChange?.(nextOpen);
+      }}
+    >
+      <summary>{t('Propose a material event change')}</summary>
       {open && (
-        <form className="stack" onSubmit={submit} noValidate>
+        <form className={`stack ${styles.toolBody}`} onSubmit={submit} noValidate>
           <p className="muted">
-            Confirmed attendees and anyone already reconfirming must respond to a material change. Pending reviews stay pending and are not asked to reconfirm; their review deadlines may be capped at the new event start. The deadline is required and must be before the event starts.
+            {t('Confirmed attendees and anyone already reconfirming must respond to a material change. Pending reviews stay pending and are not asked to reconfirm; their review deadlines may be capped at the new event start. The deadline is required and must be before the event starts.')}
           </p>
           <div className="form-grid">
             <label className="field">
-              Starts at (Manila time)
+              {t('Starts at (Manila time)')}
               <input type="datetime-local" value={form.startsAt} onChange={event => updateField('startsAt', event.target.value)} />
             </label>
             <label className="field">
-              Ends at (Manila time)
+              {t('Ends at (Manila time)')}
               <input type="datetime-local" value={form.endsAt} onChange={event => updateField('endsAt', event.target.value)} />
             </label>
             <label className="field">
-              Venue name
+              {t('Venue name')}
               <input value={form.venueName} onChange={event => updateField('venueName', event.target.value)} />
             </label>
             <label className="field">
-              Venue address
+              {t('Venue address')}
               <input value={form.venueAddress} onChange={event => updateField('venueAddress', event.target.value)} />
             </label>
             <label className="field">
-              Capacity
+              {t('Capacity')}
               <input type="number" min={1} step={1} required value={form.capacity} onChange={event => updateField('capacity', event.target.value)} />
             </label>
             <label className="field">
-              Cost label
+              {t('Cost label')}
               <input value={form.costLabel} onChange={event => updateField('costLabel', event.target.value)} />
             </label>
             <label className="field">
-              Reconfirmation deadline (Manila time)
+              {t('Reconfirmation deadline (Manila time)')}
               <input
                 type="datetime-local"
                 required
@@ -219,40 +235,40 @@ export function EventChanges({event, onChanged}: {
               />
             </label>
             <label className="field">
-              Capacity selection mode
-              <select aria-label="Capacity selection mode" value={selectionMode} onChange={event => setSelectionMode(event.target.value as SelectionMode)}>
-                <option value="exact">Exact selection</option>
-                <option value="newest_in_pool">Newest in selected pool</option>
+              {t('Capacity selection mode')}
+              <select aria-label={t('Capacity selection mode')} value={selectionMode} onChange={event => setSelectionMode(event.target.value as SelectionMode)}>
+                <option value="exact">{t('Exact selection')}</option>
+                <option value="newest_in_pool">{t('Newest in selected pool')}</option>
               </select>
             </label>
           </div>
           <p className="muted">
             {selectionMode === 'exact'
-              ? 'Exact selection cancels only the registrations you select, and requires exactly the number of seats that must be removed.'
-              : 'Newest in selected pool cancels only within the registrations you select; the server chooses the required number from that pool by reverse confirmation/admission order.'}
+              ? t('Exact selection cancels only the registrations you select, and requires exactly the number of seats that must be removed.')
+              : t('Newest in selected pool cancels only within the registrations you select; the server chooses the required number from that pool by reverse confirmation/admission order.')}
           </p>
 
-          <section className="panel stack" aria-label="Review the proposed event">
-            <h3>Review the merged event details</h3>
-            <p className="muted">This preview combines your edits with unchanged event details. Only changed material fields are sent.</p>
-            <p><strong>Starts:</strong> {manilaDate(form.startsAt)}</p>
-            <p><strong>Ends:</strong> {manilaDate(form.endsAt)}</p>
-            <p><strong>Venue:</strong> {form.venueName.trim() || 'Not set'}</p>
-            <p><strong>Address:</strong> {form.venueAddress.trim() || 'Not set'}</p>
-            <p><strong>Capacity:</strong> {form.capacity.trim() || 'Enter a positive whole number'}</p>
-            <p><strong>Cost:</strong> {form.costLabel.trim() || 'Not set'}</p>
-            <p><strong>Reconfirmation deadline:</strong> {manilaDate(form.reconfirmDeadline)}</p>
+          <section className="panel stack" aria-label={t('Review the proposed event')}>
+            <h3>{t('Review the merged event details')}</h3>
+            <p className="muted">{t('This preview combines your edits with unchanged event details. Only changed material fields are sent.')}</p>
+            <p><strong>{t('Starts')}:</strong> {manilaDate(form.startsAt, t, language)}</p>
+            <p><strong>{t('Ends')}:</strong> {manilaDate(form.endsAt, t, language)}</p>
+            <p><strong>{t('Venue')}:</strong> {form.venueName.trim() || t('Not set')}</p>
+            <p><strong>{t('Address')}:</strong> {form.venueAddress.trim() || t('Not set')}</p>
+            <p><strong>{t('Capacity')}:</strong> {form.capacity.trim() || t('Enter a positive whole number')}</p>
+            <p><strong>{t('Cost')}:</strong> {form.costLabel.trim() || t('Not set')}</p>
+            <p><strong>{t('Reconfirmation deadline')}:</strong> {manilaDate(form.reconfirmDeadline, t, language)}</p>
           </section>
 
           {capacityReduced && (
-            <section className="panel stack" aria-label="Choose registrations affected by capacity reduction">
-              <h3>Capacity reduction</h3>
+            <section className="panel stack" aria-label={t('Choose registrations affected by capacity reduction')}>
+              <h3>{t('Capacity reduction')}</h3>
               <Feedback loading={occupied.loading} error={occupied.error} onRetry={occupied.reload}>
                 {occupied.data !== null && (
                   <>
                     <p>
-                      {seatHolders.length} occupied seats, including pending reviews and reconfirmations. New capacity: {proposedCapacity}. {' '}
-                      {seatsToRemove} registration{seatsToRemove === 1 ? '' : 's'} must be selected.
+                      {t('{count} occupied seats, including pending reviews and reconfirmations. New capacity: {capacity}.', {count: seatHolders.length, capacity: proposedCapacity})}{' '}
+                      {t('{count} registrations must be selected.', {count: seatsToRemove})}
                     </p>
                     {seatsToRemove > 0 && (
                       <div className="feed">
@@ -267,8 +283,8 @@ export function EventChanges({event, onChanged}: {
                                 checked={selected}
                                 onChange={() => toggleRegistration(registration.id)}
                               />
-                              <span>Registrant {registration.id.slice(0, 8)}</span>
-                              <span className={`status-chip ${registration.status}`}>{registration.status.replace(/_/g, ' ')}</span>
+                              <span>{t('Registrant {id}', {id: registration.id.slice(0, 8)})}</span>
+                              <span className={`status-chip ${registration.status}`}>{t(registration.status.replace(/_/g, ' '))}</span>
                             </label>
                           );
                         })}
@@ -284,7 +300,7 @@ export function EventChanges({event, onChanged}: {
           {message && <p role="status">{message}</p>}
           <div className="actions">
             <button className="button" type="submit" disabled={saving}>
-              {saving ? 'Submitting…' : 'Submit material change'}
+              {saving ? t('Submitting…') : t('Submit material change')}
             </button>
           </div>
         </form>

@@ -141,7 +141,26 @@ test('session version remounts page state only for account changes, not actor re
   const refreshActor = session.match(/async function refreshActor\(\) \{([\s\S]*?)\n  \}/)?.[1];
   assert.ok(refreshActor, 'refreshActor implementation is present');
   assert.doesNotMatch(refreshActor, /version:\s*previous\.version\s*\+\s*1/);
-  assert.match(shell, /<div key=\{version\}>\{children\}<\/div>/);
+  const {createRequire} = await import('node:module');
+  const ts = createRequire(new URL('../Code/Frontend/package.json', import.meta.url))('typescript');
+  const source = ts.createSourceFile('shell.tsx', shell, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let accountBoundary;
+  const visit = node => {
+    if (ts.isJsxElement(node) && node.openingElement.attributes.properties.some(attribute =>
+      ts.isJsxAttribute(attribute) && attribute.name.getText(source) === 'key' &&
+      attribute.initializer && ts.isJsxExpression(attribute.initializer) &&
+      attribute.initializer.expression?.getText(source) === 'version')) accountBoundary = node;
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  assert.ok(accountBoundary, 'Account changes remount the page boundary');
+  let containsPage = false;
+  const findPage = node => {
+    if (ts.isIdentifier(node) && node.text === 'children') containsPage = true;
+    ts.forEachChild(node, findPage);
+  };
+  findPage(accountBoundary);
+  assert.ok(containsPage, 'The account boundary contains the routed page, including layout wrappers');
 });
 
 test('generated OpenAPI paths and named schema aliases still match the reviewed backend contract', async () => {

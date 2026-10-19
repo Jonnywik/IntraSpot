@@ -6,22 +6,25 @@
     "dev": "next dev --hostname 127.0.0.1",
     "build": "node scripts/check-public-assets.mjs && next build && node scripts/check-public-assets.mjs out",
     "start": "node scripts/serve-static.mjs",
+    "build:real": "node scripts/build-real.mjs",
+    "start:real": "node scripts/serve-real.mjs",
     "lint": "eslint .",
-    "test": "node --test ../../tests/sprint5-contract.test.mjs",
+    "test": "node --test ../../tests/sprint5-contract.test.mjs ../../tests/sprint9-localization.test.mjs ../../tests/sprint10-contract.test.mjs ../../tests/sprint11-*.test.mjs ../../tests/sprint12-*.test.mjs ../../tests/sprint13-*.test.mjs ../../tests/sprint14-*.test.mjs ../../tests/sprint15-*.test.mjs",
     "api:types": "openapi-typescript ../../docs/backend/openapi.json -o lib/api.generated.ts"
   },
   "dependencies": {
+    "@supabase/auth-js": "2.118.0",
     "next": "^16.3.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "openapi-typescript": "7.13.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.3.8",
+    "openapi-typescript": "7.13.0",
     "typescript": "^5.0.0"
   }
 }

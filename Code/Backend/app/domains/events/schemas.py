@@ -1,11 +1,14 @@
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+
+from app.core.discovery import normalized_label
 
 
 BannerKey = Literal["heritage", "design", "garden", "music"]
+EventTag = Annotated[StrictStr, Field(min_length=1, max_length=64)]
 SUMMARY_MAX_LENGTH = 200
 
 
@@ -14,6 +17,8 @@ class EventDraftInput(BaseModel):
 
     title: str | None = Field(default=None, max_length=200)
     summary: str = Field(default="", max_length=SUMMARY_MAX_LENGTH)
+    tags: list[EventTag] = Field(default_factory=list, max_length=16)
+    coarse_area: StrictStr | None = Field(default=None, max_length=80)
     description: str | None = None
     starts_at: datetime | None = None
     ends_at: datetime | None = None
@@ -24,7 +29,7 @@ class EventDraftInput(BaseModel):
     cost_label: str = Field(default="Free", max_length=100)
     registration_mode: Literal["instant", "approval"] = "instant"
     review_window_minutes: int | None = Field(default=None, strict=True, ge=15, le=2880)
-    event_type: Literal["scheduled"] = "scheduled"
+    event_type: Literal["scheduled", "flash"] = "scheduled"
 
     @field_validator("starts_at", "ends_at")
     @classmethod
@@ -32,6 +37,35 @@ class EventDraftInput(BaseModel):
         if value is not None and (value.tzinfo is None or value.utcoffset() is None):
             raise ValueError("Datetime must include a timezone.")
         return value
+
+    @field_validator("tags", mode="before")
+    @classmethod
+    def normalize_tags(cls, value):
+        if not isinstance(value, list):
+            return value
+        if len(value) > 16:
+            raise ValueError("At most 16 event tags are allowed.")
+        if any(not isinstance(tag, str) for tag in value):
+            raise ValueError("Each event tag must be a string.")
+        normalized = [normalized_label(tag) if isinstance(tag, str) else tag for tag in value]
+        return list(dict.fromkeys(normalized))
+
+    @field_validator("tags")
+    @classmethod
+    def validate_normalized_tags(cls, tags: list[str]) -> list[str]:
+        if any(not tag or len(tag) > 64 for tag in tags):
+            raise ValueError("Each normalized event tag must contain 1 to 64 characters.")
+        return tags
+
+    @field_validator("coarse_area", mode="before")
+    @classmethod
+    def normalize_coarse_area(cls, value):
+        if value is None or not isinstance(value, str):
+            return value
+        normalized = normalized_label(value)
+        if len(normalized) > 80:
+            raise ValueError("The normalized coarse area must be at most 80 characters.")
+        return normalized or None
 
 
 class EventChangeInput(BaseModel):
@@ -61,6 +95,8 @@ class EventPublic(BaseModel):
     organization_name: str
     title: str
     summary: str
+    tags: list[str] = Field(default_factory=list)
+    coarse_area: str | None = None
     description: str
     starts_at: datetime
     ends_at: datetime
@@ -75,12 +111,17 @@ class EventPublic(BaseModel):
     cost_label: str
     registration_mode: Literal["instant", "approval"]
     review_window_minutes: int | None
+    event_type: Literal["scheduled", "flash"] = "scheduled"
     material_revision: int
     status: Literal["published"]
     published_at: datetime
+    recommendation_reasons: list[
+        Literal["club", "flash", "interests", "area", "availability"]
+    ] = Field(default_factory=list)
 
 
 class EventPrivate(EventPublic):
+    draft_version: str = Field(description="Content version for conditional draft saves and publishing.")
     title: str | None
     description: str | None
     starts_at: datetime | None
@@ -94,3 +135,8 @@ class EventPrivate(EventPublic):
     published_at: datetime | None
     created_by: str
     created_at: datetime
+
+
+class EventReviewSummary(EventPublic):
+    pending_registration_count: int
+    next_review_deadline: datetime | None

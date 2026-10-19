@@ -2,12 +2,15 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { api, ApiError } from '@/lib/api';
+import { useT } from '@/lib/i18n';
 import type { Actor, ContentItem, ReportReceipt } from '@/lib/types';
 import styles from './communication.module.css';
 
 type ContentKind = 'comment' | 'message';
 type ReportReason = 'harassment' | 'spam' | 'deception' | 'impersonation' | 'other';
 type ReportChoice = 'content' | 'person';
+type LocalizedMessage = { literal: string; values?: Record<string, string | number> };
+type Translate = ReturnType<typeof useT>;
 
 const REASONS: { value: ReportReason; label: string }[] = [
   { value: 'harassment', label: 'Harassment' },
@@ -17,11 +20,17 @@ const REASONS: { value: ReportReason; label: string }[] = [
   { value: 'other', label: 'Other' },
 ];
 
-function actionError(error: unknown, label: string) {
-  if (error instanceof ApiError && error.status === 401) return 'Sign in again, then retry.';
-  if (error instanceof ApiError && error.status === 403) return 'This action is unavailable for this account.';
-  if (error instanceof ApiError && error.status === 404) return 'This item is no longer available.';
-  return `${label} could not be completed. Retry the same action.`;
+function actionError(error: unknown, action: string): LocalizedMessage {
+  if (error instanceof ApiError && error.status === 401) return { literal: 'Sign in again, then retry.' };
+  if (error instanceof ApiError && error.status === 403) return { literal: 'This action is unavailable for this account.' };
+  if (error instanceof ApiError && error.status === 404) return { literal: 'This item is no longer available.' };
+  return { literal: '{action} could not be completed. Retry the same action.', values: { action } };
+}
+
+function translateMessage(message: LocalizedMessage, t: Translate) {
+  const values = message.values && { ...message.values };
+  if (values && typeof values.action === 'string') values.action = t(values.action);
+  return t(message.literal, values);
 }
 
 export function ContentSafetyControls({
@@ -41,13 +50,14 @@ export function ContentSafetyControls({
   onChange: (item: ContentItem) => void;
   onRestore: (item: ContentItem, signal: AbortSignal) => Promise<ContentItem | null>;
 }) {
+  const t = useT();
   const [choice, setChoice] = useState<ReportChoice>('content');
   const [reason, setReason] = useState<ReportReason>('harassment');
   const [receipt, setReceipt] = useState<{ value: ReportReceipt; choice: ReportChoice } | null>(null);
-  const [reportError, setReportError] = useState<string | null>(null);
+  const [reportError, setReportError] = useState<LocalizedMessage | null>(null);
   const [reporting, setReporting] = useState(false);
   const [hiding, setHiding] = useState(false);
-  const [hideError, setHideError] = useState<string | null>(null);
+  const [hideError, setHideError] = useState<LocalizedMessage | null>(null);
   const reportController = useRef<AbortController | null>(null);
   const hideController = useRef<AbortController | null>(null);
   const id = useId();
@@ -81,7 +91,9 @@ export function ContentSafetyControls({
       } else {
         const restored = await onRestore(item, controller.signal);
         if (!controller.signal.aborted && restored) onChange(restored);
-        else if (!controller.signal.aborted) setHideError('Restored on the server, but this item could not be reloaded. Retry restore.');
+        else if (!controller.signal.aborted) {
+          setHideError({ literal: 'Restored on the server, but this item could not be reloaded. Retry restore.' });
+        }
       }
     } catch (error) {
       if (!controller.signal.aborted) setHideError(actionError(error, hidden ? 'Hiding' : 'Restoring'));
@@ -121,14 +133,14 @@ export function ContentSafetyControls({
   return (
     <div className={styles.itemControls}>
       <button className={styles.smallButton} type="button" onClick={() => void toggleHidden()} disabled={hiding}>
-        {hiding ? 'Saving…' : item.locally_hidden ? 'Restore for me' : 'Hide for me'}
+        {hiding ? t('Saving…') : item.locally_hidden ? t('Restore for me') : t('Hide for me')}
       </button>
       {canReport ? (
         <details className={styles.reportDetails}>
-          <summary className={styles.reportSummary}>Report</summary>
+          <summary className={styles.reportSummary}>{t('Report')}</summary>
           <form className={styles.reportPanel} onSubmit={(event) => void submitReport(event)}>
             <fieldset>
-              <legend>What are you reporting?</legend>
+              <legend>{t('What are you reporting?')}</legend>
               <label className={styles.reportChoice}>
                 <input
                   className={styles.radio}
@@ -139,7 +151,7 @@ export function ContentSafetyControls({
                   disabled={reporting || receipt !== null}
                   onChange={() => setChoice('content')}
                 />
-                <span>This {kind === 'comment' ? 'comment' : 'message'}</span>
+                <span>{t('This {contentType}', { contentType: t(kind === 'comment' ? 'comment' : 'message') })}</span>
               </label>
               <label className={styles.reportChoice}>
                 <input
@@ -151,10 +163,10 @@ export function ContentSafetyControls({
                   disabled={reporting || receipt !== null}
                   onChange={() => setChoice('person')}
                 />
-                <span>This member</span>
+                <span>{t('This member')}</span>
               </label>
             </fieldset>
-            <label htmlFor={`report-reason-${id}`}>Reason</label>
+            <label htmlFor={`report-reason-${id}`}>{t('Reason')}</label>
             <select
               className={styles.select}
               id={`report-reason-${id}`}
@@ -162,24 +174,26 @@ export function ContentSafetyControls({
               disabled={reporting || receipt !== null}
               onChange={(event) => setReason(event.target.value as ReportReason)}
             >
-              {REASONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              {REASONS.map((option) => <option key={option.value} value={option.value}>{t(option.label)}</option>)}
             </select>
             <p className={styles.muted}>
-              A content report does not hide the item. Hide it separately if you do not want to see it.
+              {t('A content report does not hide the item. Hide it separately if you do not want to see it.')}
             </p>
             <button className={styles.primaryButton} type="submit" disabled={reporting || receipt !== null}>
-              {reporting ? 'Sending…' : receipt ? 'Report submitted' : 'Submit report'}
+              {reporting ? t('Sending…') : receipt ? t('Report submitted') : t('Submit report')}
             </button>
-            {reportError ? <p className={styles.errorText} role="alert">{reportError}</p> : null}
+            {reportError ? <p className={styles.errorText} role="alert">{translateMessage(reportError, t)}</p> : null}
             {receipt ? (
               <p className={styles.statusText} role="status">
-                {receipt.choice === 'person' ? 'Person report sent for review.' : 'Content report sent. The item remains visible while it is reviewed.'}
+                {receipt.choice === 'person'
+                  ? t('Person report sent for review.')
+                  : t('Content report sent. The item remains visible while it is reviewed.')}
               </p>
             ) : null}
           </form>
         </details>
       ) : null}
-      {hideError ? <span className={styles.errorText} role="alert">{hideError}</span> : null}
+      {hideError ? <span className={styles.errorText} role="alert">{translateMessage(hideError, t)}</span> : null}
     </div>
   );
 }

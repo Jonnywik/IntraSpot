@@ -1,6 +1,8 @@
 import json
 import logging
 from uuid import uuid4
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -9,7 +11,7 @@ from sqlalchemy import text
 from starlette.exceptions import HTTPException
 
 from app.api.router import api_router
-from app.core.config import get_settings
+from app.core.config import ROOT, get_settings
 from app.core.errors import DomainError, domain_error, error_response, http_error, validation_error
 from app.db.session import engine
 
@@ -18,11 +20,15 @@ log = logging.getLogger('intraspot.actions')
 
 def create_app():
     settings = get_settings()
+    expected_migration = ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()
     instance_id = str(uuid4())
-    app = FastAPI(title='IntraSpot local MVP', version='0.1.0', description='Fictional local demonstration only. Not approved for production.')
+    description = ('Isolated real-auth development only. Not approved for production.'
+                   if settings.auth_provider == 'supabase' else
+                   'Fictional local demonstration only. Not approved for production.')
+    app = FastAPI(title='IntraSpot local MVP', version='0.1.0', description=description)
     app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins,
                        allow_methods=['GET', 'POST', 'PATCH', 'DELETE'],
-                       allow_headers=['Authorization', 'Content-Type', 'Idempotency-Key'],
+                       allow_headers=['Authorization', 'Content-Type', 'Idempotency-Key', 'If-Match'],
                        expose_headers=['X-Request-ID'])
     app.add_exception_handler(DomainError, domain_error)
     app.add_exception_handler(RequestValidationError, validation_error)
@@ -51,7 +57,7 @@ def create_app():
         try:
             with engine().connect() as connection:
                 version = connection.scalar(text('SELECT version_num FROM alembic_version'))
-            if version != 'mvp_0006':
+            if version != expected_migration:
                 raise RuntimeError('migration required')
         except Exception:
             raise DomainError('database_not_ready', 'Apply the reviewed local migration first.', 503)

@@ -1,0 +1,11 @@
+{
+  "method": "Local browser and isolated scratch PostgreSQL; not participant validation",
+  "passed": [
+    "Corrupt guest preferences reset to a valid default record and load successfully after reload in an isolated context",
+    "Guest device preferences are not copied into the first signed-in account",
+    "Account preferences persist across reload; Filipino updates the root language and sidebar privacy remains intact",
+    "A second account starts with its own defaults rather than the first account private settings",
+    "Serialized rapid edits persist on their original account; delayed responses do not replace the active account settings"
+  ],
+  "pageErrors": []
+}

@@ -1,0 +1,511 @@
+.root {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  margin-block-end: 0.25rem;
+}
+
+.heading h1,
+.card h2,
+.previewCard h3 {
+  margin: 0.25rem 0 0;
+  color: var(--ink);
+  font-family: var(--display);
+  line-height: 1.18;
+}
+
+.heading h1 {
+  font-size: clamp(1.8rem, 3vw, 2.55rem);
+}
+
+.card h2 {
+  font-size: 1.3rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--blue);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.muted,
+.fieldHint {
+  color: var(--muted);
+}
+
+.heading .muted {
+  margin: 0.4rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.card {
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-rest);
+}
+
+.createCard {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  max-width: 52rem;
+}
+
+.createCard h2 {
+  margin-block-start: 0.4rem;
+}
+
+.createCard p:not(.eyebrow) {
+  max-width: 46rem;
+  margin-block: 0.55rem 0;
+}
+
+.loading {
+  padding: 1.25rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}
+
+.mobileNotice {
+  display: none;
+  margin: 0;
+  padding: 1rem;
+  color: var(--ink);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+}
+
+.editorGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(19rem, 0.82fr);
+  align-items: start;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  min-width: 0;
+}
+
+.sections,
+.sidebar {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.sections {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sectionHeading,
+.actionHeading,
+.previewHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  min-width: 0;
+  margin-block-end: 1.1rem;
+}
+
+.sectionHeading {
+  justify-content: flex-start;
+}
+
+.sectionHeading h2,
+.actionHeading h2,
+.previewHeading h2 {
+  margin-block-start: 0.18rem;
+}
+
+.sectionHeading .muted {
+  margin: 0.3rem 0 0;
+  font-size: 0.92rem;
+}
+
+.step {
+  display: grid;
+  flex: 0 0 2.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  color: var(--gold);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  min-width: 0;
+}
+
+.field {
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+  min-width: 0;
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.72rem 0.8rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--control-border);
+  border-radius: 0.65rem;
+  font: 500 1rem/1.4 var(--sans);
+}
+
+.field input,
+.field select {
+  min-height: 2.9rem;
+}
+
+.field textarea {
+  min-height: 9rem;
+  resize: vertical;
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible,
+.textButton:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.fieldHint {
+  font-size: 0.84rem;
+  font-weight: 450;
+  line-height: 1.45;
+}
+
+.descriptionField {
+  margin-block-start: 1rem;
+}
+
+.sidebar {
+  position: sticky;
+  top: 5.75rem;
+  align-self: start;
+  max-height: calc(100vh - 6.75rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.actionCard {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.actionHeading {
+  align-items: center;
+  margin-block-end: 0;
+}
+
+.actionHeading h2 {
+  font-family: var(--sans);
+  font-size: 1.15rem;
+}
+
+.statusText,
+.error,
+.success {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.65rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.statusText {
+  color: var(--ink);
+  background: var(--surface-alt);
+}
+
+.error {
+  color: var(--danger-ink);
+  background: var(--danger-bg);
+}
+
+.success {
+  color: var(--success-ink);
+  background: var(--success-bg);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.actions button {
+  flex: 1 1 9rem;
+  min-width: 0;
+  white-space: normal;
+}
+
+.actions button:disabled {
+  cursor: not-allowed;
+}
+
+.textButton {
+  justify-self: start;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.1rem;
+  color: var(--blue);
+  background: transparent;
+  border: 0;
+  font: 650 0.95rem/1.35 var(--sans);
+  text-align: start;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+
+.textButton:disabled {
+  color: var(--muted);
+  cursor: progress;
+}
+
+.validation {
+  padding-block-start: 0.2rem;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.validation p {
+  margin: 0.55rem 0 0.35rem;
+  font-weight: 700;
+}
+
+.validation ul {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding-inline-start: 1.2rem;
+  color: var(--muted);
+}
+
+.previewCard {
+  display: grid;
+  gap: 1rem;
+}
+
+.previewHeading {
+  align-items: center;
+  margin: 0;
+}
+
+.previewHeading h2 {
+  max-width: 22rem;
+  font-family: var(--sans);
+  font-size: 1.15rem;
+}
+
+.previewDot {
+  flex: 0 0 0.65rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  background: var(--success-ink);
+  border-radius: 50%;
+  box-shadow: 0 0 0 0.25rem var(--success-bg);
+}
+
+.previewCard :global(.artwork-crop) {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+}
+
+.previewCard :global(.event-art) {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2.88;
+  object-fit: cover;
+}
+
+.previewContent {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.eventTypeBadge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.previewCard h3 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  overflow-wrap: anywhere;
+}
+
+.summary,
+.description {
+  margin: 0;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.summary {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.description {
+  max-height: 13rem;
+  overflow: auto;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  scrollbar-gutter: stable;
+}
+
+.facts {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.facts > div {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 0.55fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.facts dt {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.facts dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.previewNote {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  color: var(--muted);
+  background: var(--surface-soft);
+  border-radius: 0.65rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 1100px) {
+  .editorGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 767px) {
+  .heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .badges {
+    justify-content: flex-start;
+  }
+
+  .mobileNotice {
+    display: block;
+  }
+
+  .createCard {
+    display: none;
+  }
+
+  .editorGrid {
+    display: none;
+  }
+
+  .fieldGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    max-height: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .previewDot {
+    box-shadow: none;
+  }
+}

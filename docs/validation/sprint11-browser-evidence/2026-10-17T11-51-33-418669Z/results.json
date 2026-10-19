@@ -1,0 +1,8 @@
+{
+  "method": "Isolated test PostgreSQL with local Edge; not participant/device validation",
+  "passed": [
+    "Guest global search, four mobile destinations, keyboard skip link, and header utilities"
+  ],
+  "browserErrors": [],
+  "contrastRatio": null
+}

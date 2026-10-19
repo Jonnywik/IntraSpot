@@ -1,0 +1,527 @@
+.discoverFeed,
+.eventDetail {
+  min-width: 0;
+}
+
+.discoveryFilters {
+  align-items: end;
+  gap: 8px 10px;
+}
+
+.discoverFeed.compactStack {
+  gap: 10px;
+}
+
+.discoveryHeading {
+  min-height: 110px;
+}
+
+.discoveryHeading > p:first-child {
+  margin-bottom: 4px;
+}
+
+.discoveryHeading h1 {
+  margin-bottom: 4px;
+}
+
+.discoveryHeading > p:last-of-type {
+  margin-bottom: 0;
+}
+
+.searchField {
+  display: grid;
+  flex: 1 1 250px;
+  gap: 7px;
+  min-width: 0;
+}
+
+.searchLabel,
+.sortLabel {
+  display: block;
+}
+
+.searchInputRow {
+  position: relative;
+  min-width: 0;
+}
+
+.searchInputRow input {
+  padding-right: 82px;
+}
+
+.clearSearch {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--blue);
+  font-weight: 600;
+  transform: translateY(-50%);
+}
+
+.clearSearch:hover {
+  background: var(--surface-alt);
+}
+
+.searchHint {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.sortField {
+  flex: 0 1 160px;
+  width: auto;
+}
+
+.rankingHint {
+  display: block;
+  flex: 1 0 100%;
+  margin: 0;
+  padding: 0 12px;
+  border-left: 2px solid var(--gold);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.rankingHint p {
+  margin: 0 0 8px;
+}
+
+.rankingHint summary {
+  min-height: 44px;
+  padding-block: 12px;
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.rankingHint a {
+  justify-self: start;
+}
+
+.myClubsToggle {
+  align-self: end;
+  white-space: nowrap;
+  padding-inline: 12px;
+}
+
+.flashToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.flashToggle input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--blue);
+}
+
+.flashToggle input:disabled {
+  cursor: not-allowed;
+}
+
+.flashPreferenceStatus {
+  flex: 1 0 100%;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.flashPreferenceError {
+  display: flex;
+  flex: 1 0 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border-left: 3px solid var(--danger-ink);
+  border-radius: 8px;
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+}
+
+.flashPreferenceError p {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.eventTypeBadge {
+  display: inline-flex;
+  width: fit-content;
+  margin: 2px 0 6px;
+  padding: 4px 9px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.resultsCount {
+  align-self: center;
+  flex: 0 0 auto;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.emptyState {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.emptyState h2,
+.emptyState p {
+  margin: 0;
+}
+
+.eventList {
+  gap: 12px;
+}
+
+.eventCard {
+  min-width: 0;
+  padding: 16px;
+  overflow-wrap: anywhere;
+}
+
+.eventCard .eyebrow {
+  margin-bottom: 4px;
+}
+
+.eventCard h2 {
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+
+.eventCardCta {
+  gap: 8px;
+  margin-top: 2px;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+.eventCardCta.button:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+}
+
+.registrationMode {
+  margin: 10px 0 0;
+}
+
+.reasonChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reasonChips li {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--blue);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.eventFacts {
+  justify-content: flex-start;
+  gap: 8px 20px;
+  margin: 10px 0 12px;
+}
+
+.eventFacts > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.eventCounts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+
+.eventCounts > div {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.eventCounts dt,
+.detailFacts dt,
+.registrationModeFacts dt,
+.registrationFacts dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.eventCounts dt {
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.eventCounts dd,
+.detailFacts dd,
+.registrationModeFacts dd,
+.registrationFacts dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.eventCounts dd {
+  font-size: 1.125rem;
+  line-height: 1.25;
+}
+
+.detailNavigation {
+  margin-bottom: 12px;
+}
+
+.detailPanel {
+  gap: 20px;
+  overflow-wrap: anywhere;
+}
+
+.detailFacts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.detailFacts > div {
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.detailFacts dd,
+.registrationFacts dd {
+  margin-top: 4px;
+}
+
+.registrationModeFacts {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.refreshNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.refreshNotice p {
+  margin: 0;
+}
+
+.missingEvent {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.missingEvent p,
+.registrationOutcome p {
+  margin: 0;
+}
+
+.registrationOutcome {
+  gap: 16px;
+}
+
+.registrationSheet {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.registrationSheetPanel {
+  min-height: 0;
+  gap: 18px;
+  overscroll-behavior: contain;
+}
+
+.registrationFacts {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.registrationFacts > div {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.personaConsentBlock {
+  gap: 8px;
+}
+
+.personaConsent {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  font-weight: 500;
+}
+
+.personaConsent input {
+  margin: 3px 0 0;
+}
+
+.personaConsentBlock > p {
+  margin: 0;
+}
+
+.registrationSheetPanel .sheetActions {
+  position: sticky;
+  z-index: 1;
+  bottom: 0;
+  padding: 16px 0 max(16px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 -8px 16px rgb(17 47 106 / 6%);
+}
+
+.registrationConfirmed {
+  background: var(--success-bg);
+  color: var(--success-ink);
+}
+
+.registrationPending {
+  background: var(--pending-bg);
+  color: var(--pending-ink);
+}
+
+.registrationWaitlisted,
+.registrationReconfirmation {
+  background: var(--selected-bg);
+  color: var(--blue);
+}
+
+.registrationRejected,
+.registrationCancelled {
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+}
+
+@media (min-width: 768px) {
+  .searchLabel,
+  .sortLabel,
+  .searchHint {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .resultsCount {
+    flex-basis: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .eventCounts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .detailFacts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .refreshNotice {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .flashPreferenceError {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .registrationSheetPanel .sheetActions {
+    align-items: stretch;
+  }
+
+  .sheetActions > button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .registrationSheet {
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .registrationSheet .registrationSheetPanel {
+    max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .detailNavigation .text-action {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+}

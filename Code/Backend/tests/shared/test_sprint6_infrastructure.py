@@ -47,7 +47,7 @@ def test_downgrade_refuses_to_discard_approval_data(db, make_event):
     with pytest.raises(RuntimeError, match='Sprint 6 data exists'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0002')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0006'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0010'
     db.expire_all()
     assert db.get(Event, event_id).registration_mode == 'approval'
 
@@ -63,8 +63,9 @@ def test_deadlines_catch_up_in_independent_process_without_duplicate_notices(db,
     environment = os.environ | {'ENVIRONMENT': 'test', 'FIXTURE_AUTH': 'true',
                                  'DATABASE_URL': get_settings().database_url}
     for attempt in range(2):
+        # Cold imports in the synced Windows checkout consumed 24 s before worker startup.
         subprocess.run([sys.executable, '-m', 'app.deadlines', '--once'], cwd=ROOT,
-                       env=environment, check=True, capture_output=True, timeout=30)
+                       env=environment, check=True, capture_output=True, timeout=90)
         db.expire_all()
         assert db.get(Registration, registration.id).status != 'pending'
         notices = db.scalar(select(func.count(Notification.id)))

@@ -1,0 +1,862 @@
+{
+  "method": "Isolated PostgreSQL test database, local static frontend, and Microsoft Edge; not participant or physical-device validation",
+  "stage": "complete",
+  "passed": [
+    "Guest UI shows the public announcement and omits members-only content.",
+    "An eligible member reads members-only content, reacts, and receives a report receipt.",
+    "Owner desktop UI creates, edits, marks Edited, reads history, and removes an announcement.",
+    "Owner management remains desktop-only at a 390px viewport.",
+    "Platform UI hides and restores one report case, and hides then removes another.",
+    "Filipino extra-large preferences render at 320px and 390px without overflow or management controls.",
+    "Announcement headings honor dark contrast, extra-large text and reduced-motion preferences."
+  ],
+  "preflightChecks": [
+    {
+      "check": "renewed fictional account catalog",
+      "ready": true,
+      "labels": [
+        "Fictional organizer",
+        "Fictional student 1",
+        "Fictional platform admin"
+      ]
+    },
+    {
+      "check": "fixture API preflight",
+      "ready": true
+    },
+    {
+      "check": "public/private fixture access",
+      "ready": true
+    }
+  ],
+  "intentionalNegativeApiChecks": [
+    {
+      "label": "Guest private direct detail",
+      "method": "GET",
+      "path": "/api/v1/announcements/50a6f4b2-104b-4c4f-ae94-cfa1e2c84880",
+      "expectedStatus": 404,
+      "actualStatus": 404
+    },
+    {
+      "label": "Guest private reaction summary",
+      "method": "GET",
+      "path": "/api/v1/announcements/50a6f4b2-104b-4c4f-ae94-cfa1e2c84880/reactions",
+      "expectedStatus": 404,
+      "actualStatus": 404
+    },
+    {
+      "label": "Guest private history",
+      "method": "GET",
+      "path": "/api/v1/announcements/50a6f4b2-104b-4c4f-ae94-cfa1e2c84880/history",
+      "expectedStatus": 401,
+      "actualStatus": 401
+    },
+    {
+      "label": "Owner public detail after removal",
+      "method": "GET",
+      "path": "/api/v1/announcements/c48528e7-eca2-449b-9fb9-cd5e4f1f28ca",
+      "expectedStatus": 404,
+      "actualStatus": 404
+    },
+    {
+      "label": "Owner public detail after platform hide",
+      "method": "GET",
+      "path": "/api/v1/announcements/80332e05-84b0-47d7-8b29-58d442dcf038",
+      "expectedStatus": 404,
+      "actualStatus": 404
+    },
+    {
+      "label": "Owner public detail after platform removal",
+      "method": "GET",
+      "path": "/api/v1/announcements/3c376c04-f314-4c97-9eab-f604d5118fb5",
+      "expectedStatus": 404,
+      "actualStatus": 404
+    }
+  ],
+  "expectedAuthResponses": [],
+  "javascriptErrors": [],
+  "unexpectedHttpFailures": [],
+  "consoleNetworkMessages": [],
+  "failedRequests": [
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/settings/__next.settings.__PAGE__.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/organizations/__next.organizations.__PAGE__.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/7168f8ca-870d-4c98-ad34-4b79296f5c5c/announcements",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/workspace",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/organizations/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/workspace",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/__next.__PAGE__.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/organizations/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/profile/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements/3c376c04-f314-4c97-9eab-f604d5118fb5/reactions",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements/80332e05-84b0-47d7-8b29-58d442dcf038/reactions",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/chat/__next.chat.__PAGE__.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/workspace",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/my-events/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/__next.__PAGE__.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements/3c376c04-f314-4c97-9eab-f604d5118fb5/reactions",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements/80332e05-84b0-47d7-8b29-58d442dcf038/reactions",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/workspace",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/membership-applications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/membership-invitations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/memberships",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/preferences",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/7168f8ca-870d-4c98-ad34-4b79296f5c5c/announcements",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/my-events/__next.my-events.__PAGE__.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/workspace",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/draft",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/draft",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements/3c376c04-f314-4c97-9eab-f604d5118fb5/reactions",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements/80332e05-84b0-47d7-8b29-58d442dcf038/reactions",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/membership-applications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/membership-invitations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/memberships",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/7168f8ca-870d-4c98-ad34-4b79296f5c5c/announcements",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/announcement-reports",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/preferences",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/7168f8ca-870d-4c98-ad34-4b79296f5c5c/announcements",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/workspace",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/admin",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/__next.admin.__PAGE__.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/profile/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/workspace",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/admin",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/membership-applications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/membership-invitations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/memberships",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/7168f8ca-870d-4c98-ad34-4b79296f5c5c/announcements",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/announcement-reports",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/preferences",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/7168f8ca-870d-4c98-ad34-4b79296f5c5c/announcements",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/workspace",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/chat/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/settings/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/notifications/__next.notifications.__PAGE__.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements/80332e05-84b0-47d7-8b29-58d442dcf038/reactions",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/profile/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements/80332e05-84b0-47d7-8b29-58d442dcf038/reactions",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/organizations",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/settings/__next._tree.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/chat/__next.chat.__PAGE__.txt",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/notifications",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/profile",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/my-events",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "path": "/settings",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements/80332e05-84b0-47d7-8b29-58d442dcf038/reactions",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "networkFailures": [],
+  "viewportMetrics": [
+    {
+      "viewportWidth": 390,
+      "documentWidth": 375,
+      "mobileTabs": 4
+    },
+    {
+      "viewportWidth": 320,
+      "documentWidth": 305,
+      "mobileTabs": 4,
+      "language": "fil",
+      "textSize": "extra_large"
+    },
+    {
+      "viewportWidth": 390,
+      "documentWidth": 375,
+      "mobileTabs": 4,
+      "language": "fil",
+      "textSize": "extra_large"
+    },
+    {
+      "viewportWidth": 390,
+      "documentWidth": 375,
+      "mobileTabs": 4,
+      "language": "fil",
+      "textSize": "extra_large"
+    }
+  ],
+  "screenshots": [
+    "guest-public-only.png",
+    "member-reacted-and-reported.png",
+    "owner-desktop-edited-history-removed.png",
+    "owner-mobile-management-hidden.png",
+    "platform-queue-hide-restore-remove.png",
+    "member-filipino-xl-320.png",
+    "member-filipino-xl-390.png",
+    "member-dark-contrast-xl-390.png"
+  ],
+  "failure": null
+}

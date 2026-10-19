@@ -35,6 +35,7 @@ def _event_snapshot(event):
         "org_id", "created_by", "title", "summary", "description", "starts_at", "ends_at",
         "venue_name", "venue_address", "capacity", "banner_key", "cost_label", "status",
         "registration_mode", "event_type", "published_at",
+        "tags", "coarse_area",
     )
     return tuple(getattr(event, field) for field in fields)
 
@@ -80,6 +81,8 @@ def test_rerun_preserves_draft_edits_public_lifecycle_and_all_fixture_rows(db):
     ended.starts_at = now() - timedelta(days=2)
     ended.ends_at = ended.starts_at + timedelta(hours=2)
     ended.summary = "Keep this published event history."
+    ended.tags = ["organizer-chosen"]
+    ended.coarse_area = "chosen broad area"
     db.commit()
     before = {
         key: _event_snapshot(db.get(Event, event_id))

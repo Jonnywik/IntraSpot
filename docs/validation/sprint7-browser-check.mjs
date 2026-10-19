@@ -5,7 +5,7 @@ import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 const {chromium} = createRequire(import.meta.url)(process.env.SPRINT7_PLAYWRIGHT);
 const fixtures = JSON.parse(process.env.SPRINT7_FIXTURES);
-const output = path.resolve('docs/validation/sprint7-browser-evidence');
+const output = path.resolve(process.env.SPRINT7_EVIDENCE_DIR || 'docs/validation/sprint7-browser-evidence');
 await mkdir(output,{recursive:true});
 const browser = await chromium.launch({channel:'msedge',headless:true});
 const context = await browser.newContext({viewport:{width:1440,height:900},reducedMotion:'reduce'});
@@ -31,7 +31,7 @@ async function event() {
 }
 async function register() {
   await page.getByRole('button',{name:'Register',exact:true}).click();
-  await page.getByRole('dialog').getByRole('button',{name:'Confirm registration',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'Confirm your registration',exact:true}).click();
   await visible(page.getByText('Your registration is confirmed.',{exact:true}));
 }
 const commentCard = body => page.locator('article').filter({has:page.getByText(body,{exact:true})}).last();
@@ -105,7 +105,8 @@ try {
   await visible(page.getByText('A persisted fictional comment',{exact:true}));
   await account('Fictional student 5');
   await page.getByRole('link',{name:'Organization',exact:true}).click();
-  await page.getByRole('link',{name:'Review published event registrations',exact:true}).click();
+  await page.getByRole('navigation',{name:'Moderator review workspaces',exact:true})
+    .getByRole('link').filter({hasText:'Fictional Community Society'}).click();
   await page.getByRole('button',{name:/Comment.*Harassment/}).click();
   await visible(page.getByText('A persisted fictional comment',{exact:true}));
   page.once('dialog',dialog=>{

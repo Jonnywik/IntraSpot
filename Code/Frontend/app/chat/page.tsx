@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ChatWorkspace } from '@/features/communication/ChatWorkspace';
+import { useT } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
 
 function ChatRoute() {
@@ -12,8 +13,9 @@ function ChatRoute() {
 }
 
 export default function ChatPage() {
+  const t = useT();
   return (
-    <Suspense fallback={<p className="panel muted" role="status">Loading event chats…</p>}>
+    <Suspense fallback={<p className="panel muted" role="status">{t('Loading event chats…')}</p>}>
       <ChatRoute />
     </Suspense>
   );

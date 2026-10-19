@@ -1,5 +1,6 @@
 """Generate ignored credentials for fictional loopback-only development."""
 import secrets
+import os
 from pathlib import Path
 
 from cryptography.hazmat.primitives import serialization
@@ -9,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
+    if os.environ.get('INTRASPOT_CONFIG') == 'real' or os.environ.get('AUTH_PROVIDER') == 'supabase':
+        raise RuntimeError('Fictional setup cannot initialize the isolated real-development profile')
     local = ROOT / '.local'
     local.mkdir(exist_ok=True)
     key_file = local / 'private.pem'

@@ -14,6 +14,7 @@ def run_once() -> int:
     from app.domains.moderation.service import catch_up_reports_locked
     from app.domains.chat.service import purge_event_chat_locked
     from app.domains.memberships.applications import catch_up_invitations_locked
+    from app.domains.announcements.report_service import catch_up_announcement_reports_locked
     from app.domains.organizations.models import Organization
     from app.db.models import now
 
@@ -36,7 +37,9 @@ def run_once() -> int:
         with session_factory()() as db, db.begin():
             org = db.scalar(select(Organization).where(Organization.id == org_id).with_for_update())
             if org is not None:
-                catch_up_invitations_locked(db, org.id, now())
+                boundary = now()
+                catch_up_invitations_locked(db, org.id, boundary)
+                catch_up_announcement_reports_locked(db, org.id, boundary)
     return len(event_ids)
 
 

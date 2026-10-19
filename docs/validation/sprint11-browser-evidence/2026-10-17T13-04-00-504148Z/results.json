@@ -1,0 +1,18 @@
+{
+  "method": "Isolated test PostgreSQL with local Edge; not participant/device validation",
+  "passed": [
+    "Guest global search, four mobile destinations, keyboard skip link, and header utilities",
+    "Guest device preferences persist through reload in Filipino, dark, XL, high contrast, and reduced motion",
+    "Account preferences stay separate from guest storage; My Clubs narrows member search",
+    "Ineligible identity is denied; profile validates, preserves failed-save input and retries; a bounded focus-safe confirmation unlocks registration",
+    "Faculty approval is pending, confirmed registration unlocks chat, and My Events withdrawal reports success",
+    "Full event shows durable waitlist position/no-ETA copy in registration and My Events; waitlist grants no chat access",
+    "Real chat send survives a lost response and same-key retry; archived chat is read-only with retention countdown",
+    "320/360/390/430 widths, short-height, and landscape geometry retain measured shell, 44px targets, and no overflow",
+    "Account preferences persist on the account; Filipino dark high-contrast body text is 17.45:1",
+    "Discovery, details, My Events, chat, profile and inbox fit all four widths with Filipino extra-large text",
+    "Workspace management is withheld on mobile and owner workspace smoke-checks on desktop"
+  ],
+  "browserErrors": [],
+  "contrastRatio": 17.453122971235867
+}

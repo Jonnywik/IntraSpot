@@ -1,0 +1,113 @@
+{
+  "method": "Isolated PostgreSQL, local static frontend, and Microsoft Edge; not participant or physical-device validation",
+  "passed": [
+    "Guest default, Upcoming fallback, search, and public API parity",
+    "Guest Show Flash choice persists locally and changes discovery only",
+    "Signed-in For You order, transient Flash boost, and controlled reason chips",
+    "Upcoming/Newest overrides and My Clubs compose with organization search",
+    "Flash UI registration and capacity waitlist use existing participation routes",
+    "Hidden Flash stays in My Events by title with confirmed/waitlist states and detail access",
+    "Show Flash and theme remain isolated when switching fictional accounts",
+    "Scheduled approval draft converts to Flash instant/null before publish; non-manager denied",
+    "320px/390px mobile and Filipino extra-large layouts retain four attendee tabs"
+  ],
+  "browserErrorCount": 117,
+  "browserErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/favicon.ico",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/my-events/__next.my-events.__PAGE__.txt?_rsc=C1edbbMHhAZCllMz",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/chat/__next.chat.__PAGE__.txt?_rsc=CarmQMlQiw822eWr",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/settings/__next.settings.__PAGE__.txt?_rsc=DROqpzYuhFJcAG-b",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/organizations/__next.organizations.__PAGE__.txt?_rsc=-t7QIr8JV8lGIVfH",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/profile/__next.profile.__PAGE__.txt?_rsc=OaIDnoGERc4CCAQ9",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/notifications/__next.notifications.__PAGE__.txt?_rsc=VTbOxAZ48APIcUlW",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/events/__next.events.__PAGE__.txt?eventId=01162635-0746-4498-bff0-29b18526f7c1&_rsc=czAudVQlvt1h9A0N",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/organizations/__next.organizations.__PAGE__.txt?orgId=d266a70a-5ce4-446e-9376-b9f0cacce007&_rsc=-t7QIr8JV8lGIVfH",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/events/__next.events.__PAGE__.txt?eventId=3300b6e4-743a-4ba7-ab0f-8a3e15bf1f0a&_rsc=czAudVQlvt1h9A0N",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/workspace/__next.workspace.__PAGE__.txt?_rsc=0G8KOUA82-VMLnLf",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/my-events/__next.my-events.__PAGE__.txt?_rsc=YiudeXJoyWsO67mh",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/chat/__next.chat.__PAGE__.txt?_rsc=5YOlnwzvmdhsYq3r",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/settings/__next.settings.__PAGE__.txt?_rsc=STmVY4j0xRDbRMWT",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/organizations/__next.organizations.__PAGE__.txt?_rsc=Y4nf-fmN429D8Cv5",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/notifications/__next.notifications.__PAGE__.txt?_rsc=qpdB16XW1S-dJl4l",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/profile/__next.profile.__PAGE__.txt?_rsc=BtyMyM_aZfKAv_53",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/workspace/__next.workspace.__PAGE__.txt?_rsc=BQmEJnaguDzEcVRj",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/my-events/__next.my-events.__PAGE__.txt?_rsc=YGHQ-LGQAAOJk3g6",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/chat/__next.chat.__PAGE__.txt?_rsc=uy027inDsPC9DAAL",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/settings/__next.settings.__PAGE__.txt?_rsc=fWU2lwVRkoF6BBr9",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/organizations/__next.organizations.__PAGE__.txt?_rsc=Nk9aa021t1iqESkp",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/notifications/__next.notifications.__PAGE__.txt?_rsc=3aX35mcwY4Hbc1od",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/profile/__next.profile.__PAGE__.txt?_rsc=by2qa9HiYGJ5H5zF",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/workspace/__next.workspace.__PAGE__.txt?_rsc=TEgjINipowtzrEru",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/events/__next.events.__PAGE__.txt?eventId=b78c24d9-8f89-4a78-84fd-b343c0801b84&_rsc=-Ijp7aSmiMgM02VL",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/my-events/__next.my-events.__PAGE__.txt?_rsc=-76hDaBcRaiCyfiw",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/chat/__next.chat.__PAGE__.txt?_rsc=SxrlMMRgXzSnf4Kg",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/settings/__next.settings.__PAGE__.txt?_rsc=mnNbueWjnCtgZdey",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/organizations/__next.organizations.__PAGE__.txt?_rsc=jLJHmDRro9ded9FQ",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/notifications/__next.notifications.__PAGE__.txt?_rsc=-YGY1t32GIOrDnUA",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/profile/__next.profile.__PAGE__.txt?_rsc=sXoFTJF9NlDAFmBD",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/workspace/__next.workspace.__PAGE__.txt?_rsc=OAn0e0guL0iih35k",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/events/__next.events.__PAGE__.txt?eventId=64821e53-1435-499e-b9e8-966c7c6da985&_rsc=lbkXx0zF-91L6GvU",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden) http://127.0.0.1:8002/api/v1/events/64821e53-1435-499e-b9e8-966c7c6da985/draft",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/events/__next.events.__PAGE__.txt?eventId=64821e53-1435-499e-b9e8-966c7c6da985&_rsc=czAudVQlvt1h9A0N",
+    "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:3000/events/__next.events.__PAGE__.txt?eventId=01162635-0746-4498-bff0-29b18526f7c1&_rsc=-Ijp7aSmiMgM02VL"
+  ],
+  "failedRequests": [
+    "404 http://127.0.0.1:3000/my-events/__next.my-events.__PAGE__.txt (fetch)",
+    "404 http://127.0.0.1:3000/chat/__next.chat.__PAGE__.txt (fetch)",
+    "404 http://127.0.0.1:3000/settings/__next.settings.__PAGE__.txt (fetch)",
+    "404 http://127.0.0.1:3000/organizations/__next.organizations.__PAGE__.txt (fetch)",
+    "404 http://127.0.0.1:3000/profile/__next.profile.__PAGE__.txt (fetch)",
+    "404 http://127.0.0.1:3000/notifications/__next.notifications.__PAGE__.txt (fetch)",
+    "404 http://127.0.0.1:3000/events/__next.events.__PAGE__.txt (fetch)",
+    "404 http://127.0.0.1:3000/workspace/__next.workspace.__PAGE__.txt (fetch)",
+    "403 http://127.0.0.1:8002/api/v1/events/64821e53-1435-499e-b9e8-966c7c6da985/draft (fetch)"
+  ],
+  "screenshots": [
+    "guest-flash-hidden-viewport.png",
+    "guest-flash-hidden-fullpage.png",
+    "desktop-flash-discover-1440-viewport.png",
+    "desktop-flash-discover-1440-fullpage.png",
+    "english-flash-discover-390-viewport.png",
+    "english-flash-discover-390-fullpage.png",
+    "filipino-xl-discover-390-viewport.png",
+    "filipino-xl-discover-390-fullpage.png"
+  ],
+  "geometry": [
+    {
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1425,
+      "navCount": 4
+    },
+    {
+      "width": 320,
+      "height": 700,
+      "scrollWidth": 305,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "navCount": 4
+    },
+    {
+      "width": 320,
+      "height": 700,
+      "scrollWidth": 305,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "navCount": 4
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "navCount": 4
+    }
+  ]
+}

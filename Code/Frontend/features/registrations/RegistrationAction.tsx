@@ -4,8 +4,12 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { ApiError, api } from '@/lib/api';
 import { formatDate, formatTime } from '@/lib/date';
+import { useT } from '@/lib/i18n';
+import { usePreferences } from '@/lib/preferences';
 import { useSession } from '@/lib/session';
+import { useApiResource } from '@/lib/use-api-resource';
 import type { PublicEvent, Registration } from '@/lib/types';
+import styles from '@/features/events/attendee-events.module.css';
 
 type AttendeeRegistration = Omit<Registration, 'status'> & {
   status: 'confirmed' | 'waitlisted' | 'pending' | 'reconfirmation_required' | 'cancelled' | 'rejected';
@@ -13,17 +17,23 @@ type AttendeeRegistration = Omit<Registration, 'status'> & {
   reconfirm_deadline?: string | null;
 };
 
-function formatDeadline(value: string | null | undefined) {
+function formatDeadline(value: string | null | undefined, language: 'en' | 'fil') {
   if (!value || !Number.isFinite(Date.parse(value))) return null;
-  return `${formatDate(value)} · ${formatTime(value)}`;
+  return `${formatDate(value, language)} · ${formatTime(value, language)}`;
 }
 
 export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; onOutcome?: () => void }) {
   const { actor, token, authLoading } = useSession();
+  const t = useT();
+  const { preferences } = usePreferences();
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
-  const [result, setResult] = useState<AttendeeRegistration | null>(null);
+  const [submittedResult, setResult] = useState<AttendeeRegistration | null>(null);
+  const registrations = useApiResource<AttendeeRegistration[]>(token && actor?.eligible ? '/me/registrations' : null, token);
+  const result = submittedResult ?? registrations.data?.find(item =>
+    item.event_id === event.id && ['confirmed', 'waitlisted', 'pending', 'reconfirmation_required'].includes(item.status),
+  ) ?? null;
   const [personaShared, setPersonaShared] = useState(false);
   const [now, setNow] = useState<number | null>(null);
   const attemptKey = useRef<{ eventId: string; key: string; personaShared: boolean } | null>(null);
@@ -31,6 +41,10 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
   const dialog = useRef<HTMLElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const outcome = useRef<HTMLDivElement>(null);
+  const confirmationDialogId = `registration-confirmation-${event.id}`;
+  const confirmationTitleId = `${confirmationDialogId}-title`;
+  const confirmationFactsId = `${confirmationDialogId}-facts`;
+  const personaHelpId = `${confirmationDialogId}-persona-help`;
 
   useEffect(() => () => controller.current?.abort(), []);
 
@@ -83,8 +97,8 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
   }, [open]);
 
   useEffect(() => {
-    if (result) outcome.current?.focus();
-  }, [result]);
+    if (submittedResult) outcome.current?.focus();
+  }, [submittedResult]);
 
   const retryable = error !== null && (error.status === 0 || error.status >= 500);
   const profileClue = error !== null &&
@@ -95,7 +109,7 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
   const startsAt = Date.parse(event.starts_at);
   const eventStarted = error?.code === 'event_started' ||
     (now !== null && (!Number.isFinite(startsAt) || startsAt <= now));
-  const actionLabel = isFull ? 'Join waitlist' : approvalRequired ? 'Request to register' : 'Register';
+  const actionLabel = isFull ? t('Join waitlist') : approvalRequired ? t('Request to register') : t('Register');
   const personaConsentId = `registration-persona-${event.id}`;
 
   function openConfirmation() {
@@ -154,76 +168,102 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
   }
 
   if (authLoading && !actor) {
-    return <p className="muted" role="status">Checking your registration access…</p>;
+    return <p className="muted" role="status">{t('Checking registration access…')}</p>;
   }
   if (!token || !actor) {
-    return <p className="muted">Sign in from the header to register for this event.</p>;
+    return <p className="muted">{t('Sign in from the header to register for this event.')}</p>;
   }
   if (result) {
-    const reviewDeadline = formatDeadline(result.review_deadline);
-    const reconfirmDeadline = formatDeadline(result.reconfirm_deadline);
+    const reviewDeadline = formatDeadline(result.review_deadline, preferences.language);
+    const reconfirmDeadline = formatDeadline(result.reconfirm_deadline, preferences.language);
+    const outcomeStyle = result.status === 'confirmed'
+      ? styles.registrationConfirmed
+      : result.status === 'pending'
+        ? styles.registrationPending
+        : result.status === 'waitlisted'
+          ? styles.registrationWaitlisted
+          : result.status === 'reconfirmation_required'
+            ? styles.registrationReconfirmation
+            : result.status === 'rejected'
+              ? styles.registrationRejected
+              : styles.registrationCancelled;
     return (
-      <div className="panel stack" role="status" tabIndex={-1} ref={outcome}>
-        {result.status === 'confirmed' ? <p>Your registration is confirmed.</p> : null}
+      <div className={`panel stack ${styles.registrationOutcome} ${outcomeStyle}`} role="status" aria-live="polite" tabIndex={-1} ref={outcome}>
+        {result.status === 'confirmed' ? <p>{t('Your registration is confirmed.')}</p> : null}
         {result.status === 'pending' ? (
-          <p>
-            Your request is pending organizer approval. A seat is reserved for you
-            {reviewDeadline ? ` until ${reviewDeadline}` : ' while it is reviewed'}.
-            {!reviewDeadline ? ' Check My Events for the current review deadline.' : ''}
-          </p>
+          <div>
+            <p>{reviewDeadline
+              ? t('Your request is pending organizer approval. A seat is reserved for you until {deadline}.', { deadline: reviewDeadline })
+              : t('Your request is pending organizer approval. A seat is reserved for you while it is reviewed.')}
+            </p>
+            {!reviewDeadline ? <p>{t('Check My Events for the current review deadline.')}</p> : null}
+          </div>
         ) : null}
         {result.status === 'reconfirmation_required' ? (
-          <p>
-            A seat is reserved while you reconfirm
-            {reconfirmDeadline ? ` by ${reconfirmDeadline}` : '. Check My Events for the current deadline'}.
+          <p>{reconfirmDeadline
+            ? t('A seat is reserved while you reconfirm by {deadline}.', { deadline: reconfirmDeadline })
+            : t('A seat is reserved while you reconfirm. Check My Events for the current deadline.')}
           </p>
         ) : null}
         {result.status === 'waitlisted' ? (
           <div className="stack">
-            <p>Waitlist position: {result.waitlist_position ?? 'Not provided'}.</p>
-            {result.waitlist_message ? <p>{result.waitlist_message}</p> : null}
+            <p>{t('Waitlist position: {position}.', { position: result.waitlist_position ?? t('Not provided') })}</p>
+            <p>{t(result.waitlist_message ?? 'You are on the waitlist. No estimated wait time is available.')}</p>
           </div>
         ) : null}
-        {result.status === 'rejected' ? <p>Your registration request was rejected.</p> : null}
-        {result.status === 'cancelled' ? <p>Registration status: Cancelled.</p> : null}
-        <Link className="button button-secondary" href={`/my-events?tab=${result.status === 'waitlisted' ? 'waitlist' : result.status === 'pending' || result.status === 'reconfirmation_required' ? 'pending' : 'confirmed'}`}>View My Events</Link>
+        {result.status === 'rejected' ? <p>{t('This registration was rejected.')}</p> : null}
+        {result.status === 'cancelled' ? <p>{t('This registration was cancelled.')}</p> : null}
+        <Link className="button button-secondary" href={`/my-events?tab=${now !== null && Date.parse(event.ends_at) <= now ? 'past' : result.status === 'waitlisted' ? 'waitlist' : result.status === 'pending' || result.status === 'reconfirmation_required' ? 'pending' : 'confirmed'}`}>{t('View My Events')}</Link>
       </div>
     );
   }
   if (!actor.eligible) {
-    return <p className="muted">Registration requires an eligible PLM account. Review your <Link href="/profile">profile</Link>.</p>;
+    return <p className="muted">{t('Registration requires an eligible PLM account.')} <Link href="/profile">{t('Review your profile')}</Link>.</p>;
   }
   if (!actor.profile_complete) {
-    return <p className="muted">Complete your profile before registering. <Link href="/profile">Update your profile</Link>.</p>;
+    return <p className="muted">{t('Complete your profile before registering.')} <Link href="/profile">{t('Update your profile')}</Link>.</p>;
   }
 
   if (eventStarted) {
     return (
       <div className="stack">
-        <button className="button button-secondary" type="button" disabled>Registration closed</button>
+        <button className="button button-secondary" type="button" disabled>{t('Registration is closed.')}</button>
         <p className="muted" role="status">
-          {error?.code === 'event_started' ? error.message : 'Registration is closed because the event has started.'}
+          {error?.code === 'event_started' ? t(error.message) : t('Registration is closed because the event has started.')}
         </p>
       </div>
     );
   }
   if (now === null) {
-    return <p className="muted" role="status">Checking event availability…</p>;
+    return <p className="muted" role="status">{t('Checking availability…')}</p>;
   }
+  if (registrations.loading) return <p className="muted" role="status">{t('Checking registration access…')}</p>;
+  if (registrations.error) return <div className="panel error" role="alert">
+    <p>{t(registrations.error.message)}</p>
+    <button className="button button-secondary" type="button" onClick={registrations.reload}>{t('Retry')}</button>
+  </div>;
 
   return (
     <div className="stack">
-      <button className="button" type="button" onClick={openConfirmation} ref={trigger}>
+      <button
+        className="button"
+        type="button"
+        onClick={openConfirmation}
+        ref={trigger}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls={confirmationDialogId}
+      >
         {actionLabel}
       </button>
 
       {error && !open ? (
         <div className="panel error" role="alert">
-          <p>{error.message}</p>
-          {profileClue ? <p>Review your <Link href="/profile">profile</Link> before trying again.</p> : null}
+          <p>{t(error.message)}</p>
+          {profileClue ? <p><Link href="/profile">{t('Review your profile before trying again.')}</Link></p> : null}
           {retryable ? (
             <button className="button button-secondary" type="button" onClick={() => { setOpen(true); void submitRegistration(); }}>
-              Retry registration
+              {t('Retry registration')}
             </button>
           ) : null}
         </div>
@@ -231,81 +271,84 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
 
       {open ? (
         <div
-          className="sheet"
+          className={`sheet ${styles.registrationSheet}`}
           role="presentation"
         >
           <section
-            className="stack"
+            id={confirmationDialogId}
+            className={`stack ${styles.registrationSheetPanel}`}
             role="dialog"
             aria-modal="true"
-            aria-labelledby="registration-confirmation-title"
+            aria-labelledby={confirmationTitleId}
+            aria-describedby={confirmationFactsId}
             tabIndex={-1}
             ref={dialog}
           >
             <div>
-              <p className="eyebrow">REGISTRATION</p>
-              <h2 id="registration-confirmation-title">
-                {isFull ? 'Join the waitlist' : approvalRequired ? 'Request organizer approval' : 'Confirm your registration'}
+              <p className="eyebrow">{t('Registration')}</p>
+              <h2 id={confirmationTitleId}>
+                {isFull ? t('Join the waitlist') : approvalRequired ? t('Request organizer approval') : t('Confirm your registration')}
               </h2>
             </div>
-            <div className="stack">
-              <p><strong>Date and time</strong><br />{formatDate(event.starts_at)} · {formatTime(event.starts_at)}</p>
-              <p><strong>Venue</strong><br />{event.venue_name}<br />{event.venue_address}</p>
-              <p><strong>Cost</strong><br />{event.cost_label}</p>
-              <p><strong>Attendance mode</strong><br />
+            <dl className={styles.registrationFacts} id={confirmationFactsId}>
+              <div><dt>{t('Date and time')}</dt><dd>{formatDate(event.starts_at, preferences.language)} · {formatTime(event.starts_at, preferences.language)}</dd></div>
+              <div><dt>{t('Venue')}</dt><dd>{event.venue_name}<br />{event.venue_address}</dd></div>
+              <div><dt>{t('Cost')}</dt><dd>{event.cost_label}</dd></div>
+              <div><dt>{t('Attendance mode')}</dt><dd>
                 {isFull
                   ? approvalRequired
-                    ? 'Waitlist first; organizer review begins only if a place becomes available.'
-                    : 'Join the waitlist; registration is confirmed if a place becomes available.'
+                    ? t('Waitlist first; organizer review begins only if a place becomes available.')
+                    : t('Join the waitlist; registration is confirmed if a place becomes available.')
                   : approvalRequired
-                    ? 'Organizer approval required; your seat is reserved while they review your request.'
-                    : 'Instant confirmation.'}
-              </p>
-            </div>
+                    ? t('Organizer approval required; your seat is reserved while they review your request.')
+                    : t('Instant confirmation.')}
+              </dd></div>
+            </dl>
             {approvalRequired ? (
-              <div className="stack">
-                <label htmlFor={personaConsentId}>
+              <div className={`stack ${styles.personaConsentBlock}`}>
+                <label className={styles.personaConsent} htmlFor={personaConsentId}>
                   <input
                     id={personaConsentId}
                     type="checkbox"
                     checked={personaShared}
                     disabled={submitting || (retryable && error !== null)}
+                    aria-describedby={personaHelpId}
                     onChange={(change) => setPersonaShared(change.target.checked)}
                   />
-                  Share my nickname, age bracket, tags, pronouns, and icebreaker with this event&apos;s authorized reviewers if my request is reviewed.
+                  <span>{t("Share my nickname, age bracket, tags, pronouns, and icebreaker with this event's authorized reviewers if my request is reviewed.")}</span>
                 </label>
-                <p className="muted">
-                  This optional choice starts unchecked and applies only to this event. It does not change your profile&apos;s global visibility.
+                <p className="muted" id={personaHelpId}>
+                  {t("This optional choice starts unchecked and applies only to this event. It does not change your profile's global visibility.")}
                 </p>
                 {!isFull && event.review_window_minutes ? (
                   <p className="muted">
-                    Organizer review window: up to {event.review_window_minutes} minutes; the event start may shorten it.
+                    {t('Organizer review window: up to {minutes} minutes; the event start may shorten it.', { minutes: event.review_window_minutes })}
                   </p>
                 ) : null}
               </div>
             ) : null}
             {error ? (
-              <div className="panel error" role="alert">
-                <p>{error.message}</p>
-                {profileClue ? <p>Review your <Link href="/profile">profile</Link> before trying again.</p> : null}
+              <div className="panel error" role="alert" aria-live="assertive">
+                <p>{t(error.message)}</p>
+                {profileClue ? <p><Link href="/profile">{t('Review your profile before trying again.')}</Link></p> : null}
               </div>
             ) : null}
-            <div className="actions">
+            <div className={`actions ${styles.sheetActions}`}>
               {(!error || retryable) ? (
-                <button className="button" type="button" onClick={() => { void submitRegistration(); }} disabled={submitting}>
+                <button className="button" type="button" onClick={() => { void submitRegistration(); }} disabled={submitting} aria-live="polite">
                   {submitting
-                    ? 'Submitting…'
+                    ? t('Submitting…')
                     : error
-                      ? 'Retry registration'
+                      ? t('Retry registration')
                       : isFull
-                        ? 'Join waitlist'
+                        ? t('Join waitlist')
                         : approvalRequired
-                          ? 'Send registration request'
-                          : 'Confirm registration'}
+                          ? t('Send registration request')
+                          : t('Confirm your registration')}
                 </button>
               ) : null}
               <button className="button button-secondary" type="button" onClick={() => setOpen(false)} disabled={submitting}>
-                {error && !retryable ? 'Close' : 'Cancel'}
+                {error && !retryable ? t('Close') : t('Cancel')}
               </button>
             </div>
           </section>

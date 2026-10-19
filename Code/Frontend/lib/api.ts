@@ -10,13 +10,15 @@ export class ApiError extends Error {
 }
 
 export function localDemoEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_LOCAL_DEMO === 'true' &&
+  return (!process.env.NEXT_PUBLIC_AUTH_MODE || process.env.NEXT_PUBLIC_AUTH_MODE === 'fixture') &&
+    process.env.NEXT_PUBLIC_LOCAL_DEMO === 'true' &&
     typeof window !== 'undefined' && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
 }
 
 export async function api<T>(path: string, options: {
   token?: string | null; method?: string; body?: unknown;
   idempotencyKey?: string; signal?: AbortSignal;
+  ifMatch?: string;
 } = {}): Promise<T> {
   if (!path.startsWith('/') || path.startsWith('//')) {
     throw new ApiError(0, 'invalid_api_path', 'An internal API path is required.');
@@ -31,10 +33,14 @@ export async function api<T>(path: string, options: {
   if (base.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(base.hostname) || base.username || base.password) {
     throw new ApiError(0, 'local_api_required', 'This MVP connects only to a local backend.');
   }
+  if (process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase' && base.href !== 'http://127.0.0.1:8011/') {
+    throw new ApiError(0, 'isolated_api_required', 'Google development sign-in requires its separate local backend.');
+  }
   const headers: Record<string, string> = {};
   if (options.token) headers.Authorization = `Bearer ${options.token}`;
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
   if (options.idempotencyKey) headers['Idempotency-Key'] = options.idempotencyKey;
+  if (options.ifMatch) headers['If-Match'] = `"${options.ifMatch}"`;
   let response: Response;
   try {
     response = await fetch(`${base.origin}/api/v1${path}`, {

@@ -36,6 +36,10 @@ def notify_in_app(db: Session, *, user_id: str, event_id: str | None = None,
     if event_id is None and org_id is None:
         raise ValueError('A notification requires event or organization context.')
     if db.scalar(select(Notification.id).where(Notification.dedupe_key == dedupe_key)) is None:
+        if org_id is None and event_id is not None:
+            from app.domains.events.models import Event
+            event = db.get(Event, event_id)
+            org_id = event.org_id if event else None
         db.add(Notification(user_id=user_id, event_id=event_id, org_id=org_id,
                             registration_id=registration_id, kind=kind,
                             message=message, dedupe_key=dedupe_key))
@@ -82,11 +86,15 @@ def notification_router():
 
     @router.get('/me/notifications', response_model=list[NotificationPublic], tags=['notifications'])
     def notifications(actor: Annotated[Actor, Depends(current_actor)], db: Annotated[Session, Depends(get_db, scope='function')]):
-        query = select(Notification).where(Notification.user_id == actor.user_id)
+        from app.domains.events.models import Event
+        query = (select(Notification, Event.org_id)
+                 .outerjoin(Event, Event.id == Notification.event_id)
+                 .where(Notification.user_id == actor.user_id))
         if not actor.eligible:
             query = query.where(Notification.kind != 'chat_message')
-        return list(db.scalars(query
-                               .order_by(Notification.created_at.desc(), Notification.id).limit(100)))
+        return [NotificationPublic.model_validate(notice).model_copy(update={'org_id': notice.org_id or event_org_id})
+                for notice, event_org_id in db.execute(query
+                    .order_by(Notification.created_at.desc(), Notification.id).limit(100))]
 
     @router.post('/me/notifications/{notification_id}/read', response_model=NotificationPublic, tags=['notifications'])
     def mark_read(notification_id: UUID, actor: Annotated[Actor, Depends(current_actor)],
@@ -98,6 +106,10 @@ def notification_router():
         if notice.read_at is None:
             notice.read_at = now()
         db.flush()
-        return notice
+        result = NotificationPublic.model_validate(notice)
+        if result.org_id is None and notice.event_id is not None:
+            from app.domains.events.models import Event
+            result.org_id = db.scalar(select(Event.org_id).where(Event.id == notice.event_id))
+        return result
 
     return router

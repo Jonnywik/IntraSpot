@@ -10,8 +10,10 @@ graphify-out/
 **/node_modules/
 **/.next/
 **/out/
+**/out-real/
 **/tsconfig.tsbuildinfo
 Code/Frontend/public/local-accounts.json
 Code/Backend/.cache/
 Code/Frontend/.cache/
+/.cache/
 /NUL

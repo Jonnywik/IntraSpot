@@ -79,6 +79,51 @@
   gap: 16px;
 }
 
+.sectionSummary {
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.sectionSummary::-webkit-details-marker {
+  display: none;
+}
+
+.sectionSummary > div {
+  min-width: 0;
+}
+
+.sectionSummary::after {
+  content: '+';
+  display: grid;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 1.2rem;
+}
+
+.section[open] > .sectionSummary::after {
+  content: '−';
+}
+
+.sectionCount {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 650;
+}
+
 .sectionHeader h2 {
   margin: 0 0 6px;
   color: var(--ink);
@@ -333,7 +378,8 @@
   }
 
   .cardHeader,
-  .auditRow {
+  .auditRow,
+  .sectionSummary {
     flex-direction: column;
     align-items: flex-start;
   }

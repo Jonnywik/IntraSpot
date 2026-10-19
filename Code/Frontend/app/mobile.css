@@ -1,0 +1,111 @@
+/* Mobile attendee shell. Desktop tokens and management layouts stay unchanged. */
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 88px;
+    scroll-padding-bottom: calc(var(--mobile-nav-height, 96px) + 16px);
+  }
+  body {
+    padding-bottom: var(--mobile-nav-height, 96px);
+  }
+  .header-inner {
+    gap: 12px;
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  }
+  .utilities {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+  .utilities .avatar {
+    width: 44px;
+    min-height: 44px !important;
+  }
+  .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 4px;
+    padding: 6px max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    box-shadow: 0 -4px 20px #1020440a;
+  }
+  .mobile-nav a {
+    justify-content: center;
+    min-height: 56px;
+    padding: 6px 2px;
+    border-radius: 10px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+  }
+  .mobile-nav a span {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .mobile-nav a[aria-current='page'] {
+    background: var(--selected-bg);
+    color: var(--ink);
+  }
+  .mobile-nav a:active {
+    background: var(--surface-alt);
+  }
+  .mobile-nav a:focus-visible {
+    outline-offset: -3px;
+  }
+  .local-demo-bar {
+    padding-inline: 16px;
+  }
+  .local-account-controls > label {
+    width: 100%;
+    min-width: 0;
+    gap: 4px 8px;
+  }
+  .local-account-controls > label select {
+    flex: 1 1 180px;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .local-demo-bar :is(button, select) {
+    min-height: 44px;
+  }
+  .local-account-controls .status-chip {
+    max-width: 100%;
+    white-space: normal;
+  }
+  .workspace,
+  .workspace.management,
+  .workspace.attendee {
+    width: 100%;
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+    margin-block: 24px 32px;
+  }
+  .workspace :is(.actions, .field, .stack, .panel, .feed) > * {
+    min-width: 0;
+  }
+  .workspace :is(.button, summary, label) {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  .workspace :is(.button, input, select, textarea) {
+    max-width: 100%;
+  }
+  .workspace .actions > .button {
+    flex: 1 1 180px;
+  }
+  .workspace .panel,
+  .workspace .event-card {
+    padding: 16px;
+  }
+  .workspace .stack {
+    gap: 16px;
+  }
+  .site-footer {
+    padding: 16px;
+    margin-bottom: 0;
+  }
+  :is(input, select, textarea, button, a) {
+    scroll-margin-block: 88px calc(var(--mobile-nav-height, 96px) + 16px);
+  }
+  .text-action {
+    min-height: 44px;
+  }
+}

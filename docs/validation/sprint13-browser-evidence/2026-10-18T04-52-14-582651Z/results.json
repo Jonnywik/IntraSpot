@@ -1,0 +1,7 @@
+{
+  "method": "Isolated PostgreSQL, local static frontend, and Microsoft Edge; not participant or physical-device validation",
+  "passed": [],
+  "browserErrorCount": 8,
+  "screenshots": [],
+  "geometry": []
+}

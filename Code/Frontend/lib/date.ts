@@ -1,7 +1,15 @@
-const dateFormatter = new Intl.DateTimeFormat('en-PH', {timeZone: 'Asia/Manila', dateStyle: 'medium'});
-const timeFormatter = new Intl.DateTimeFormat('en-PH', {timeZone: 'Asia/Manila', timeStyle: 'short'});
-export const formatDate = (value: string) => dateFormatter.format(new Date(value));
-export const formatTime = (value: string) => timeFormatter.format(new Date(value));
+const formatters = {
+  en: {
+    date: new Intl.DateTimeFormat('en-PH', {timeZone:'Asia/Manila', dateStyle:'medium'}),
+    time: new Intl.DateTimeFormat('en-PH', {timeZone:'Asia/Manila', timeStyle:'short'}),
+  },
+  fil: {
+    date: new Intl.DateTimeFormat('fil-PH', {timeZone:'Asia/Manila', dateStyle:'medium'}),
+    time: new Intl.DateTimeFormat('fil-PH', {timeZone:'Asia/Manila', timeStyle:'short'}),
+  },
+};
+export const formatDate = (value: string, language:'en'|'fil'='en') => formatters[language].date.format(new Date(value));
+export const formatTime = (value: string, language:'en'|'fil'='en') => formatters[language].time.format(new Date(value));
 export function toUtcFromManila(value: string): string {
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) throw new Error('Enter a valid Manila date and time.');
   const date = new Date(`${value}:00+08:00`);

@@ -1,0 +1,16 @@
+{
+  "method": "Local browser and isolated scratch PostgreSQL; not participant validation",
+  "passed": [
+    "Corrupt guest preferences reset to a valid default record and load successfully after reload in an isolated context",
+    "Guest device preferences are not copied into the first signed-in account",
+    "Account preferences persist across reload; Filipino updates the root language and sidebar privacy remains intact",
+    "A second account starts with its own defaults rather than the first account private settings",
+    "Serialized rapid edits persist on their original account; delayed responses do not replace the active account settings",
+    "A failed save retains the selected value and retry persists it",
+    "System theme follows OS changes; explicit theme wins; reduced motion honors both OS and app settings",
+    "High-contrast and decoration-pause preferences remain operable and readable",
+    "Registration sheet contains keyboard focus, closes on Escape, and returns focus without changing registration state",
+    "Sidebars and 680px feed meet 3/2/1-column breakpoints; required desktop routes fit; mobile keeps four tabs"
+  ],
+  "pageErrors": []
+}

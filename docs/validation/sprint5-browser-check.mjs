@@ -37,14 +37,14 @@ async function register(expected) {
   // Initial reverse tab must stay within the confirmation sheet.
   await page.keyboard.press('Shift+Tab');
   assert.equal(await dialog.evaluate(el=>el.contains(document.activeElement)),true);
-  await dialog.getByRole('button',{name: /^(Confirm registration|Join waitlist)$/}).click();
+  await dialog.getByRole('button',{name: /^(Confirm your registration|Join waitlist)$/}).click();
   await visible(page.getByText(expected,{exact:true}));
 }
 try {
   await page.goto(base,{waitUntil:'networkidle'});
   await event();
   await visible(page.getByText('Sign in from the header to register for this event.',{exact:true}));
-  assert.equal(await page.getByRole('group',{name:'Event counts'}).count(),1);
+  assert.equal(await page.locator('dl[aria-label="Event counts"]').count(),1);
   passed.push('Guest discovery and public detail, distinct attendance counts');
 
   await account('Fictional incomplete profile');
@@ -56,7 +56,10 @@ try {
   await visible(page.getByText('Profile saved.',{exact:true}));
   await event();
   await register('Your registration is confirmed.');
-  await visible(page.getByRole('group',{name:'Event counts'}).getByText('Confirmed 1',{exact:true}));
+  const confirmedCount = page.locator('dl[aria-label="Event counts"] > div').filter({has:page.locator('dt').getByText('Confirmed',{exact:true})}).locator('dd');
+  await page.waitForFunction(() => [...document.querySelectorAll('dl[aria-label="Event counts"] > div')]
+    .some(element => element.querySelector('dt')?.textContent === 'Confirmed' && element.querySelector('dd')?.textContent === '1'));
+  assert.equal(await confirmedCount.textContent(),'1');
   await page.getByRole('link',{name:'View My Events',exact:true}).click();
   await visible(page.getByRole('heading',{name:'My Events',level:1}));
   await visible(page.getByRole('heading',{name:'Fictional Heritage Gathering',level:2}));
@@ -68,7 +71,7 @@ try {
   await visible(page.getByText(/no estimated wait time/i));
   await page.getByRole('link',{name:'View My Events',exact:true}).click();
   await visible(page.getByRole('heading',{name:'My Events',level:1}));
-  await page.getByRole('tab',{name:'Waitlist',exact:true}).click();
+  await page.getByRole('tab',{name:/^Waitlist(?:\s|$)/}).click();
   await visible(page.getByText('Waitlist position: 1.',{exact:true}));
   await visible(page.getByText(/no estimated wait time/i));
   passed.push('Faculty eligibility and immediate/persisted waitlist position');
@@ -108,7 +111,7 @@ try {
     else await route.fulfill({response});
   });
   await page.getByRole('button',{name:'Register',exact:true}).click();
-  await page.getByRole('dialog').getByRole('button',{name:'Confirm registration',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'Confirm your registration',exact:true}).click();
   await page.getByRole('dialog').getByRole('button',{name:'Retry registration',exact:true}).click();
   await visible(page.getByText('Your registration is confirmed.',{exact:true}));
   assert.equal(attempts,2);assert.ok(keys[0]);assert.equal(keys[0],keys[1]);
@@ -184,7 +187,7 @@ try {
     await page.screenshot({path:path.join(output,`discover-${viewport.width}.png`),fullPage:true});
   }
   await account('Fictional organizer');
-  await page.goto(draftUrl,{waitUntil:'networkidle'}); // Guest after hard navigation is intentional memory-only auth.
+  await page.goto(draftUrl,{waitUntil:'networkidle'}); // Restored local account is reverified after hard navigation.
   await account('Fictional organizer');
   await visible(page.locator('.desktop-required'));
   assert.equal(await page.getByLabel('Event title',{exact:true}).isVisible(),false);

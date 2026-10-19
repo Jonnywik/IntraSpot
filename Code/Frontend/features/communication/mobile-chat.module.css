@@ -1,0 +1,58 @@
+@media (max-width: 767px) {
+  .mobileChatPage .mobileChatLayout[data-has-selection] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .mobileChatPage .mobileChatLayout .mobileInbox,
+  .mobileChatPage .mobileChatLayout .mobileThread {
+    position: static;
+    inset: auto;
+    grid-column: 1;
+    grid-row: 1;
+    order: 0;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    scrollbar-gutter: auto;
+    padding: 0.8rem;
+  }
+
+  .mobileChatPage .mobileChatLayout .mobileThread {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mobileChatPage .mobileChatLayout[data-has-selection='true'] .mobileInbox,
+  .mobileChatPage .mobileChatLayout:not([data-has-selection='true']) .mobileThread {
+    display: none;
+  }
+
+  .mobileChatPage .mobileChatLayout .mobileChatLog {
+    flex: 1 1 auto;
+    min-height: 7rem;
+    max-height: max(7rem, calc(100dvh - var(--mobile-nav-height, 96px) - 18rem));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .mobileChatPage .mobileChatLayout .mobileChatComposer {
+    position: sticky;
+    bottom: calc(var(--mobile-nav-height, 96px) + 0.5rem);
+    z-index: 2;
+    flex-shrink: 0;
+    margin: 0;
+    border-top: 1px solid var(--line);
+    padding: 0.75rem 0 0;
+    background: var(--surface);
+    scroll-margin-block-end: calc(var(--mobile-nav-height, 96px) + 0.75rem);
+  }
+}

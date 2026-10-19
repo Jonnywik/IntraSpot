@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, CheckConstraint, ForeignKey, Integer, String, Text
+from sqlalchemy import BigInteger, CheckConstraint, ForeignKey, Integer, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import JSONB
 
 from app.db.models import UTC, now, uid
 from app.db.session import Base
@@ -10,6 +11,7 @@ from app.db.session import Base
 class Event(Base):
     __tablename__ = "events"
     __table_args__ = (
+        CheckConstraint("jsonb_typeof(tags) = 'array' AND jsonb_array_length(tags) <= 16", name="ck_events_tags_array"),
         CheckConstraint("status IN ('draft', 'published')", name="ck_events_status"),
         CheckConstraint(
             "registration_mode IN ('instant', 'approval')",
@@ -27,7 +29,16 @@ class Event(Base):
             name="ck_events_published_review_settings",
         ),
         CheckConstraint("material_revision >= 0", name="ck_events_material_revision_nonnegative"),
-        CheckConstraint("event_type = 'scheduled'", name="ck_events_event_type"),
+        CheckConstraint("event_type IN ('scheduled', 'flash')", name="ck_events_event_type"),
+        CheckConstraint(
+            "event_type != 'flash' OR (registration_mode = 'instant' AND review_window_minutes IS NULL)",
+            name="ck_events_flash_instant",
+        ),
+        CheckConstraint(
+            "status != 'published' OR event_type != 'flash' OR "
+            "(starts_at > published_at AND starts_at <= published_at + INTERVAL '24 hours')",
+            name="ck_events_flash_published_window",
+        ),
         CheckConstraint(
             "banner_key IS NULL OR banner_key IN ('heritage', 'design', 'garden', 'music')",
             name="ck_events_banner_key",
@@ -53,6 +64,8 @@ class Event(Base):
     created_by: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     title: Mapped[str | None] = mapped_column(String(200), nullable=True)
     summary: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
+    coarse_area: Mapped[str | None] = mapped_column(String(80), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     starts_at: Mapped[datetime | None] = mapped_column(UTC, nullable=True)
     ends_at: Mapped[datetime | None] = mapped_column(UTC, nullable=True)

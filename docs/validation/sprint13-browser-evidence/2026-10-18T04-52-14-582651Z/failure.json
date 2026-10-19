@@ -1,0 +1,8 @@
+{
+  "stage": "guest defaults, Upcoming fallback, search, and local persistence",
+  "pathname": "/",
+  "errorType": "AssertionError",
+  "message": "The public API order matches the fixture contract\n+ actual - expected\n\n+ []\n- [\n-   '051b18a6-3a56-4310-8e05-d21e969cf977',\n-   '1a452061-974b-42ae-8ae0-65b091040537',\n-   '8f69e701-646a-4aba-81af-415f35a74dbd',\n-   'e727b1dd-2d1d-46c1-b1c3-ccf7b1dc1cde',\n-   'f09d89da-a9bf-4c3c-9a85-5b2b6dfb4eff'\n- ]\n",
+  "browserErrorCount": 8,
+  "passedCount": 0
+}

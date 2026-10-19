@@ -51,6 +51,8 @@ _EVENT_FIXTURES = (
         "duration": timedelta(hours=2),
         "fields": {
             "title": "Community Heritage Walk",
+            "tags": ["heritage", "community"],
+            "coarse_area": "intramuros",
             "summary": "",
             "description": "A fictional scheduled event for the local discovery demonstration.",
             "venue_name": "Sample Heritage Courtyard",
@@ -68,6 +70,8 @@ _EVENT_FIXTURES = (
         "duration": timedelta(hours=3),
         "fields": {
             "title": "Campus Garden Workday",
+            "tags": ["gardening", "community"],
+            "coarse_area": "intramuros",
             "summary": "A small fictional community event for public discovery.",
             "description": "A fictional scheduled garden activity used in the local demo.",
             "venue_name": "Sample Community Garden",

@@ -2,13 +2,17 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Feedback } from '@/components/feedback';
 import { ApiError, api } from '@/lib/api';
 import { formatDate, formatTime } from '@/lib/date';
+import { useT } from '@/lib/i18n';
+import { usePreferences } from '@/lib/preferences';
 import { useApiResource } from '@/lib/use-api-resource';
 import { useSession } from '@/lib/session';
 import type { MyRegistration, Registration } from '@/lib/types';
+import attendeeStyles from '@/features/attendee-pages.module.css';
+import { eventChatAvailable } from './presentation';
 
 type RegistrationStatus = 'confirmed' | 'waitlisted' | 'pending' | 'reconfirmation_required' | 'cancelled' | 'rejected';
 type AttendeeRegistration = Omit<Registration, 'status'> & {
@@ -24,31 +28,44 @@ type AttendeeMyRegistration = Omit<MyRegistration, 'status'> & {
   reconfirm_revision?: number | null;
 };
 type RegistrationTab = 'pending' | 'confirmed' | 'waitlist' | 'past';
+type Translate = ReturnType<typeof useT>;
 
-function formatDeadline(value: string | null | undefined) {
+const registrationTabOrder: RegistrationTab[] = ['pending', 'confirmed', 'waitlist', 'past'];
+
+function formatDeadline(value: string | null | undefined, language: 'en' | 'fil') {
   if (!value || !Number.isFinite(Date.parse(value))) return null;
-  return `${formatDate(value)} · ${formatTime(value)}`;
+  return `${formatDate(value, language)} · ${formatTime(value, language)}`;
 }
 
-function statusLabel(status: RegistrationStatus) {
-  if (status === 'waitlisted') return 'Waitlist';
-  if (status === 'reconfirmation_required') return 'Reconfirmation required';
-  return status.charAt(0).toUpperCase() + status.slice(1);
+function statusLabel(status: RegistrationStatus, t: Translate) {
+  const labels: Record<RegistrationStatus, string> = {
+    confirmed: t('Confirmed'),
+    waitlisted: t('Waitlist'),
+    pending: t('Pending'),
+    reconfirmation_required: t('Reconfirmation required'),
+    cancelled: t('Cancelled'),
+    rejected: t('Rejected'),
+  };
+  return labels[status];
 }
 
 function eventDetailsHref(eventId: string) {
   return `/events?eventId=${encodeURIComponent(eventId)}`;
 }
 
-function eventDate(startsAt: string | null) {
-  return startsAt ? `${formatDate(startsAt)} · ${formatTime(startsAt)}` : 'Event date unavailable';
+function eventDate(startsAt: string | null, t: Translate, language: 'en' | 'fil') {
+  return startsAt ? `${formatDate(startsAt, language)} · ${formatTime(startsAt, language)}` : t('Event date unavailable');
 }
 
 function WaitlistDetails({ registration }: { registration: AttendeeMyRegistration }) {
+  const t = useT();
+  const waitlistMessage = !registration.waitlist_message || registration.waitlist_message === 'You are on the waitlist. No estimated wait time is available.'
+    ? t('You are on the waitlist. No estimated wait time is available.')
+    : registration.waitlist_message;
   return (
     <div className="stack">
-      <p>Waitlist position: {registration.waitlist_position ?? 'Not provided'}.</p>
-      {registration.waitlist_message ? <p>{registration.waitlist_message}</p> : null}
+      <p>{t('Waitlist position: {position}.', { position: registration.waitlist_position ?? t('Not provided') })}</p>
+      {waitlistMessage ? <p>{waitlistMessage}</p> : null}
     </div>
   );
 }
@@ -76,14 +93,17 @@ function RegistrationCard({
   onReconfirm: (registration: AttendeeMyRegistration, accept: boolean) => void;
   onRefresh: () => void;
 }) {
+  const t = useT();
+  const { preferences: { language } } = usePreferences();
   const active = ['confirmed', 'waitlisted', 'pending'].includes(registration.status);
+  const chatAvailable = eventChatAvailable(registration.status, registration.ends_at, now);
   const canWithdraw = !registration.is_past && active &&
     now !== null &&
     registration.starts_at !== null &&
     Date.parse(registration.starts_at) > now;
-  const reviewDeadline = formatDeadline(registration.review_deadline);
+  const reviewDeadline = formatDeadline(registration.review_deadline, language);
   const reviewDeadlineAt = registration.review_deadline ? Date.parse(registration.review_deadline) : Number.NaN;
-  const reconfirmDeadline = formatDeadline(registration.reconfirm_deadline);
+  const reconfirmDeadline = formatDeadline(registration.reconfirm_deadline, language);
   const reconfirmDeadlineAt = registration.reconfirm_deadline ? Date.parse(registration.reconfirm_deadline) : Number.NaN;
   const hasCurrentReconfirmation = registration.status === 'reconfirmation_required' &&
     Number.isInteger(registration.reconfirm_revision) && Number.isFinite(reconfirmDeadlineAt);
@@ -95,22 +115,23 @@ function RegistrationCard({
       <header>
         <div>
           <p className="muted">{registration.organization_name}</p>
-          <h2>{registration.event_title ?? 'Event details unavailable'}</h2>
+          <h2>{registration.event_title ?? t('Event details unavailable')}</h2>
         </div>
-        <span className={`status-chip ${registration.status}`}>{statusLabel(registration.status)}</span>
+        <span className={`status-chip ${registration.status} ${attendeeStyles.statusBadge}`}>{statusLabel(registration.status, t)}</span>
       </header>
-      <p>{eventDate(registration.starts_at)}</p>
+      <p>{eventDate(registration.starts_at, t, language)}</p>
       {registration.status === 'waitlisted' ? <WaitlistDetails registration={registration} /> : null}
       {registration.status === 'pending' ? (
         <>
           <p>
-            Your request is awaiting organizer review. A seat is reserved for you
-            {reviewDeadline ? ` until ${reviewDeadline}` : ' while it is reviewed'}.
-            {!reviewDeadline ? ' Refresh your registrations for the current review deadline.' : ''}
-            {reviewDeadline && now !== null && reviewDeadlineAt <= now ? ' The deadline has passed; refresh to check the current status.' : ''}
+            {reviewDeadline
+              ? t('Your request is awaiting organizer review. A seat is reserved for you until {deadline}.', { deadline: reviewDeadline })
+              : t('Your request is awaiting organizer review. A seat is reserved for you while it is reviewed.')}
+            {!reviewDeadline ? ` ${t('Refresh your registrations for the current review deadline.')}` : ''}
+            {reviewDeadline && now !== null && reviewDeadlineAt <= now ? ` ${t('The deadline has passed; refresh to check the current status.')}` : ''}
           </p>
           {reviewDeadline && now !== null && reviewDeadlineAt <= now ? (
-            <button className="button button-secondary" type="button" onClick={onRefresh}>Refresh registrations</button>
+            <button className="button button-secondary" type="button" onClick={onRefresh}>{t('Refresh registrations')}</button>
           ) : null}
         </>
       ) : null}
@@ -118,57 +139,57 @@ function RegistrationCard({
         <div className="stack">
           <p>
             {responseAlreadySubmitted
-              ? 'Your response was received. Refresh registrations to check the updated status.'
-              : `Your seat is reserved. Accept or decline by ${reconfirmDeadline ?? 'the organizer-set deadline'}.`}
+              ? t('Your response was received. Refresh registrations to check the updated status.')
+              : t('Your seat is reserved. Accept or decline by {deadline}.', { deadline: reconfirmDeadline ?? t('the organizer-set deadline') })}
           </p>
           {!hasCurrentReconfirmation ? (
-            <p className="muted">The current request details are unavailable. Refresh registrations before responding.</p>
+            <p className="muted">{t('The current request details are unavailable. Refresh registrations before responding.')}</p>
           ) : null}
           {hasCurrentReconfirmation && now !== null && reconfirmDeadlineAt <= now ? (
-            <p className="muted" role="status">The deadline has passed. Refresh registrations to check the current status.</p>
+            <p className="muted" role="status">{t('The deadline has passed. Refresh registrations to check the current status.')}</p>
           ) : null}
-          {now === null ? <p className="muted" role="status">Checking the response deadline…</p> : null}
+          {now === null ? <p className="muted" role="status">{t('Checking the response deadline…')}</p> : null}
           {canReconfirm && !reconfirmError && !responseAlreadySubmitted ? (
             <div className="actions">
               <button className="button" type="button" onClick={() => onReconfirm(registration, true)} disabled={reconfirming}>
-                {reconfirming ? 'Saving…' : 'Accept and keep my seat'}
+                {reconfirming ? t('Saving…') : t('Accept and keep my seat')}
               </button>
               <button className="button button-secondary" type="button" onClick={() => onReconfirm(registration, false)} disabled={reconfirming}>
-                Decline seat
+                {t('Decline seat')}
               </button>
             </div>
           ) : null}
           {reconfirmError ? (
             <div className="panel error" role="alert">
-              <p>{reconfirmError.message}</p>
-              <p>Refresh registrations to check whether your response took effect.</p>
-              <button className="button button-secondary" type="button" onClick={onRefresh}>Refresh registrations</button>
+              <p>{t(reconfirmError.message)}</p>
+              <p>{t('Refresh registrations to check whether your response took effect.')}</p>
+              <button className="button button-secondary" type="button" onClick={onRefresh}>{t('Refresh registrations')}</button>
             </div>
           ) : null}
         </div>
       ) : null}
-      {registration.status === 'cancelled' ? <p className="muted">This registration is cancelled.</p> : null}
-      {registration.status === 'rejected' ? <p className="muted">This registration request was rejected.</p> : null}
+      {registration.status === 'cancelled' ? <p className="muted">{t('This registration is cancelled.')}</p> : null}
+      {registration.status === 'rejected' ? <p className="muted">{t('This registration request was rejected.')}</p> : null}
       <div className="actions">
         <Link className="button button-secondary" href={eventDetailsHref(registration.event_id)}>
-          Event details
+          {t('Event details')}
         </Link>
-        {registration.status === 'confirmed' ? (
+        {chatAvailable ? (
           <Link className="button button-secondary" href={`/chat?eventId=${encodeURIComponent(registration.event_id)}`}>
-            Open event chat
+            {t('Open event chat')}
           </Link>
         ) : null}
         {canWithdraw ? (
           <button className="button button-danger" type="button" onClick={() => onWithdraw(registration)} disabled={withdrawing}>
-            {withdrawing ? 'Withdrawing…' : 'Withdraw registration'}
+            {withdrawing ? t('Withdrawing…') : t('Withdraw registration')}
           </button>
         ) : null}
       </div>
       {withdrawError ? (
         <div className="panel error" role="alert">
-          <p>{withdrawError.message}</p>
-          <p>Refresh your registrations to check the current status before trying again.</p>
-          <button className="button button-secondary" type="button" onClick={onRefresh}>Refresh registrations</button>
+          <p>{t(withdrawError.message)}</p>
+          <p>{t('Refresh your registrations to check the current status before trying again.')}</p>
+          <button className="button button-secondary" type="button" onClick={onRefresh}>{t('Refresh registrations')}</button>
         </div>
       ) : null}
     </article>
@@ -176,23 +197,25 @@ function RegistrationCard({
 }
 
 function FutureCancellation({ registration }: { registration: AttendeeMyRegistration }) {
+  const t = useT();
+  const { preferences: { language } } = usePreferences();
   return (
     <article className="event-card stack">
       <header>
         <div>
           <p className="muted">{registration.organization_name}</p>
-          <h3>{registration.event_title ?? 'Event details unavailable'}</h3>
+          <h3>{registration.event_title ?? t('Event details unavailable')}</h3>
         </div>
-        <span className={`status-chip ${registration.status}`}>{statusLabel(registration.status)}</span>
+        <span className={`status-chip ${registration.status} ${attendeeStyles.statusBadge}`}>{statusLabel(registration.status, t)}</span>
       </header>
       <p className="muted">
-        {registration.status === 'rejected' ? 'This registration request was rejected.' : 'This registration is cancelled.'}
-        {' '}The event is still upcoming.
+        {registration.status === 'rejected' ? t('This registration request was rejected.') : t('This registration is cancelled.')}
+        {' '}{t('The event is still upcoming.')}
       </p>
-      <p>{eventDate(registration.starts_at)}</p>
+      <p>{eventDate(registration.starts_at, t, language)}</p>
       <div className="actions">
         <Link className="button button-secondary" href={eventDetailsHref(registration.event_id)}>
-          Event details
+          {t('Event details')}
         </Link>
       </div>
     </article>
@@ -208,6 +231,7 @@ export function MyEvents() {
 }
 
 function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
+  const t = useT();
   const { actor, token, authLoading } = useSession();
   const path = actor && token ? '/me/registrations' : null;
   const { data, loading, error, reload } = useApiResource<AttendeeMyRegistration[]>(path, token);
@@ -215,11 +239,13 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
   const [now, setNow] = useState<number | null>(null);
   const [withdrawingId, setWithdrawingId] = useState<string | null>(null);
   const [withdrawError, setWithdrawError] = useState<{ id: string; error: Error } | null>(null);
+  const [withdrawSuccess, setWithdrawSuccess] = useState<string | null>(null);
   const [reconfirmingId, setReconfirmingId] = useState<string | null>(null);
   const [reconfirmError, setReconfirmError] = useState<{ id: string; error: Error } | null>(null);
   const [reconfirmSuccess, setReconfirmSuccess] = useState<string | null>(null);
   const [submittedReconfirmations, setSubmittedReconfirmations] = useState<Record<string, number>>({});
   const mutation = useRef<AbortController | null>(null);
+  const tabButtons = useRef<Partial<Record<RegistrationTab, HTMLButtonElement>>>({});
 
   useEffect(() => {
     const firstUpdate = window.setTimeout(() => setNow(Date.now()), 0);
@@ -236,7 +262,7 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
     const startsAt = registration.starts_at ? Date.parse(registration.starts_at) : Number.NaN;
     if (registration.is_past || !Number.isFinite(startsAt) || startsAt <= Date.now()) {
       setNow(Date.now());
-      setWithdrawError({ id: registration.id, error: new Error('Withdrawals are available only before the event starts.') });
+      setWithdrawError({ id: registration.id, error: new Error(t('Withdrawals are available only before the event starts.')) });
       return;
     }
 
@@ -244,13 +270,17 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
     mutation.current = requestController;
     setWithdrawingId(registration.id);
     setWithdrawError(null);
+    setWithdrawSuccess(null);
     try {
       await api<AttendeeRegistration>(`/events/${encodeURIComponent(registration.event_id)}/registrations/me`, {
         token,
         method: 'DELETE',
         signal: requestController.signal,
       });
-      if (!requestController.signal.aborted) reload();
+      if (!requestController.signal.aborted) {
+        setWithdrawSuccess(t('Registration withdrawn for {event}.', { event: registration.event_title ?? t('this event') }));
+        reload();
+      }
     } catch (caught) {
       if (!requestController.signal.aborted) {
         setWithdrawError({
@@ -291,8 +321,8 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
       if (!requestController.signal.aborted) {
         setSubmittedReconfirmations((current) => ({ ...current, [registration.id]: revision }));
         setReconfirmSuccess(accept
-          ? `Your seat for ${registration.event_title ?? 'this event'} is confirmed.`
-          : `You declined your seat for ${registration.event_title ?? 'this event'}.`);
+          ? t('Your seat for {event} is confirmed.', { event: registration.event_title ?? t('this event') })
+          : t('You declined your seat for {event}.', { event: registration.event_title ?? t('this event') }));
         reload();
       }
     } catch (caught) {
@@ -315,18 +345,18 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
 
   if (authLoading && !actor) {
     return (
-      <section className="stack">
-        <header className="page-heading"><p className="eyebrow">YOUR EVENTS</p><h1>My Events</h1></header>
-        <p className="panel muted" role="status">Checking your account…</p>
+      <section className={`stack ${attendeeStyles.eventsPage}`}>
+        <header className="page-heading"><p className="eyebrow">{t('YOUR EVENTS')}</p><h1>{t('My Events')}</h1></header>
+        <p className="panel muted" role="status">{t('Checking your account…')}</p>
       </section>
     );
   }
 
   if (!actor || !token) {
     return (
-      <section className="stack">
-        <header className="page-heading"><p className="eyebrow">YOUR EVENTS</p><h1>My Events</h1></header>
-        <p className="panel muted">Sign in from the header to view your registrations.</p>
+      <section className={`stack ${attendeeStyles.eventsPage}`}>
+        <header className="page-heading"><p className="eyebrow">{t('YOUR EVENTS')}</p><h1>{t('My Events')}</h1></header>
+        <p className="panel muted">{t('Sign in from the header to view your registrations.')}</p>
       </section>
     );
   }
@@ -347,77 +377,115 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
   });
   const futureCancellations = registrations.filter((registration) =>
     !registration.is_past && (registration.status === 'cancelled' || registration.status === 'rejected'));
+  const tabCounts: Record<RegistrationTab, number> = {
+    pending: registrations.filter((registration) => !registration.is_past && (registration.status === 'pending' || registration.status === 'reconfirmation_required')).length,
+    confirmed: registrations.filter((registration) => !registration.is_past && registration.status === 'confirmed').length,
+    waitlist: registrations.filter((registration) => !registration.is_past && registration.status === 'waitlisted').length,
+    past: registrations.filter((registration) => registration.is_past).length,
+  };
+  const tabLabels: Record<RegistrationTab, string> = {
+    pending: t('Pending'),
+    confirmed: t('Confirmed'),
+    waitlist: t('Waitlist'),
+    past: t('Past'),
+  };
+
+  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, currentTab: RegistrationTab) {
+    const index = registrationTabOrder.indexOf(currentTab);
+    const nextTab = event.key === 'ArrowRight'
+      ? registrationTabOrder[(index + 1) % registrationTabOrder.length]
+      : event.key === 'ArrowLeft'
+        ? registrationTabOrder[(index - 1 + registrationTabOrder.length) % registrationTabOrder.length]
+        : event.key === 'Home'
+          ? registrationTabOrder[0]
+          : event.key === 'End'
+            ? registrationTabOrder[registrationTabOrder.length - 1]
+            : null;
+    if (!nextTab) return;
+    event.preventDefault();
+    setTab(nextTab);
+    tabButtons.current[nextTab]?.focus();
+  }
 
   return (
-    <section className="stack">
+    <section className={`stack ${attendeeStyles.eventsPage}`}>
       <header className="page-heading">
-        <p className="eyebrow">YOUR EVENTS</p>
-        <h1>My Events</h1>
+        <p className="eyebrow">{t('YOUR EVENTS')}</p>
+        <h1>{t('My Events')}</h1>
       </header>
 
-      <div className="tabs" role="tablist" aria-label="Registration status">
-        <button type="button" role="tab" aria-selected={tab === 'pending'} onClick={() => setTab('pending')}>
-          Pending
-        </button>
-        <button type="button" role="tab" aria-selected={tab === 'confirmed'} onClick={() => setTab('confirmed')}>
-          Confirmed
-        </button>
-        <button type="button" role="tab" aria-selected={tab === 'waitlist'} onClick={() => setTab('waitlist')}>
-          Waitlist
-        </button>
-        <button type="button" role="tab" aria-selected={tab === 'past'} onClick={() => setTab('past')}>
-          Past
-        </button>
+      <div className={attendeeStyles.registrationTabs} role="tablist" aria-label={t('Registration status')}>
+        {registrationTabOrder.map((registrationTab) => (
+          <button
+            key={registrationTab}
+            ref={(element) => { tabButtons.current[registrationTab] = element ?? undefined; }}
+            className={attendeeStyles.registrationTab}
+            type="button"
+            role="tab"
+            id={`registration-tab-${registrationTab}`}
+            aria-controls="registration-panel"
+            aria-selected={tab === registrationTab}
+            tabIndex={tab === registrationTab ? 0 : -1}
+            onClick={() => setTab(registrationTab)}
+            onKeyDown={(event) => handleTabKeyDown(event, registrationTab)}
+          >
+            <span>{tabLabels[registrationTab]}</span>
+            {data ? <span className={attendeeStyles.tabCount}>{tabCounts[registrationTab]}</span> : null}
+          </button>
+        ))}
       </div>
       {reconfirmSuccess ? <p className="panel muted" role="status">{reconfirmSuccess}</p> : null}
+      {withdrawSuccess ? <p className="panel success" role="status">{withdrawSuccess}</p> : null}
 
-      <Feedback loading={loading} error={error} onRetry={reload}>
-        <div className="stack">
-          {visibleRegistrations.length ? (
-            <div className="feed">
-              {visibleRegistrations.map((registration) => (
-                <RegistrationCard
-                  key={registration.id}
-                  registration={registration}
-                  now={now}
-                  withdrawing={withdrawingId === registration.id}
-                  withdrawError={withdrawError?.id === registration.id ? withdrawError.error : null}
-                  reconfirming={reconfirmingId === registration.id}
-                  reconfirmError={reconfirmError?.id === registration.id ? reconfirmError.error : null}
-                  submittedRevision={submittedReconfirmations[registration.id] ?? null}
-                  onWithdraw={(item) => { void withdraw(item); }}
-                  onReconfirm={(item, accept) => { void reconfirm(item, accept); }}
-                  onRefresh={() => refreshRegistration(registration.id)}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="panel empty-state muted">
-              {tab === 'past'
-                ? 'Past registrations will appear here.'
-                : tab === 'waitlist'
-                  ? 'You have no upcoming waitlist registrations.'
-                  : tab === 'pending'
-                    ? 'You have no pending approvals or reconfirmation requests.'
-                    : 'You have no upcoming confirmed registrations.'}
-            </p>
-          )}
-
-          {futureCancellations.length ? (
-            <section className="stack" aria-labelledby="closed-upcoming-title">
-              <div>
-                <h2 id="closed-upcoming-title">Closed upcoming registrations</h2>
-                <p className="muted">These registrations are closed, and the API still marks their events as upcoming.</p>
-              </div>
+      <div id="registration-panel" className={attendeeStyles.registrationPanel} role="tabpanel" aria-labelledby={`registration-tab-${tab}`} tabIndex={0}>
+        <Feedback loading={loading} error={error ? new Error(t(error.message)) : null} onRetry={reload}>
+          <div className="stack">
+            {visibleRegistrations.length ? (
               <div className="feed">
-                {futureCancellations.map((registration) => (
-                  <FutureCancellation key={registration.id} registration={registration} />
+                {visibleRegistrations.map((registration) => (
+                  <RegistrationCard
+                    key={registration.id}
+                    registration={registration}
+                    now={now}
+                    withdrawing={withdrawingId === registration.id}
+                    withdrawError={withdrawError?.id === registration.id ? withdrawError.error : null}
+                    reconfirming={reconfirmingId === registration.id}
+                    reconfirmError={reconfirmError?.id === registration.id ? reconfirmError.error : null}
+                    submittedRevision={submittedReconfirmations[registration.id] ?? null}
+                    onWithdraw={(item) => { void withdraw(item); }}
+                    onReconfirm={(item, accept) => { void reconfirm(item, accept); }}
+                    onRefresh={() => refreshRegistration(registration.id)}
+                  />
                 ))}
               </div>
-            </section>
-          ) : null}
-        </div>
-      </Feedback>
+            ) : (
+              <p className="panel empty-state muted">
+                {tab === 'past'
+                  ? t('Past registrations will appear here.')
+                  : tab === 'waitlist'
+                    ? t('You have no upcoming waitlist registrations.')
+                    : tab === 'pending'
+                      ? t('You have no pending approvals or reconfirmation requests.')
+                      : t('You have no upcoming confirmed registrations.')}
+              </p>
+            )}
+
+            {futureCancellations.length ? (
+              <section className="stack" aria-labelledby="closed-upcoming-title">
+                <div>
+                  <h2 id="closed-upcoming-title">{t('Closed upcoming registrations')}</h2>
+                  <p className="muted">{t('These registrations are closed, and the API still marks their events as upcoming.')}</p>
+                </div>
+                <div className="feed">
+                  {futureCancellations.map((registration) => (
+                    <FutureCancellation key={registration.id} registration={registration} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
+        </Feedback>
+      </div>
     </section>
   );
 }

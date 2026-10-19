@@ -4,6 +4,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Feedback } from '@/components/feedback';
 import { ApiError, api } from '@/lib/api';
 import { formatDate, formatTime } from '@/lib/date';
+import { useT } from '@/lib/i18n';
+import { usePreferences } from '@/lib/preferences';
 import { useSession } from '@/lib/session';
 import { useApiResource } from '@/lib/use-api-resource';
 import type { MembershipApplicationReview, MembershipInviteOut, MembershipRosterItem,
@@ -37,9 +39,9 @@ interface StaffMembershipProps {
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function dateLabel(value: string | null): string {
+function dateLabel(value: string | null, language: 'en' | 'fil'): string {
   if (!value) return 'Not recorded';
-  return `${formatDate(value)} · ${formatTime(value)} Manila time`;
+  return `${formatDate(value, language)} · ${formatTime(value, language)} Manila time`;
 }
 
 function roleLabel(value: string): string {
@@ -74,6 +76,8 @@ function writeDescription(write: MembershipWrite): string {
 }
 
 function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps) {
+  const t = useT();
+  const {preferences: {language}} = usePreferences();
   const { actor, token, authLoading, error: sessionError } = useSession();
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
@@ -114,6 +118,11 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
   const [revokeError, setRevokeError] = useState<string | null>(null);
   const [revokeNotice, setRevokeNotice] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [reviewConfirmation, setReviewConfirmation] = useState<{
+    application: MembershipApplicationReview;
+    outcome: 'approved' | 'rejected';
+    reason?: RejectionReason;
+  } | null>(null);
   const [roleSelection, setRoleSelection] = useState<Record<string, MembershipRole>>({});
 
   function reloadAll() {
@@ -149,7 +158,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
     }
     if (result) {
       setReviewNotice(
-        `${result.status.charAt(0).toUpperCase()}${result.status.slice(1)} decision recorded by account ${result.decided_by || 'not returned'} at ${dateLabel(result.resolved_at)}.`,
+        `${result.status.charAt(0).toUpperCase()}${result.status.slice(1)} decision recorded by account ${result.decided_by || 'not returned'} at ${dateLabel(result.resolved_at, language)}.`,
       );
       reloadAll();
       onChanged?.();
@@ -198,7 +207,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
     if (write.kind === 'invite' && invitation) {
       setRecipientCode('');
       setRecipientError(null);
-      setWriteNotice(`Invitation created for account ${invitation.recipient_id}; it expires ${dateLabel(invitation.expires_at)}.`);
+      setWriteNotice(`Invitation created for account ${invitation.recipient_id}; it expires ${dateLabel(invitation.expires_at, language)}.`);
     } else if (write.kind === 'role' && change) {
       setRoleSelection(previous => ({ ...previous, [write.membershipId]: change!.role }));
       setWriteNotice(`${write.label}'s role changed from ${roleLabel(write.oldRole)} to ${roleLabel(change.role)}. Existing event registrations were not changed.`);
@@ -255,7 +264,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
       setRevokeBusyId(null);
     }
     if (result) {
-      setRevokeNotice(`Invitation status is now ${result.status}; recorded at ${dateLabel(result.resolved_at)}.`);
+      setRevokeNotice(`Invitation status is now ${result.status}; recorded at ${dateLabel(result.resolved_at, language)}.`);
       reloadAll();
       onChanged?.();
     } else {
@@ -291,6 +300,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
   const pendingReviews = reviewRows.filter(application => application.status === 'pending');
   const reviewHistory = reviewRows.filter(application => application.status !== 'pending');
   const lockedWrite = pendingWrite !== null;
+  const hasConfirmation = confirmation !== null || reviewConfirmation !== null;
 
   return (
     <div className={styles.root}>
@@ -306,7 +316,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
 
         {authLoading ? <Feedback loading /> : !token || !actor ? (
           <section className={styles.gate} role={sessionError ? 'alert' : 'status'}>
-            {sessionError?.message || 'Choose a local account to access this organization workspace.'}
+            {sessionError?.message || t('Sign in using the site header to open organization workspaces.')}
           </section>
         ) : actor.eligible !== true ? (
           <section className={styles.gate} role="status">
@@ -344,13 +354,14 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
               </div>
             )}
 
-            <section className={styles.section} aria-labelledby="membership-review-title">
-              <div className={styles.sectionHeader}>
+            <details className={styles.section}>
+              <summary className={`${styles.sectionHeader} ${styles.sectionSummary}`}>
                 <div>
-                  <h2 id="membership-review-title">Applications</h2>
-                  <p className={styles.muted}>Pending requests and closed review history. Decisions show the recorded staff account and server time.</p>
+                  <h2 id="membership-review-title">{t('Applications')}</h2>
+                  <p className={styles.muted}>{t('Pending requests and closed review history. Decisions show the recorded staff account and server time.')}</p>
                 </div>
-              </div>
+                <span className={styles.sectionCount}>{t('{count} pending', {count: pendingReviews.length})}</span>
+              </summary>
               {reviewNotice && <p className={styles.success} role="status">{reviewNotice}</p>}
               {reviewError && (
                 <div className={styles.error} role="alert">
@@ -371,7 +382,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                             <header className={styles.cardHeader}>
                               <div>
                                 <h4>{application.applicant_label}</h4>
-                                <p className={styles.meta}>Submitted <time dateTime={application.created_at}>{dateLabel(application.created_at)}</time></p>
+                                <p className={styles.meta}>Submitted <time dateTime={application.created_at}>{dateLabel(application.created_at, language)}</time></p>
                               </div>
                               <span className={`${styles.status} ${statusClass(application.status)}`}>Pending</span>
                             </header>
@@ -391,8 +402,11 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                               <button
                                 className="button"
                                 type="button"
-                                disabled={reviewBusyId !== null || lockedWrite || confirmation !== null}
-                                onClick={() => void decide(application, 'approved')}
+                                disabled={reviewBusyId !== null || lockedWrite || hasConfirmation}
+                                onClick={() => {
+                                  setConfirmation(null);
+                                  setReviewConfirmation({application, outcome: 'approved'});
+                                }}
                               >
                                 {reviewBusyId === application.id ? 'Saving…' : 'Approve membership'}
                               </button>
@@ -402,7 +416,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                                   id={`membership-reason-${application.id}`}
                                   required
                                   value={selectedReason}
-                                  disabled={reviewBusyId !== null || lockedWrite || confirmation !== null}
+                                  disabled={reviewBusyId !== null || lockedWrite || hasConfirmation}
                                   onChange={event => setRejectionByApplication(previous => ({
                                     ...previous, [application.id]: event.target.value as RejectionReason | '',
                                   }))}
@@ -414,12 +428,38 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                               <button
                                 className="button button-danger"
                                 type="button"
-                                disabled={!selectedReason || reviewBusyId !== null || lockedWrite || confirmation !== null}
-                                onClick={() => void decide(application, 'rejected', selectedReason || undefined)}
+                                disabled={!selectedReason || reviewBusyId !== null || lockedWrite || hasConfirmation}
+                                onClick={() => {
+                                  setConfirmation(null);
+                                  setReviewConfirmation({application, outcome: 'rejected', reason: selectedReason || undefined});
+                                }}
                               >
                                 Reject application
                               </button>
                             </div>
+                            {reviewConfirmation?.application.id === application.id && (
+                              <div className={styles.confirmation} role="group" aria-labelledby={`membership-decision-title-${application.id}`}>
+                                <h4 id={`membership-decision-title-${application.id}`}>
+                                  {t(reviewConfirmation.outcome === 'approved' ? 'Confirm membership approval' : 'Confirm membership rejection')}
+                                </h4>
+                                <p>{t(reviewConfirmation.outcome === 'approved'
+                                  ? 'Approve this membership application?'
+                                  : 'Reject this membership application with the selected reason?')}</p>
+                                <div className={styles.actions}>
+                                  <button className={reviewConfirmation.outcome === 'approved' ? 'button' : 'button button-danger'} type="button" disabled={reviewBusyId !== null || lockedWrite} onClick={() => {
+                                    const pendingDecision = reviewConfirmation;
+                                    if (!pendingDecision) return;
+                                    setReviewConfirmation(null);
+                                    void decide(pendingDecision.application, pendingDecision.outcome, pendingDecision.reason);
+                                  }}>
+                                    {t('Confirm membership decision')}
+                                  </button>
+                                  <button className="button button-secondary" type="button" disabled={reviewBusyId !== null} onClick={() => setReviewConfirmation(null)}>
+                                    {t('Cancel')}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </article>
                         );
                       })}
@@ -435,19 +475,19 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                           <header className={styles.cardHeader}>
                             <div>
                               <h4>{application.applicant_label}</h4>
-                              <p className={styles.meta}>Submitted <time dateTime={application.created_at}>{dateLabel(application.created_at)}</time></p>
+                              <p className={styles.meta}>Submitted <time dateTime={application.created_at}>{dateLabel(application.created_at, language)}</time></p>
                             </div>
                             <span className={`${styles.status} ${statusClass(application.status)}`}>{application.status}</span>
                           </header>
                           <p className={styles.meta}>
                             Recorded by account {application.decided_by || 'not returned'} at{' '}
-                            <time dateTime={application.resolved_at || undefined}>{dateLabel(application.resolved_at)}</time>
+                            <time dateTime={application.resolved_at || undefined}>{dateLabel(application.resolved_at, language)}</time>
                           </p>
                           {application.status === 'rejected' && application.reason && (
                             <p>Reason: {rejectionReasons.find(reason => reason.value === application.reason)?.label || 'Other membership criteria'}</p>
                           )}
                           {application.can_reapply_at && (
-                            <p className={styles.meta}>Reapplication available <time dateTime={application.can_reapply_at}>{dateLabel(application.can_reapply_at)}</time></p>
+                            <p className={styles.meta}>Reapplication available <time dateTime={application.can_reapply_at}>{dateLabel(application.can_reapply_at, language)}</time></p>
                           )}
                         </article>
                       ))}
@@ -455,16 +495,17 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                   )}
                 </div>
               </Feedback>
-            </section>
+            </details>
 
             {canInvite && (
-              <section className={styles.section} aria-labelledby="membership-invitations-title">
-                <div className={styles.sectionHeader}>
+              <details className={styles.section}>
+                <summary className={`${styles.sectionHeader} ${styles.sectionSummary}`}>
                   <div>
-                    <h2 id="membership-invitations-title">Targeted invitations</h2>
-                    <p className={styles.muted}>Invite an existing account by its account code. Invitations are private, single-use, and expire after seven days.</p>
+                    <h2 id="membership-invitations-title">{t('Targeted invitations')}</h2>
+                    <p className={styles.muted}>{t('Invite an existing account by its account code. Invitations are private, single-use, and expire after seven days.')}</p>
                   </div>
-                </div>
+                  <span className={styles.sectionCount}>{t('{count} pending', {count: (invitations.data ?? []).filter(invitation => invitation.status === 'pending').length})}</span>
+                </summary>
                 {revokeNotice && <p className={styles.success} role="status">{revokeNotice}</p>}
                 {revokeError && <p className={styles.error} role="alert">{revokeError}</p>}
                 <form className={styles.invitationForm} onSubmit={createInvitation}>
@@ -478,13 +519,13 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                       pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
                       placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                       value={recipientCode}
-                      disabled={lockedWrite || confirmation !== null}
+                      disabled={lockedWrite || hasConfirmation}
                       onChange={event => { setRecipientCode(event.target.value); setRecipientError(null); }}
                       required
                     />
                   </label>
                   {recipientError && <p className={styles.error} role="alert">{recipientError}</p>}
-                  <button className="button" type="submit" disabled={lockedWrite || confirmation !== null}>
+                  <button className="button" type="submit" disabled={lockedWrite || hasConfirmation}>
                     {pendingWrite?.kind === 'invite' && writeBusy ? 'Sending…' : 'Send invitation'}
                   </button>
                 </form>
@@ -496,7 +537,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                           <header className={styles.cardHeader}>
                             <div>
                               <h4>Account {invitation.recipient_id}</h4>
-                              <p className={styles.meta}>Sent {dateLabel(invitation.created_at)} · expires {dateLabel(invitation.expires_at)}</p>
+                              <p className={styles.meta}>Sent {dateLabel(invitation.created_at, language)} · expires {dateLabel(invitation.expires_at, language)}</p>
                             </div>
                             <span className={`${styles.status} ${statusClass(invitation.status)}`}>{invitation.status}</span>
                           </header>
@@ -504,7 +545,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                             {invitation.sender_id === actor.id ? 'Sent by you' : `Sent by account ${invitation.sender_id}`}
                             {' · '}{invitation.access_ready ? 'Workspace access is ready on acceptance' : 'Access remains eligibility-gated'}
                           </p>
-                          {invitation.resolved_at && <p className={styles.meta}>Resolved <time dateTime={invitation.resolved_at}>{dateLabel(invitation.resolved_at)}</time></p>}
+                          {invitation.resolved_at && <p className={styles.meta}>Resolved <time dateTime={invitation.resolved_at}>{dateLabel(invitation.resolved_at, language)}</time></p>}
                           {invitation.status === 'pending' && (role === 'owner' || role === 'admin') ? (
                             confirmation?.kind === 'revoke' && confirmation.invitation.id === invitation.id ? (
                               <div className={styles.confirmation} role="group" aria-label="Confirm invitation revocation">
@@ -522,7 +563,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                               <button
                                 className="button button-danger"
                                 type="button"
-                                disabled={revokeBusyId !== null || lockedWrite || confirmation !== null}
+                                disabled={revokeBusyId !== null || lockedWrite || hasConfirmation}
                                 onClick={() => setConfirmation({ kind: 'revoke', invitation })}
                               >
                                 {revokeBusyId === invitation.id ? 'Revoking…' : 'Revoke invitation'}
@@ -534,16 +575,17 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                     </div>
                   )}
                 </Feedback>
-              </section>
+              </details>
             )}
 
-            <section className={styles.section} aria-labelledby="membership-roster-title">
-              <div className={styles.sectionHeader}>
+            <details className={styles.section}>
+              <summary className={`${styles.sectionHeader} ${styles.sectionSummary}`}>
                 <div>
-                  <h2 id="membership-roster-title">Staff roster</h2>
-                  <p className={styles.muted}>Staff-only account labels and membership state. This roster contains no private profile details.</p>
+                  <h2 id="membership-roster-title">{t('Staff roster')}</h2>
+                  <p className={styles.muted}>{t('Staff-only account labels and membership state. This roster contains no private profile details.')}</p>
                 </div>
-              </div>
+                <span className={styles.sectionCount}>{t('{count} members', {count: roster.data?.length ?? 0})}</span>
+              </summary>
               <Feedback loading={roster.loading} error={roster.error} onRetry={roster.reload}>
                 {!roster.data?.length ? <p className={styles.empty}>No active organization memberships were returned.</p> : (
                   <div className={styles.list}>
@@ -559,7 +601,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                             <div>
                               <h4>{member.label}</h4>
                               <p className={styles.meta}>{roleLabel(member.role)} · {member.eligible ? 'PLM eligible' : 'PLM eligibility not current'} · {member.access_ready ? 'workspace access ready' : 'workspace access locked'}</p>
-                              <p className={styles.meta}>Joined {dateLabel(member.joined_at)}</p>
+                              <p className={styles.meta}>Joined {dateLabel(member.joined_at, language)}</p>
                             </div>
                             <span className={`${styles.status} ${member.access_ready ? styles.approved : styles.withdrawn}`}>
                               {member.access_ready ? 'Active access' : 'Access locked'}
@@ -574,7 +616,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                                     <select
                                       id={`membership-role-${member.id}`}
                                       value={selectedRole}
-                                      disabled={lockedWrite || confirmation !== null}
+                                      disabled={lockedWrite || hasConfirmation}
                                       onChange={event => setRoleSelection(previous => ({ ...previous, [member.id]: event.target.value as MembershipRole }))}
                                     >
                                       {options.map(option => <option value={option} key={option}>{roleLabel(option)}</option>)}
@@ -583,7 +625,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                                   <button
                                     className="button button-secondary"
                                     type="button"
-                                    disabled={selectedRole === member.role || lockedWrite || confirmation !== null}
+                                    disabled={selectedRole === member.role || lockedWrite || hasConfirmation}
                                     onClick={() => setConfirmation({ kind: 'role', member, nextRole: selectedRole })}
                                   >Confirm role change</button>
                                 </div>
@@ -592,7 +634,7 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                                 <button
                                   className="button button-danger"
                                   type="button"
-                                  disabled={lockedWrite || confirmation !== null}
+                                  disabled={lockedWrite || hasConfirmation}
                                   onClick={() => setConfirmation({ kind: 'remove', member })}
                                 >Remove member</button>
                               )}
@@ -634,15 +676,16 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                   </div>
                 )}
               </Feedback>
-            </section>
+            </details>
 
-            <section className={styles.section} aria-labelledby="membership-audit-title">
-              <div className={styles.sectionHeader}>
+            <details className={styles.section}>
+              <summary className={`${styles.sectionHeader} ${styles.sectionSummary}`}>
                 <div>
-                  <h2 id="membership-audit-title">Membership audit</h2>
-                  <p className={styles.muted}>Latest organization membership actions recorded by the service.</p>
+                  <h2 id="membership-audit-title">{t('Membership audit')}</h2>
+                  <p className={styles.muted}>{t('Latest organization membership actions recorded by the service.')}</p>
                 </div>
-              </div>
+                <span className={styles.sectionCount}>{t('{count} records', {count: audit.data?.length ?? 0})}</span>
+              </summary>
               <Feedback loading={audit.loading} error={audit.error} onRetry={audit.reload}>
                 {!audit.data?.length ? <p className={styles.empty}>No membership audit records were returned.</p> : (
                   <ol className={styles.auditList}>
@@ -655,13 +698,13 @@ function StaffMembershipContent({ orgId, role, onChanged }: StaffMembershipProps
                             Actor: {record.actor_id ? `account ${record.actor_id}` : 'system'} · affected account: {record.user_id}
                           </p>
                         </div>
-                        <time className={styles.meta} dateTime={record.created_at}>{dateLabel(record.created_at)}</time>
+                        <time className={styles.meta} dateTime={record.created_at}>{dateLabel(record.created_at, language)}</time>
                       </li>
                     ))}
                   </ol>
                 )}
               </Feedback>
-            </section>
+            </details>
           </div>
         )}
       </div>

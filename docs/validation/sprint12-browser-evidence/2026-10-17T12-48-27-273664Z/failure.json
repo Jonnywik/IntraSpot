@@ -1,0 +1,6 @@
+{
+  "stage": "guest fallback and search",
+  "pathname": "/",
+  "browserErrorCount": 0,
+  "message": "locator.waitFor: Timeout 15000ms exceeded."
+}

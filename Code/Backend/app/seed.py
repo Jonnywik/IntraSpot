@@ -6,6 +6,7 @@ from uuid import NAMESPACE_URL, uuid5
 
 import jwt
 from sqlalchemy import select
+from sqlalchemy.engine import make_url
 
 from app.core.config import ROOT, get_settings
 from app.db.models import now
@@ -18,7 +19,8 @@ def fixture_id(label):
 
 def main():
     settings = get_settings()
-    if settings.environment != 'local':
+    if (settings.environment != 'local' or settings.auth_provider != 'fixture'
+            or not settings.fixture_auth or make_url(settings.database_url).database != 'intraspot_mvp'):
         raise RuntimeError('Seed is local-only; test fixtures use the separate test database')
     from app.domains.identity.models import User
     from app.domains.organizations.models import Organization, OrgMembership

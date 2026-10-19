@@ -1,0 +1,68 @@
+.page,
+.form {
+  min-width: 0;
+}
+
+.completion {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 10px;
+  padding: clamp(14px, 4vw, 20px);
+}
+
+.completionTitle,
+.completionCount {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.completionTitle {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.completionBar {
+  display: block;
+  width: 100%;
+  height: 12px;
+  accent-color: var(--blue);
+}
+
+.completionBar::-webkit-progress-bar {
+  border-radius: 999px;
+  background: var(--surface-alt);
+}
+
+.completionBar::-webkit-progress-value {
+  border-radius: 999px;
+  background: var(--blue);
+}
+
+.completionBar::-moz-progress-bar {
+  border-radius: 999px;
+  background: var(--blue);
+}
+
+.completionCount {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.privacyNotice,
+.validationError {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.validationError {
+  margin: 0;
+  padding: 12px 14px;
+}
+
+@media (max-width: 360px) {
+  .form {
+    padding: 14px;
+  }
+}
