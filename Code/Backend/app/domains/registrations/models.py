@@ -29,6 +29,9 @@ class RegistrationReceipt(Base):
     created_at: Mapped[datetime] = mapped_column(UTC, default=now, nullable=False)
     processed_at: Mapped[datetime | None] = mapped_column(UTC, nullable=True)
     persona_shared: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text('false'))
+    blocked_attendee_acknowledged: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text('false'),
+    )
 
 
 class Registration(Base):

@@ -3,11 +3,12 @@
 import Image from "next/image";
 import { useState } from "react";
 import type { PrivateEvent, PublicEvent } from "@/lib/types";
-import { useT } from '@/lib/i18n';
+import { MediaImage } from "@/features/media/MediaImage";
+import { useT } from "@/lib/i18n";
 
 type ArtworkEvent =
-  | Pick<PublicEvent, "banner_key" | "title">
-  | Pick<PrivateEvent, "banner_key" | "title">;
+  | Pick<PublicEvent, "banner_key" | "banner_url" | "title">
+  | Pick<PrivateEvent, "banner_key" | "banner_url" | "title">;
 
 const colors = {
   heritage: { background: "#efe3cf", accent: "#8a5d37", soft: "#d1ad7d" },
@@ -17,11 +18,24 @@ const colors = {
   event: { background: "#eee8dc", accent: "#645d53", soft: "#c9bca6" },
 };
 
-export function EventArtwork({ event, priority=false }: { event: ArtworkEvent; priority?: boolean }) {
+export function EventArtwork({ event, priority = false, token }: { event: ArtworkEvent; priority?: boolean; token?: string | null }) {
   const [heritageImageFailed, setHeritageImageFailed] = useState(false);
   const t = useT();
   const key = event.banner_key ?? "event";
   const title = event.title || "event";
+
+  if (event.banner_url) {
+    return (
+      <div className="artwork-crop">
+        <MediaImage
+          mediaUrl={event.banner_url}
+          alt={t("Event artwork for {title}", { title })}
+          token={token}
+          className="event-art"
+        />
+      </div>
+    );
+  }
 
   if (key === "heritage" && !heritageImageFailed) {
     return (

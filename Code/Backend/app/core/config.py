@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     fixture_auth: bool = False
     auth_provider: Literal['fixture', 'supabase'] = 'fixture'
     database_url: str = Field(repr=False)
+    media_root: Path = ROOT / '.local/media'
     supabase_url: str | None = None
     supabase_publishable_key: str | None = Field(default=None, repr=False)
     jwt_issuer: str = 'urn:intraspot:local'
@@ -50,6 +51,11 @@ class Settings(BaseSettings):
             allowed_origins = {'http://localhost:3001', 'http://127.0.0.1:3001'}
         if not self.cors_origins or any(x not in allowed_origins for x in self.cors_origins):
             raise ValueError('Only explicit localhost frontend origins are supported')
+        if not self.media_root.is_absolute():
+            raise ValueError('The local media root must be absolute')
+        self.media_root = self.media_root.resolve() / (
+            'real' if self.auth_provider == 'supabase' else 'fixture'
+        ) / self.environment
         return self
 
     @property

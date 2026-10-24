@@ -1,0 +1,141 @@
+.panel {
+  display: grid;
+  gap: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.heading,
+.offerHeader,
+.actions,
+.nomination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.offerList {
+  display: grid;
+  gap: 12px;
+}
+
+.offer {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--paper);
+}
+
+.offer h3,
+.panel h2 {
+  margin: 0;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 11px;
+  color: var(--ink);
+  background: var(--pending-bg);
+  font-weight: 600;
+}
+
+.status[data-status='accepted'] {
+  background: var(--success-bg);
+}
+
+.status[data-status='declined'],
+.status[data-status='revoked'],
+.status[data-status='expired'] {
+  background: var(--danger-bg);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: var(--burgundy);
+}
+
+.nomination {
+  align-items: end;
+  justify-content: start;
+}
+
+.nomination label {
+  display: grid;
+  gap: 7px;
+  flex: 1 1 16rem;
+  max-width: 32rem;
+  font-weight: 600;
+}
+
+.dialog {
+  width: min(36rem, calc(100vw - 32px));
+  max-width: 36rem;
+  max-height: min(86dvh, 48rem);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: clamp(20px, 4vw, 32px);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 24px 70px rgb(17 47 106 / 22%);
+}
+
+.dialog::backdrop {
+  background: rgb(17 35 65 / 58%);
+}
+
+.dialogContent {
+  display: grid;
+  gap: 18px;
+}
+
+.dialog h2 {
+  margin: 0;
+  font-family: var(--display);
+}
+
+.facts {
+  display: grid;
+  gap: 10px;
+  border-left: 3px solid var(--gold);
+  padding-left: 14px;
+}
+
+.actions {
+  justify-content: start;
+}
+
+.notice {
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--ink);
+  background: var(--success-bg);
+}
+
+.errorBox {
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--burgundy);
+  background: var(--danger-bg);
+}
+
+@media (max-width: 767px) {
+  .panel,
+  .dialog {
+    display: none !important;
+  }
+}

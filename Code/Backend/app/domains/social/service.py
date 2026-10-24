@@ -4,7 +4,7 @@ from hashlib import sha256
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import exists, func, select
 from sqlalchemy.orm import Session
 
 from app.core.communication import (
@@ -18,6 +18,8 @@ from app.core.communication_schemas import ContentCreate, ContentItem, ContentPa
 from app.db.models import now, uid
 from app.domains.events.models import Event
 from app.domains.identity.models import User
+from app.domains.moderation.models import ContentHide
+from app.domains.personas.service import project_author_labels
 from app.domains.social.models import EventComment, EventReaction
 from app.domains.social.schemas import REACTION_KINDS, ReactionKind, ReactionSummary
 
@@ -131,6 +133,8 @@ def _comment_projection(
     comment: EventComment,
     author: User,
     viewer_id: str | None,
+    *,
+    show_persona: bool = False,
 ) -> ContentItem:
     hidden = is_locally_hidden(db, viewer_id, "comment", comment.id)
     removed = comment.removed_at is not None
@@ -138,7 +142,11 @@ def _comment_projection(
         id=comment.id,
         event_id=comment.event_id,
         author_id=comment.author_id,
-        author_label=author_label(author, viewer_id),
+        author_label=author_label(
+            author,
+            viewer_id,
+            show_persona=show_persona and not hidden and not removed,
+        ),
         sequence=comment.sequence,
         body=None if removed or hidden else comment.body,
         created_at=comment.created_at,
@@ -175,13 +183,42 @@ def list_comments(
     has_more = len(rows) > limit
     rows = rows[:limit]
     viewer_id = actor.user_id if actor is not None else None
+    author_rows = db.execute(
+        select(EventComment.author_id, User.nickname)
+        .select_from(EventComment)
+        .outerjoin(User, User.id == EventComment.author_id)
+        .where(
+            EventComment.event_id == event.id,
+            EventComment.removed_at.is_(None),
+            EventComment.body.is_not(None),
+            ~exists(select(ContentHide.id).where(
+                ContentHide.user_id == viewer_id,
+                ContentHide.kind == 'comment',
+                ContentHide.target_id == EventComment.id,
+            )),
+        )
+        .distinct()
+    ).all()
+    author_labels, visible_personas = project_author_labels(
+        db, event, viewer_id, author_rows,
+        at=now(),
+        allow_broad=True,
+    )
     items = [
-        _comment_projection(db, event, comment, author, viewer_id)
+        _comment_projection(
+            db,
+            event,
+            comment,
+            author,
+            viewer_id,
+            show_persona=author.id in visible_personas,
+        )
         for comment, author in rows
     ]
     return ContentPage(
         items=items,
         next_before=items[-1].sequence if has_more and items else None,
+        author_labels=author_labels,
     )
 
 

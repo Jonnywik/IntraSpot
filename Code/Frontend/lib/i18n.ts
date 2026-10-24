@@ -16,10 +16,15 @@ import { discoveryMessages } from './discovery-messages';
 import { announcementMessages } from './announcement-messages';
 import { announcementReportMessages } from './announcement-report-messages';
 import { authMessages } from './auth-messages';
+import { mediaMessages } from '@/features/media/messages';
+import { planningMessages } from '@/features/planning/messages';
+import { featuredMessages } from '@/features/featured/messages';
+import { personaMessages } from '@/features/personas/messages';
+import { ownershipMessages } from '@/features/ownership/messages';
 
 const filipinoMessages: Record<string, string> = {...sharedMessages, ...eventMessages, ...socialMessages, ...attendeeMessages,
   ...workspaceMessages, ...platformMessages, ...draftMessages, ...inboxMessages, ...mobileMessages, ...discoveryMessages,
-  ...announcementMessages, ...announcementReportMessages, ...authMessages};
+  ...announcementMessages, ...announcementReportMessages, ...authMessages, ...mediaMessages, ...planningMessages, ...featuredMessages, ...personaMessages, ...ownershipMessages};
 
 export type TranslationValues = Record<string, string | number>;
 export type Translate = (english: string, values?: TranslationValues) => string;

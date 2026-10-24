@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, CheckConstraint, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, ForeignKey, Index, String, Text, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.models import UTC, now, uid
@@ -19,6 +19,13 @@ class Organization(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default='')
+    logo_media_id: Mapped[str | None] = mapped_column(
+        ForeignKey('media_assets.id', name='fk_organizations_logo_media', use_alter=True), nullable=True,
+    )
+
+    @property
+    def logo_url(self) -> str | None:
+        return f'/api/v1/media/{self.logo_media_id}' if self.logo_media_id else None
     accreditation_status: Mapped[str] = mapped_column(String(16), nullable=False, default='pending')
     created_by: Mapped[str] = mapped_column(String(36), ForeignKey('users.id'), nullable=False)
     created_at: Mapped[datetime] = mapped_column(UTC, nullable=False, default=now)
@@ -28,6 +35,8 @@ class OrgMembership(Base):
     __tablename__ = 'org_memberships'
     __table_args__ = (
         UniqueConstraint('org_id', 'user_id', name='uq_org_memberships_org_user'),
+        Index('uq_org_memberships_active_owner', 'org_id', unique=True,
+              postgresql_where=text("active AND role = 'owner'")),
         CheckConstraint(
             "role IN ('owner', 'admin', 'moderator', 'member')",
             name='ck_org_memberships_role',

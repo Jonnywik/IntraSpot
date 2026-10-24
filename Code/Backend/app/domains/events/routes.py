@@ -95,13 +95,18 @@ def _public_projection(
     confirmed: int | None = None,
     reserved: int | None = None,
     recommendation_reasons: list[str] | None = None,
+    is_featured: bool | None = None,
 ) -> EventPublic:
+    if is_featured is None:
+        from app.domains.featured.service import active_featured_event_ids
+        is_featured = event.id in active_featured_event_ids(db, [event])
     if confirmed is None:
         confirmed = _confirmed_count(db, event.id)
     if reserved is None:
         reserved = _reserved_count(db, event.id)
     capacity = event.capacity or 0
     return EventPublic(
+        is_featured=is_featured,
         id=event.id,
         org_id=event.org_id,
         organization_name=organization_name,
@@ -120,6 +125,7 @@ def _public_projection(
         remaining_spots=max(0, capacity - confirmed - reserved),
         interest_count=event.interest_count,
         banner_key=event.banner_key,
+        banner_url=f'/api/v1/media/{event.banner_media_id}' if event.banner_media_id else None,
         cost_label=event.cost_label,
         registration_mode=event.registration_mode,
         review_window_minutes=event.review_window_minutes,
@@ -131,9 +137,9 @@ def _public_projection(
     )
 
 
-def _private_projection(db: Session, event: Event, organization_name: str) -> EventPrivate:
+def _private_projection(db: Session, event: Event, organization_name: str, *, is_featured: bool | None = None) -> EventPrivate:
     if event.status == "published":
-        values = _public_projection(db, event, organization_name).model_dump()
+        values = _public_projection(db, event, organization_name, is_featured=is_featured).model_dump()
     else:
         capacity = event.capacity
         values = {
@@ -155,6 +161,7 @@ def _private_projection(db: Session, event: Event, organization_name: str) -> Ev
             "remaining_spots": capacity,
             "interest_count": event.interest_count,
             "banner_key": event.banner_key,
+            "banner_url": f'/api/v1/media/{event.banner_media_id}' if event.banner_media_id else None,
             "cost_label": event.cost_label,
             "registration_mode": event.registration_mode,
             "review_window_minutes": event.review_window_minutes,
@@ -230,7 +237,8 @@ def list_events(
     statement = (
         select(Event, Organization.name)
         .join(Organization, Organization.id == Event.org_id)
-        .where(Event.status == "published", Event.ends_at > boundary)
+        .where(Event.status == "published", Event.ends_at > boundary,
+               Organization.accreditation_status == "approved")
     )
     if not include_flash:
         statement = statement.where(Event.event_type == "scheduled")
@@ -290,6 +298,8 @@ def list_events(
             confirmed_counts[counted_event_id] = count
         else:
             reserved_counts[counted_event_id] = reserved_counts.get(counted_event_id, 0) + count
+    from app.domains.featured.service import active_featured_event_ids
+    featured_ids = active_featured_event_ids(db, [event for event, _ in rows], at=boundary)
     return [
         _public_projection(
             db,
@@ -298,6 +308,7 @@ def list_events(
             confirmed_counts.get(event.id, 0),
             reserved_counts.get(event.id, 0),
             reason_codes_by_event.get(event.id, []),
+            is_featured=event.id in featured_ids,
         )
         for event, organization_name in rows
     ]
@@ -310,9 +321,10 @@ def get_public_event(
     _actor: Actor | None = Depends(optional_actor),
 ):
     event = _event_or_404(db, str(event_id))
-    if event.status != "published":
+    organization = db.get(Organization, event.org_id)
+    if event.status != "published" or organization is None or organization.accreditation_status != "approved":
         raise DomainError("event_not_found", "Event was not found.", 404)
-    return _public_projection(db, event, _organization_name(db, event.org_id))
+    return _public_projection(db, event, organization.name)
 
 
 @router.get("/organizations/{org_id}/events", response_model=list[EventPrivate])
@@ -327,7 +339,9 @@ def list_organization_events(
         .where(Event.org_id == organization.id)
         .order_by(Event.starts_at.asc().nulls_last(), Event.id.asc())
     ).all()
-    return [_private_projection(db, event, organization.name) for event in rows]
+    from app.domains.featured.service import active_featured_event_ids
+    featured_ids = active_featured_event_ids(db, rows)
+    return [_private_projection(db, event, organization.name, is_featured=event.id in featured_ids) for event in rows]
 
 
 @router.post("/organizations/{org_id}/events", response_model=EventPrivate, status_code=201)
@@ -380,9 +394,11 @@ def list_review_events(
             summary["reserved"] += count
         if status == "pending":
             summary.update(pending=count, deadline=deadline)
+    from app.domains.featured.service import active_featured_event_ids
+    featured_ids = active_featured_event_ids(db, events)
     return [EventReviewSummary(
         **_public_projection(db, event, organization.name, counts[event.id]["confirmed"],
-                             counts[event.id]["reserved"]).model_dump(),
+                             counts[event.id]["reserved"], is_featured=event.id in featured_ids).model_dump(),
         pending_registration_count=counts[event.id]["pending"],
         next_review_deadline=counts[event.id]["deadline"],
     ) for event in events]
@@ -466,6 +482,8 @@ def change_event(
     for name, value in material_fields.items():
         setattr(event, name, value)
     event.material_revision += 1
+    from app.domains.featured.service import pause_for_material_change
+    pause_for_material_change(db, event, actor.user_id)
     db.flush()
     return _private_projection(db, event, organization.name)
 

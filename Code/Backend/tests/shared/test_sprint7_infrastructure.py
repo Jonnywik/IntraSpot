@@ -39,7 +39,7 @@ def test_sprint7_downgrade_refuses_safety_data(db, make_event, make_user):
     with pytest.raises(RuntimeError, match='Sprint 7 data exists'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0004')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0010'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0015'
 
 
 def test_notification_reads_are_private_idempotent_and_not_guest_writable(client, db, make_event, make_user, token_for):

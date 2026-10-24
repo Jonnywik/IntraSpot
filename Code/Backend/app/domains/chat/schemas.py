@@ -28,6 +28,7 @@ class ChatThread(BaseModel):
     items: list[ContentItem]
     next_before: int | None = None
     removed_ids: list[str] = Field(default_factory=list)
+    author_labels: dict[str, str] = Field(default_factory=dict)
 
 
 __all__ = ['ChatInboxItem', 'ChatThread', 'ContentCreate', 'ContentItem', 'ContentPage']

@@ -13,6 +13,7 @@ const REVIEW_WARNING_MESSAGE = 'A registration assigned to you still awaits revi
 export function notificationCategory(kind: string): NotificationCategory {
   if (kind === 'membership_attendance_ended') return 'registrations';
   if (kind.startsWith('membership')) return 'clubs';
+  if (kind.startsWith('ownership_transfer_')) return 'clubs';
   if (kind === 'chat_message') return 'chat';
   if (kind.startsWith('report') || kind.startsWith('personal') || kind.startsWith('safety')) return 'safety';
   return 'registrations';
@@ -76,6 +77,13 @@ export function notificationDestination(
     }
     if (notice.event_id) return { href: eventHref(notice.event_id), label: 'View event' };
     return null;
+  }
+
+  if (notice.kind.startsWith('ownership_transfer_')) {
+    if (!notice.org_id) return null;
+    return hasStaffGrant(actor, notice.org_id)
+      ? { href: workspaceHref(notice.org_id), label: 'Open organization workspace' }
+      : { href: organizationHref(notice.org_id), label: 'View club' };
   }
 
   if (isStaffRegistrationReview(notice)) {

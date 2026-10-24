@@ -120,7 +120,8 @@ def test_event_list_statement_growth_is_bounded(client, db, make_event):
     finally:
         sa_event.remove(eng, "before_cursor_execute", before_cursor)
 
-    assert second == first == 2
+    # Event rows, aggregated attendance, and one batched Featured lookup.
+    assert second == first == 3
 
 
 # --- D3: unbounded summary payload (NOW-FAILS) ---
@@ -179,12 +180,14 @@ def test_public_organization_profile_exposes_no_private_ids(client, db, make_use
     response = client.get(f"/api/v1/organizations/{organization.id}")
 
     assert response.status_code == 200
+    assert response.json()['logo_url'] is None
     assert set(response.json()) == {
         "id",
         "name",
         "description",
         "accreditation_status",
         "created_at",
+        "logo_url",
     }
     assert organization.created_by not in response.text
 

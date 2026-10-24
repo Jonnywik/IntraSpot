@@ -8,6 +8,7 @@ class RegistrationInput(BaseModel):
     model_config = {'extra': 'forbid'}
 
     persona_shared: StrictBool = False
+    blocked_attendee_acknowledged: StrictBool = False
 
 
 class RegistrationDecisionInput(BaseModel):
@@ -62,7 +63,12 @@ class RegistrationReview(BaseModel):
     persona: RegistrationPersona | None
 
 
+class RegistrationBlockWarning(BaseModel):
+    warning: StrictBool
+
+
 class MyRegistration(RegistrationResult):
+    is_featured: bool = False
     event_title: str | None
     starts_at: datetime | None
     ends_at: datetime | None

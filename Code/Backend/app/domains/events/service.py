@@ -42,7 +42,7 @@ def draft_version(event: Event) -> str:
     for name in ("starts_at", "ends_at"):
         value = fields[name]
         fields[name] = value.astimezone(timezone.utc).isoformat() if value else None
-    fields.update(id=event.id, status=event.status)
+    fields.update(id=event.id, status=event.status, banner_media_id=event.banner_media_id)
     return sha256(json.dumps(fields, sort_keys=True, ensure_ascii=False,
                              separators=(",", ":")).encode("utf-8")).hexdigest()
 

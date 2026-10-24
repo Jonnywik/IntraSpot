@@ -34,3 +34,4 @@ class ContentItem(BaseModel):
 class ContentPage(BaseModel):
     items: list[ContentItem]
     next_before: int | None = None
+    author_labels: dict[str, str] = Field(default_factory=dict)

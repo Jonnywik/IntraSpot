@@ -20,10 +20,10 @@ def require_communication_allowed(db: Session, user_id: str, at=None, *, lock: b
                           'Creating events and sending messages are paused during a personal report review. Existing registrations remain valid.', 403)
 
 
-def author_label(user: User, viewer_id=None, *, persona_shared=False, before_end=False) -> str:
+def author_label(user: User, viewer_id=None, *, show_persona=False) -> str:
     if viewer_id == user.id:
         return 'You'
-    if (user.persona_visible or (persona_shared and before_end)) and user.nickname:
+    if show_persona and user.nickname:
         return user.nickname
     return 'PLM member'
 

@@ -9,6 +9,8 @@ import { usePreferences } from '@/lib/preferences';
 import { useSession } from '@/lib/session';
 import type { Actor, ContentItem, ContentPage, ReactionSummary } from '@/lib/types';
 import { ContentSafetyControls } from './ContentSafetyControls';
+import { applyAuthorLabels, clearAuthorLabels } from '@/lib/content-labels';
+import { PERSONA_ACCESS_CHANGED_EVENT } from '@/features/personas/access-events';
 import styles from './communication.module.css';
 
 type ReactionKind = NonNullable<ReactionSummary['mine']>;
@@ -101,6 +103,7 @@ function EventSocialSession({
   const commentMutation = useRef<AbortController | null>(null);
   const reactionMutation = useRef<AbortController | null>(null);
   const deleteMutation = useRef<AbortController | null>(null);
+  const labelsController = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const first = window.setTimeout(() => setNow(Date.now()), 0);
@@ -130,7 +133,9 @@ function EventSocialSession({
         signal: controller.signal,
       });
       if (controller.signal.aborted) return;
-      setComments((current) => beforeSequence === undefined ? page.items : mergeComments(current, page.items));
+      setComments((current) => applyAuthorLabels(
+        beforeSequence === undefined ? page.items : mergeComments(current, page.items), page.author_labels,
+      ));
       setNextBefore(page.next_before ?? null);
     } catch (error) {
       if (!controller.signal.aborted) setCommentsError(requestMessage(error, 'Comments'));
@@ -165,6 +170,44 @@ function EventSocialSession({
       deleteMutation.current?.abort();
     };
   }, [eventId, token, loadComments]);
+
+  useEffect(() => {
+    if (!token || !actor?.eligible) return;
+    async function refreshLabels() {
+      const controller = new AbortController();
+      labelsController.current?.abort();
+      labelsController.current = controller;
+      try {
+        const page = await api<ContentPage>(`/events/${encodeURIComponent(eventId)}/comments?limit=1`, {
+          token, signal: controller.signal,
+        });
+        if (!controller.signal.aborted) setComments(current => applyAuthorLabels(current, page.author_labels));
+      } catch {
+        if (!controller.signal.aborted) setComments(current => clearAuthorLabels(current));
+      }
+    }
+    const onAccessChange = (event: Event) => {
+      const userId = (event as CustomEvent<{ userId?: string }>).detail?.userId;
+      commentsController.current?.abort();
+      setComments(current => clearAuthorLabels(current, userId));
+      setLoadingOlder(false);
+      void refreshLabels();
+    };
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') void refreshLabels();
+    };
+    const timer = window.setInterval(onFocus, 30_000);
+    window.addEventListener(PERSONA_ACCESS_CHANGED_EVENT, onAccessChange);
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener(PERSONA_ACCESS_CHANGED_EVENT, onAccessChange);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+      labelsController.current?.abort();
+    };
+  }, [actor?.eligible, eventId, token]);
 
   useEffect(() => {
     if (!Number.isFinite(startsAtMs)) return;

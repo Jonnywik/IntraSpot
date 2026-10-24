@@ -1,0 +1,53 @@
+.root {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.label {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.input {
+  min-height: 2.75rem;
+  padding: 0.45rem;
+  border: 1px solid var(--control-border);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.hint,
+.status,
+.error {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  color: var(--muted);
+}
+
+.status {
+  color: var(--ink);
+}
+
+.error {
+  color: var(--danger-ink);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.actions button {
+  flex: 1 1 9rem;
+  min-width: 0;
+  white-space: normal;
+}

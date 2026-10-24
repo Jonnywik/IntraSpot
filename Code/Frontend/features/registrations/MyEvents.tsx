@@ -12,7 +12,12 @@ import { useApiResource } from '@/lib/use-api-resource';
 import { useSession } from '@/lib/session';
 import type { MyRegistration, Registration } from '@/lib/types';
 import attendeeStyles from '@/features/attendee-pages.module.css';
+import { EventCalendar } from '@/features/planning/EventCalendar';
+import { SavedEvents } from '@/features/planning/SavedEvents';
+import { intervalsOverlap } from '@/features/planning/calendar';
+import planningStyles from '@/features/planning/planning.module.css';
 import { eventChatAvailable } from './presentation';
+import { FeaturedBadge } from '@/features/featured/FeaturedBadge';
 
 type RegistrationStatus = 'confirmed' | 'waitlisted' | 'pending' | 'reconfirmation_required' | 'cancelled' | 'rejected';
 type AttendeeRegistration = Omit<Registration, 'status'> & {
@@ -115,6 +120,7 @@ function RegistrationCard({
       <header>
         <div>
           <p className="muted">{registration.organization_name}</p>
+          {registration.is_featured && <FeaturedBadge />}
           <h2>{registration.event_title ?? t('Event details unavailable')}</h2>
         </div>
         <span className={`status-chip ${registration.status} ${attendeeStyles.statusBadge}`}>{statusLabel(registration.status, t)}</span>
@@ -205,6 +211,7 @@ function FutureCancellation({ registration }: { registration: AttendeeMyRegistra
         <div>
           <p className="muted">{registration.organization_name}</p>
           <h3>{registration.event_title ?? t('Event details unavailable')}</h3>
+          {registration.is_featured && <FeaturedBadge />}
         </div>
         <span className={`status-chip ${registration.status} ${attendeeStyles.statusBadge}`}>{statusLabel(registration.status, t)}</span>
       </header>
@@ -236,6 +243,8 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
   const path = actor && token ? '/me/registrations' : null;
   const { data, loading, error, reload } = useApiResource<AttendeeMyRegistration[]>(path, token);
   const [tab, setTab] = useState<RegistrationTab>(initialTab);
+  const [section, setSection] = useState<'registrations' | 'saved'>('registrations');
+  const [view, setView] = useState<'list' | 'calendar'>('list');
   const [now, setNow] = useState<number | null>(null);
   const [withdrawingId, setWithdrawingId] = useState<string | null>(null);
   const [withdrawError, setWithdrawError] = useState<{ id: string; error: Error } | null>(null);
@@ -389,6 +398,24 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
     waitlist: t('Waitlist'),
     past: t('Past'),
   };
+  const conflictingIds = new Set<string>();
+  if (now !== null) {
+    const currentConfirmed = registrations.filter((registration) =>
+      registration.status === 'confirmed' &&
+      registration.ends_at !== null &&
+      Date.parse(registration.ends_at) > now);
+    for (let left = 0; left < currentConfirmed.length; left += 1) {
+      for (let right = left + 1; right < currentConfirmed.length; right += 1) {
+        const first = currentConfirmed[left];
+        const second = currentConfirmed[right];
+        if (intervalsOverlap(first.starts_at, first.ends_at, second.starts_at, second.ends_at)) {
+          conflictingIds.add(first.id);
+          conflictingIds.add(second.id);
+        }
+      }
+    }
+  }
+  const ownConfirmedConflicts = registrations.filter((registration) => conflictingIds.has(registration.id));
 
   function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, currentTab: RegistrationTab) {
     const index = registrationTabOrder.indexOf(currentTab);
@@ -407,6 +434,32 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
     tabButtons.current[nextTab]?.focus();
   }
 
+  function renderRegistrationCard(registration: AttendeeMyRegistration) {
+    return (
+      <RegistrationCard
+        key={registration.id}
+        registration={registration}
+        now={now}
+        withdrawing={withdrawingId === registration.id}
+        withdrawError={withdrawError?.id === registration.id ? withdrawError.error : null}
+        reconfirming={reconfirmingId === registration.id}
+        reconfirmError={reconfirmError?.id === registration.id ? reconfirmError.error : null}
+        submittedRevision={submittedReconfirmations[registration.id] ?? null}
+        onWithdraw={(item) => { void withdraw(item); }}
+        onReconfirm={(item, accept) => { void reconfirm(item, accept); }}
+        onRefresh={() => refreshRegistration(registration.id)}
+      />
+    );
+  }
+
+  const emptyRegistrationMessage = tab === 'past'
+    ? t('Past registrations will appear here.')
+    : tab === 'waitlist'
+      ? t('You have no upcoming waitlist registrations.')
+      : tab === 'pending'
+        ? t('You have no pending approvals or reconfirmation requests.')
+        : t('You have no upcoming confirmed registrations.');
+
   return (
     <section className={`stack ${attendeeStyles.eventsPage}`}>
       <header className="page-heading">
@@ -414,6 +467,25 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
         <h1>{t('My Events')}</h1>
       </header>
 
+      <div className={planningStyles.sectionControls} role="group" aria-label={t('Event sections')}>
+        <button className={planningStyles.control} type="button" aria-pressed={section === 'registrations'} onClick={() => setSection('registrations')}>
+          {t('Registrations')}
+        </button>
+        <button className={planningStyles.control} type="button" aria-pressed={section === 'saved'} onClick={() => setSection('saved')}>
+          {t('Saved')}
+        </button>
+      </div>
+      <div className={planningStyles.viewControls} role="group" aria-label={t('Event view')}>
+        <button className={planningStyles.control} type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>
+          {t('List')}
+        </button>
+        <button className={planningStyles.control} type="button" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')}>
+          {t('Calendar')}
+        </button>
+      </div>
+
+      {section === 'saved' ? <SavedEvents view={view} /> : (
+        <>
       <div className={attendeeStyles.registrationTabs} role="tablist" aria-label={t('Registration status')}>
         {registrationTabOrder.map((registrationTab) => (
           <button
@@ -436,39 +508,45 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
       </div>
       {reconfirmSuccess ? <p className="panel muted" role="status">{reconfirmSuccess}</p> : null}
       {withdrawSuccess ? <p className="panel success" role="status">{withdrawSuccess}</p> : null}
+      {tab === 'confirmed' && ownConfirmedConflicts.length ? (
+        <aside className="panel muted" role="status">
+          <p>{t('Schedule conflicts with your confirmed events:')}</p>
+          <ul>
+            {ownConfirmedConflicts.map((registration) => (
+              <li key={registration.id}>
+                {registration.event_title ?? t('Event details unavailable')}
+                {' — '}{registration.organization_name}
+              </li>
+            ))}
+          </ul>
+          <p>{t('Schedule conflict advisory only; it does not affect registration.')}</p>
+        </aside>
+      ) : null}
 
       <div id="registration-panel" className={attendeeStyles.registrationPanel} role="tabpanel" aria-labelledby={`registration-tab-${tab}`} tabIndex={0}>
         <Feedback loading={loading} error={error ? new Error(t(error.message)) : null} onRetry={reload}>
           <div className="stack">
-            {visibleRegistrations.length ? (
-              <div className="feed">
-                {visibleRegistrations.map((registration) => (
-                  <RegistrationCard
-                    key={registration.id}
-                    registration={registration}
-                    now={now}
-                    withdrawing={withdrawingId === registration.id}
-                    withdrawError={withdrawError?.id === registration.id ? withdrawError.error : null}
-                    reconfirming={reconfirmingId === registration.id}
-                    reconfirmError={reconfirmError?.id === registration.id ? reconfirmError.error : null}
-                    submittedRevision={submittedReconfirmations[registration.id] ?? null}
-                    onWithdraw={(item) => { void withdraw(item); }}
-                    onReconfirm={(item, accept) => { void reconfirm(item, accept); }}
-                    onRefresh={() => refreshRegistration(registration.id)}
+            {visibleRegistrations.length
+              ? view === 'list'
+                ? <div className="feed">{visibleRegistrations.map(renderRegistrationCard)}</div>
+                : (
+                  <EventCalendar
+                    mode="registrations"
+                    registrations={visibleRegistrations}
+                    renderRegistration={renderRegistrationCard}
+                    emptyMessage={emptyRegistrationMessage}
                   />
-                ))}
-              </div>
-            ) : (
-              <p className="panel empty-state muted">
-                {tab === 'past'
-                  ? t('Past registrations will appear here.')
-                  : tab === 'waitlist'
-                    ? t('You have no upcoming waitlist registrations.')
-                    : tab === 'pending'
-                      ? t('You have no pending approvals or reconfirmation requests.')
-                      : t('You have no upcoming confirmed registrations.')}
-              </p>
-            )}
+                )
+              : view === 'calendar'
+                ? (
+                  <EventCalendar
+                    mode="registrations"
+                    registrations={visibleRegistrations}
+                    renderRegistration={renderRegistrationCard}
+                    emptyMessage={emptyRegistrationMessage}
+                  />
+                )
+                : <p className="panel empty-state muted">{emptyRegistrationMessage}</p>}
 
             {futureCancellations.length ? (
               <section className="stack" aria-labelledby="closed-upcoming-title">
@@ -486,6 +564,8 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
           </div>
         </Feedback>
       </div>
+        </>
+      )}
     </section>
   );
 }

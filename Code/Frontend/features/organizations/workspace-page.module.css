@@ -610,3 +610,11 @@
     flex-direction: column;
   }
 }
+.logoPreview {
+  width: 80px;
+  height: 80px;
+  flex: 0 0 80px;
+  border-radius: 16px;
+  object-fit: contain;
+  background: var(--surface, white);
+}

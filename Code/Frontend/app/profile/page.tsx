@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { Feedback } from '@/components/feedback';
+import { BlockList } from '@/features/personas/BlockList';
 import { ApiError, api } from '@/lib/api';
 import { useT } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
@@ -10,8 +11,16 @@ import type { Profile } from '@/lib/types';
 import attendeeStyles from '@/features/attendee-pages.module.css';
 import profileStyles from '@/features/profile-mobile.module.css';
 
-type ProfileFields = { nickname: string; ageBracket: string; tags: string };
-type ProfileValidationError = { field: keyof ProfileFields; message: string } | null;
+type ProfileFields = {
+  nickname: string;
+  ageBracket: string;
+  tags: string;
+  pronouns: string;
+  icebreaker: string;
+  personaVisible: boolean;
+};
+type ProfileValidationField = 'nickname' | 'ageBracket' | 'tags' | 'pronouns' | 'icebreaker';
+type ProfileValidationError = { field: ProfileValidationField; message: string } | null;
 
 function profileCompletion(fields: ProfileFields): number {
   const nickname = fields.nickname.trim();
@@ -29,6 +38,9 @@ function fieldsFromProfile(profile: Profile): ProfileFields {
     nickname: profile.nickname ?? '',
     ageBracket: profile.age_bracket ?? '',
     tags: profile.tags.join(', '),
+    pronouns: profile.pronouns ?? '',
+    icebreaker: profile.icebreaker ?? '',
+    personaVisible: profile.persona_visible ?? false,
   };
 }
 
@@ -78,12 +90,14 @@ export default function ProfilePage() {
 
   return <section className={pageClass}>
     {heading}
-    <ProfileEditor key={token} token={token} profile={profile.data} refreshActor={refreshActor} />
+    <ProfileEditor key={`${actor.id}:${token}`} token={token} actorId={actor.id} canBlock={actor.eligible} profile={profile.data} refreshActor={refreshActor} />
   </section>;
 }
 
-function ProfileEditor({ token, profile, refreshActor }: {
+function ProfileEditor({ token, actorId, canBlock, profile, refreshActor }: {
   token: string;
+  actorId: string;
+  canBlock: boolean;
   profile: Profile;
   refreshActor: () => Promise<void>;
 }) {
@@ -96,7 +110,7 @@ function ProfileEditor({ token, profile, refreshActor }: {
   const [saving, setSaving] = useState(false);
   const [refreshingActor, setRefreshingActor] = useState(false);
 
-  function updateField(field: keyof ProfileFields, value: string) {
+  function updateField(field: Exclude<keyof ProfileFields, 'personaVisible'>, value: string) {
     setFields(current => ({ ...current, [field]: value }));
     setClientError(null);
     setSaveError(null);
@@ -131,12 +145,14 @@ function ProfileEditor({ token, profile, refreshActor }: {
             : tags.length === 0 ? { field: 'tags', message: t('Add at least one interest or vibe tag.') }
               : tags.length > 32 ? { field: 'tags', message: t('Use 32 tags or fewer.') }
                 : tags.some(tag => tag.length > 64) ? { field: 'tags', message: t('Each tag must be 64 characters or fewer.') }
-                  : null;
+                    : fields.pronouns.trim().length > 40 ? { field: 'pronouns', message: t('Pronouns must be 40 characters or fewer.') }
+                      : fields.icebreaker.trim().length > 300 ? { field: 'icebreaker', message: t('Icebreaker must be 300 characters or fewer.') }
+                        : null;
     if (invalid) {
       setClientError(invalid);
       setSaveError(null);
       setSuccess(false);
-      event?.currentTarget.querySelector<HTMLInputElement>(`#profile-${invalid.field}`)?.focus();
+      event?.currentTarget.querySelector<HTMLElement>(`#profile-${invalid.field}`)?.focus();
       return;
     }
 
@@ -149,13 +165,16 @@ function ProfileEditor({ token, profile, refreshActor }: {
       const updated = await api<Profile>('/me/profile', {
         token,
         method: 'PATCH',
-        body: { nickname, age_bracket: ageBracket, tags },
+        body: {
+          nickname,
+          age_bracket: ageBracket,
+          tags,
+          pronouns: fields.pronouns.trim() || null,
+          icebreaker: fields.icebreaker.trim() || null,
+          persona_visible: fields.personaVisible,
+        },
       });
-      setFields({
-        nickname: updated.nickname ?? '',
-        ageBracket: updated.age_bracket ?? '',
-        tags: updated.tags.join(', '),
-      });
+      setFields(fieldsFromProfile(updated));
       setSuccess(true);
       await refreshCurrentActor();
     } catch (error) {
@@ -236,6 +255,61 @@ function ProfileEditor({ token, profile, refreshActor }: {
           />
           <small id="profile-tags-help">{t('Separate tags with commas. Add at least one.')}</small>
         </label>
+        <label className="field">
+          <span>{t('Pronouns (optional)')}</span>
+          <input
+            id="profile-pronouns"
+            name="pronouns"
+            maxLength={40}
+            disabled={saving || refreshingActor}
+            aria-invalid={clientError?.field === 'pronouns' || undefined}
+            aria-describedby={clientError?.field === 'pronouns' ? 'profile-pronouns-help profile-validation-error' : 'profile-pronouns-help'}
+            value={fields.pronouns}
+            onChange={event => updateField('pronouns', event.target.value)}
+          />
+          <small id="profile-pronouns-help">{t('Leave blank to clear this optional value.')}</small>
+        </label>
+        <label className="field">
+          <span>{t('Icebreaker (optional)')}</span>
+          <textarea
+            id="profile-icebreaker"
+            name="icebreaker"
+            maxLength={300}
+            rows={3}
+            disabled={saving || refreshingActor}
+            aria-invalid={clientError?.field === 'icebreaker' || undefined}
+            aria-describedby={clientError?.field === 'icebreaker' ? 'profile-icebreaker-help profile-validation-error' : 'profile-icebreaker-help'}
+            value={fields.icebreaker}
+            onChange={event => updateField('icebreaker', event.target.value)}
+          />
+          <small id="profile-icebreaker-help">{t('Leave blank to clear this optional value.')}</small>
+        </label>
+        <div className="stack">
+          <label className="field">
+            <input
+              id="profile-persona-visible"
+              name="persona_visible"
+              type="checkbox"
+              disabled={saving || refreshingActor}
+              checked={fields.personaVisible}
+              aria-describedby="profile-persona-visibility-help"
+              onChange={event => {
+                setFields(current => ({ ...current, personaVisible: event.target.checked }));
+                setClientError(null);
+                setSaveError(null);
+                setSuccess(false);
+                setRefreshError(null);
+              }}
+            />
+            <span>{t('Enable broad text visibility')}</span>
+          </label>
+          <div className="muted" id="profile-persona-visibility-help">
+            <p>{t('Your text persona is private by default.')}</p>
+            <p>{t('New profiles start private. Turn this on only if you want eligible members to see this text in event comment contexts and authorized shared event chats.')}</p>
+            <p>{t('When enabled, eligible signed-in members may see your nickname, age bracket, interest or vibe tags, pronouns, and icebreaker in event comment contexts and authorized shared event chats. It does not create a searchable profile.')}</p>
+            <p>{t('Event-only sharing and approval reviewer consent are separate choices.')}</p>
+          </div>
+        </div>
         <div className="actions">
           <button className="button" type="submit" disabled={saving || refreshingActor}>
             {saving ? t('Saving profile…') : t('Save profile')}
@@ -243,5 +317,6 @@ function ProfileEditor({ token, profile, refreshActor }: {
           {(saving || refreshingActor) && <span role="status">{t('Saving your profile…')}</span>}
         </div>
       </form>
+      {canBlock ? <BlockList key={`${actorId}:${token}`} token={token} actorId={actorId} /> : null}
     </section>;
 }

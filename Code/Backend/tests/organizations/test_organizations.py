@@ -44,7 +44,8 @@ def test_creation_starts_pending_and_grants_owner_access(client, db, make_user, 
     assert body['name'] == 'Fictional club'
     assert body['description'] == ''
     assert body['accreditation_status'] == 'pending'
-    assert set(body) == {'id', 'name', 'description', 'accreditation_status', 'created_at'}
+    assert body['logo_url'] is None
+    assert set(body) == {'id', 'name', 'description', 'accreditation_status', 'created_at', 'logo_url'}
 
     membership = db.scalar(select(OrgMembership).where(
         OrgMembership.org_id == body['id'], OrgMembership.user_id == owner.id,
@@ -179,7 +180,8 @@ def test_public_profile_does_not_expose_roster_persona_or_email(client, db, make
     response = client.get(f'/api/v1/organizations/{organization.id}')
 
     assert response.status_code == 200
-    assert set(response.json()) == {'id', 'name', 'description', 'accreditation_status', 'created_at'}
+    assert response.json()['logo_url'] is None
+    assert set(response.json()) == {'id', 'name', 'description', 'accreditation_status', 'created_at', 'logo_url'}
     body = response.text.lower()
     for private_value in ('owner-private@example.invalid', 'member-private@example.invalid', owner.id, member.id,
                           'persona_visible', 'roster', 'members'):
@@ -203,7 +205,8 @@ def test_public_organization_hides_pending_and_rejected_but_keeps_reads(client, 
     assert rejected_response.status_code == 404
     assert rejected_response.json()['error']['code'] == 'organization_not_found'
     assert approved_response.status_code == 200
-    assert set(approved_response.json()) == {'id', 'name', 'description', 'accreditation_status', 'created_at'}
+    assert approved_response.json()['logo_url'] is None
+    assert set(approved_response.json()) == {'id', 'name', 'description', 'accreditation_status', 'created_at', 'logo_url'}
     assert manager_workspace.status_code == 200
     assert manager_grants.status_code == 200
     assert {grant['org_id'] for grant in manager_grants.json()['grants']} == {pending.id, rejected.id, approved.id}

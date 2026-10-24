@@ -8,6 +8,11 @@ from app.domains.identity.preferences_models import UserPreferences
 from app.domains.identity.discovery_models import UserDiscoveryPreferences
 from app.domains.organizations.models import Organization, OrgMembership, AccreditationDecision
 from app.domains.events.models import Event
+from app.domains.media.models import MediaAsset
+from app.domains.planning.models import SavedEvent
+from app.domains.featured.models import FeaturedRequest, FeaturedDecision
+from app.domains.personas.models import UserBlock, EventPersonaVisibility
+from app.domains.ownership.models import OwnershipTransfer, OwnershipTransferAudit
 from app.domains.registrations.models import RegistrationReceipt, Registration
 from app.notifications import Notification
 from app.domains.social.models import EventReaction, EventComment

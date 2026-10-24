@@ -10,6 +10,8 @@ import { useSession } from '@/lib/session';
 import type { ChatInboxItem, ChatThread, ContentItem } from '@/lib/types';
 import attendeeStyles from '@/features/attendee-pages.module.css';
 import { ContentSafetyControls } from './ContentSafetyControls';
+import { applyAuthorLabels, clearAuthorLabels } from '@/lib/content-labels';
+import { PERSONA_ACCESS_CHANGED_EVENT } from '@/features/personas/access-events';
 import styles from './communication.module.css';
 import mobileStyles from './mobile-chat.module.css';
 
@@ -326,7 +328,8 @@ function ChatThreadView({
         if (!disposed && !initial.signal.aborted) {
           setPersonalReviewPending(false);
           const removedIds = result.removed_ids ?? [];
-          replaceThread({ ...result, removed_ids: removedIds, items: applyRemovedIds(result.items, removedIds) });
+          replaceThread({ ...result, removed_ids: removedIds,
+            items: applyAuthorLabels(applyRemovedIds(result.items, removedIds), result.author_labels) });
         }
       } catch (error) {
         if (!disposed && !initial?.signal.aborted) {
@@ -359,10 +362,11 @@ function ChatThreadView({
               ? {
                   ...result,
                   removed_ids: removedIds,
-                  items: applyRemovedIds(merged, removedIds),
+                  items: applyAuthorLabels(applyRemovedIds(merged, removedIds), result.author_labels),
                   next_before: previous.next_before,
                 }
-              : { ...result, removed_ids: removedIds, items: applyRemovedIds(merged, removedIds) };
+              : { ...result, removed_ids: removedIds,
+                  items: applyAuthorLabels(applyRemovedIds(merged, removedIds), result.author_labels) };
             threadRef.current = next;
             return next;
           });
@@ -370,6 +374,12 @@ function ChatThreadView({
         }
       } catch (error) {
         if (!disposed && !controller.signal.aborted && !revokeAccess(error)) {
+          setThread(previous => {
+            if (!previous) return previous;
+            const next = { ...previous, items: clearAuthorLabels(previous.items) };
+            threadRef.current = next;
+            return next;
+          });
           setThreadError('Messages could not be refreshed. The conversation remains available; retry if updates stop.');
         }
       } finally {
@@ -381,9 +391,22 @@ function ChatThreadView({
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') void poll();
     };
+    const onAccessChange = (event: Event) => {
+      const userId = (event as CustomEvent<{ userId?: string }>).detail?.userId;
+      initial?.abort();
+      pollController.current?.abort();
+      olderController.current?.abort();
+      setLoadingOlder(false);
+      olderLoadingRef.current = false;
+      polling.current = false;
+      const previous = threadRef.current;
+      if (previous) replaceThread({ ...previous, items: clearAuthorLabels(previous.items, userId) });
+      void poll();
+    };
     void loadInitial();
     pollTimer = window.setInterval(() => void poll(), 5000);
     document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener(PERSONA_ACCESS_CHANGED_EVENT, onAccessChange);
     return () => {
       disposed = true;
       initial?.abort();
@@ -391,6 +414,7 @@ function ChatThreadView({
       olderController.current?.abort();
       sendController.current?.abort();
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener(PERSONA_ACCESS_CHANGED_EVENT, onAccessChange);
       if (pollTimer !== null) window.clearInterval(pollTimer);
       polling.current = false;
       olderLoadingRef.current = false;
@@ -421,8 +445,8 @@ function ChatThreadView({
           const removedIds = mergeRemovedIds(current?.removed_ids, page.removed_ids);
           const merged = mergeMessages(current?.items ?? [], page.items);
           const next = current
-            ? { ...page, removed_ids: removedIds, items: applyRemovedIds(merged, removedIds) }
-            : { ...page, removed_ids: removedIds, items: applyRemovedIds(merged, removedIds) };
+            ? { ...page, removed_ids: removedIds, items: applyAuthorLabels(applyRemovedIds(merged, removedIds), page.author_labels) }
+            : { ...page, removed_ids: removedIds, items: applyAuthorLabels(applyRemovedIds(merged, removedIds), page.author_labels) };
           threadRef.current = next;
           return next;
         });

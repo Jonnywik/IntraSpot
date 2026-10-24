@@ -1,6 +1,68 @@
 # IntraSpot local MVP
 
-## Current work — Sprint 15 isolated Google development sign-in
+## Current work — Sprint 20 manual ownership transfer
+
+Sprint 20 adds desktop-only nomination of an active eligible organization admin,
+a seven-day acceptance deadline, decline/revoke, scoped history, and atomic role
+changes. Acceptance makes the former owner a member without removing either
+person's participation or chat access. Creator metadata is historical; current
+membership roles remain authoritative. Audits and in-app notices are retry-safe.
+Automated inactivity succession and mobile management are not included.
+
+Reviewed additive `mvp_0015` follows `mvp_0014`; apply explicitly, never at startup.
+The migration refuses duplicate active owners and destructive history rollback.
+See the [contract](Sprint-20.md), [interaction handoff](../design/sprint20-interaction-handoff.md),
+and [acceptance record](../validation/sprint-20-acceptance-2026-10-23.md).
+Sprint 18's live-browser and existing Next.js dependency-security/build gates
+remain open; Sprint 20 is not deployment or participant approval.
+
+### Historical Sprint 18 checkpoint
+
+Sprint 18 code is implemented locally: optional text-profile editing, explicit
+broad/event-only sharing, scoped persona reads, mutual block hiding, outgoing
+block management and an anonymous registration warning with explicit proceed.
+Shared group-chat content and existing participation are preserved. Sprint 19
+remains implemented. Explicit additive `mvp_0014` follows `mvp_0013`; all existing
+development rows and Featured history were preserved.
+
+Automated verification is recorded in the [acceptance report](../validation/sprint-18-acceptance-2026-10-23.md).
+Live browser acceptance remains pending because the old in-app browser tab is an
+inaccessible internal error page. The final build commands also stop on the
+existing Next.js 16.4.0 security advisory; a minimal patch was requested, not
+silently applied. No deployment or release approval. See the
+[contract](Sprint-18.md) and [interaction handoff](../design/sprint18-interaction-handoff.md).
+
+### Historical Sprint 17 checkpoint
+
+Sprint 17 is complete locally: private saved events, My Events list/calendar,
+and advisory confirmed-event overlap warnings. Saving never registers or reserves
+a place. Both profiles use explicit additive `mvp_0012`, with pre-existing data
+preserved. See the [contract](Sprint-17.md),
+[acceptance evidence](../validation/sprint-17-acceptance-2026-10-20.md), and
+[interaction handoff](../design/sprint17-interaction-handoff.md).
+
+Developer checks passed; participant/native-device/security/release approval is
+still separate. Personal Google sign-in is verified, live PLM sign-in remains
+pending. Default fictional 3000/8001 and real-development 3001/8011 stay isolated;
+no new cloud storage/SQL or deployment. Sprint 18 persona/blocking is next, not
+implemented. Sprint 16 and 17 changes remain local/uncommitted until requested.
+
+### Historical Sprint 16 checkpoint
+
+Sprint 16 adds persistent local event banners and club logos, authorized upload,
+replacement/removal, decoded validation, metadata stripping, and protected image
+reads. Apply the reviewed additive `mvp_0011` migration explicitly; never migrate
+at startup. Existing fictional and real-development data remain isolated. See the
+[contract](Sprint-16.md), [acceptance report](../validation/sprint-16-acceptance-2026-10-19.md),
+and [interaction handoff](../design/sprint16-interaction-handoff.md).
+
+Personal Google development sign-in is now verified. Live PLM-account sign-in is
+still pending; it is not implied by the personal-account check. Supabase remains
+Auth-only; media and application SQL stay local. Default fictional 3000/8001 and
+real-development 3001/8011 are separate. Sprint 17 saved events/calendar/conflicts
+is next, not implemented here. No deployment or new GitHub push is part of Sprint 16.
+
+### Historical Sprint 15 setup checkpoint
 
 Sprint 15 is in progress, not complete. The selected Supabase development
 project is connected; Google OAuth client/provider setup and live sign-in remain
@@ -82,7 +144,10 @@ desktop browser gate passed 18 groups, and the communication/safety regression
 passed nine groups. Sprint 11 mobile attendee closure is next; participant review
 remains deferred. No new database migration or deployment is part of Sprint 10.
 
-Fictional data only. No cloud connections, real Google sign-in or participant/deployment approval. Backend is `127.0.0.1:8001`; frontend is `localhost:3000`. Penpot database is not used.
+The default profile uses fictional data on backend `127.0.0.1:8001` and frontend
+`localhost:3000`. The separate real-development profile uses Supabase Auth on
+3001/8011 with local application SQL/media. Neither profile has participant or
+deployment approval. Penpot's database is not used.
 
 ## Setup (PowerShell, project root)
 
@@ -366,7 +431,7 @@ Then `rtk proxy .mvp-venv/Scripts/python.exe -m app.local_events` adds one fixed
 
 **Historical Sprint 1 verification:** Root independently ran `tests/identity` and `tests/shared/test_foundation.py`: **32 passed, 1 dependency deprecation warning in 10.46 seconds** (2026-10-11). This covers trusted fictional identities, token validation, database-derived eligibility/privileges, private self-profiles, local configuration/CORS, sanitized metadata logging, migration readiness, test isolation, and commit-before-success behavior. Identity organization-grant serialization is fixed with attribute-based response validation.
 
-PostgreSQL 17 uses the separate `intraspot-mvp` project and `intraspot_mvp` database on loopback port 5433. Readiness requires the reviewed current head, `mvp_0010`: organization announcements, reactions, revision history and event-independent safety reports. `mvp_0009` adds Flash and its saved discovery switch; `mvp_0008` adds discovery metadata/preferences; `mvp_0007` adds display preferences; `mvp_0006` adds membership lifecycle; `mvp_0005` adds communication/safety. Apply reviewed migrations explicitly with `python -m alembic upgrade head`; they do not run at startup. Downgrades refuse to discard new announcements/history, discovery data, preferences or lifecycle history rather than silently losing them.
+PostgreSQL 17 uses the separate `intraspot-mvp` project and `intraspot_mvp` database on loopback port 5433. Readiness requires the reviewed current head, `mvp_0013`: Featured requests, decisions and global placement-window exclusion. `mvp_0012` adds private saved events; `mvp_0011` adds local media; `mvp_0010` adds announcements/reactions/history; `mvp_0009` adds Flash and its saved discovery switch; `mvp_0008` adds discovery metadata/preferences; `mvp_0007` adds display preferences; `mvp_0006` adds membership lifecycle; `mvp_0005` adds communication/safety. Apply reviewed migrations explicitly with `python -m alembic upgrade head`; they do not run at startup. Downgrades refuse to discard retained feature history or other new data rather than silently losing it. Sprint 19 was explicitly selected before Sprint 18, which remains unbuilt. See [Sprint 19 acceptance](../validation/sprint-19-acceptance-2026-10-22.md).
 
 **Historical Sprint 1 checkpoint:** at that stop, Sprints 2–5 and frontend were paused. Their existing code was preliminary, not accepted. Phase 2 now evaluates the organization domain and its draft/publication authorization boundary only; it does not accept all event/registration/notification code. Participant/security release gates remain closed.
 

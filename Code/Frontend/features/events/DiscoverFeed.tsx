@@ -12,6 +12,7 @@ import { usePreferences } from "@/lib/preferences";
 import { formatDate, formatTime } from "@/lib/date";
 import type { MyOrganizations, PublicEvent } from "@/lib/types";
 import { EventSocialPreview } from "@/features/communication/EventSocial";
+import { FeaturedBadge } from "@/features/featured/FeaturedBadge";
 import { HeritageDecoration } from "@/components/heritage-decoration";
 import styles from "./attendee-events.module.css";
 
@@ -242,6 +243,7 @@ export function DiscoverFeed() {
                           {event.event_type === "flash" && (
                             <span className={styles.eventTypeBadge}>{t("Flash event")}</span>
                           )}
+                          {event.is_featured && <FeaturedBadge />}
                           <h2 id={`event-${event.id}-title`}>{event.title}</h2>
                         </div>
                       </header>

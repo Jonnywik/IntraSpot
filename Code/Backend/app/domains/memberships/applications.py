@@ -7,6 +7,7 @@ from app.core.errors import DomainError
 from app.db.models import now, uid
 from app.domains.identity.models import User
 from app.domains.organizations.models import Organization
+from app.domains.personas.service import blocked_user_ids
 from . import policy
 from .models import MembershipApplication, MembershipInvitation
 
@@ -41,12 +42,24 @@ def _application_out(db: Session, application: MembershipApplication, at: dateti
     }
 
 
-def _application_review(db: Session, application: MembershipApplication, at: datetime) -> dict:
+def _application_review(
+    db: Session,
+    application: MembershipApplication,
+    at: datetime,
+    reviewer_id: str,
+    blocked_ids: set[str] | None = None,
+) -> dict:
     result = _application_out(db, application, at)
     user = db.get(User, application.user_id)
     persona = None
     label = 'Applicant'
-    if application.status == 'pending' and application.persona_shared and user is not None:
+    blocked_ids = blocked_ids if blocked_ids is not None else blocked_user_ids(db, reviewer_id)
+    if (
+        application.status == 'pending'
+        and application.persona_shared
+        and user is not None
+        and application.user_id not in blocked_ids
+    ):
         tags = user.tags if isinstance(user.tags, list) else []
         persona = {
             'nickname': user.nickname,
@@ -290,7 +303,11 @@ def list_application_reviews(db: Session, reviewer_id: str, org_id: str) -> list
         .order_by(MembershipApplication.created_at.desc(), MembershipApplication.id.desc())
     ).tuples()
     at = now()
-    return [_application_review(db, application, at) for application, _user in rows]
+    blocked_ids = blocked_user_ids(db, reviewer_id)
+    return [
+        _application_review(db, application, at, reviewer_id, blocked_ids)
+        for application, _user in rows
+    ]
 
 
 def decide_application(
@@ -319,7 +336,7 @@ def decide_application(
 
     if application.status != 'pending':
         if application.status == outcome and application.reason == reason:
-            return _application_review(db, application, now())
+            return _application_review(db, application, now(), reviewer_id)
         raise DomainError('membership_application_decision_conflict', 'This request already has a different outcome.', 409)
 
     _lock_pending_applications(db, org_id, application.user_id)
@@ -365,7 +382,7 @@ def decide_application(
         at,
     )
     db.flush()
-    return _application_review(db, application, at)
+    return _application_review(db, application, at, reviewer_id)
 
 
 def create_invitation(

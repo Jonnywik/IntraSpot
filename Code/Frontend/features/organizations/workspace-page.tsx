@@ -12,12 +12,17 @@ import { useApiResource } from '@/lib/use-api-resource';
 import type { MyOrganizations, Organization, PrivateEvent, ReviewEvent, Workspace } from '@/lib/types';
 import { DecisionHistory, StatusBadge } from './shared';
 import styles from './workspace-page.module.css';
+import { FeaturedRequestControl } from '@/features/featured/FeaturedControls';
+import { FeaturedBadge } from '@/features/featured/FeaturedBadge';
 import { Feedback } from '@/components/feedback';
 import { EventChanges } from './EventChanges';
 import { RegistrationReview } from './RegistrationReview';
 import { ModerationReportQueue } from '@/features/moderation/report-queue';
 import { StaffMembership } from '@/features/memberships/StaffMembership';
 import { AnnouncementManager } from '@/features/announcements/AnnouncementManager';
+import { MediaUploader } from '@/features/media/MediaUploader';
+import { MediaImage } from '@/features/media/MediaImage';
+import { OwnershipTransferPanel } from '@/features/ownership/OwnershipTransferPanel';
 
 function draftHref(orgId: string, eventId?: string) {
   const params = new URLSearchParams({orgId});
@@ -279,6 +284,7 @@ function OrganizationEvents({workspace, events, loading, error, onRetry, token, 
                   <div className={styles.eventTitle}>
                     <span className={styles.eventKind}>{event.status === 'draft' ? t('Private draft') : t('Organization event')}</span>
                     <h3>{event.title || t('Untitled draft')}</h3>
+                    {event.is_featured && <FeaturedBadge />}
                   </div>
                   <StatusBadge status={event.status} />
                 </header>
@@ -343,6 +349,9 @@ function OrganizationEvents({workspace, events, loading, error, onRetry, token, 
                       onOpenChange={open => setActivePanel(open ? `review:${event.id}` : null)}
                       onReviewed={reviewSummaries.reload}
                     />
+                    {isManager && workspace.accreditation_status === 'approved' && (
+                      <FeaturedRequestControl key={`featured:${event.id}:${event.material_revision}`} eventId={event.id} eventStartsAt={event.starts_at} orgId={workspace.id} token={token} />
+                    )}
                     {isManager && workspace.accreditation_status === 'approved' && (
                       <EventChanges
                         key={`${event.id}:${event.material_revision}`}
@@ -474,7 +483,7 @@ function ModeratorReviews({grant, token, selectedEventId}: {
   );
 }
 
-function WorkspaceDetails({token, sessionVersion, workspace, events, eventsLoading, eventsError, reloadEvents, selectedEventId}: {
+function WorkspaceDetails({token, sessionVersion, workspace, events, eventsLoading, eventsError, reloadEvents, reloadWorkspace, selectedEventId, onOwnershipChanged}: {
   token: string;
   sessionVersion: number;
   workspace: Workspace;
@@ -482,13 +491,16 @@ function WorkspaceDetails({token, sessionVersion, workspace, events, eventsLoadi
   eventsLoading: boolean;
   eventsError: Error | null;
   reloadEvents: () => void;
+  reloadWorkspace: () => void;
   selectedEventId: string | null;
+  onOwnershipChanged: () => Promise<void>;
 }) {
   const t = useT();
   return (
     <div className={styles.workspaceDetails}>
       <section className={`panel ${styles.organizationCard}`} aria-labelledby="workspace-detail-title">
         <div className={styles.organizationHeading}>
+          {workspace.logo_url && <MediaImage mediaUrl={workspace.logo_url} token={token} alt="" className={styles.logoPreview} />}
           <div>
             <p className={styles.eyebrow}>{t('Organization workspace')}</p>
             <h2 id="workspace-detail-title">{workspace.name}</h2>
@@ -498,6 +510,13 @@ function WorkspaceDetails({token, sessionVersion, workspace, events, eventsLoadi
         <p>{workspace.description || t('No organization description was provided.')}</p>
         <p className={styles.contextLine}>{t('Workspace role: {role}', {role: t(workspace.role)})}</p>
         <DecisionHistory decisions={workspace.decisions} />
+        {workspace.accreditation_status !== 'rejected' && (
+          <div className="stack">
+            <h3>{t('Club logo')}</h3>
+            <MediaUploader key={`${token}:${workspace.id}`} endpoint={`/organizations/${encodeURIComponent(workspace.id)}/logo`}
+              token={token} currentUrl={workspace.logo_url} onChanged={reloadWorkspace} />
+          </div>
+        )}
       </section>
       <OrganizationEvents
         key={`${workspace.id}:${selectedEventId ?? ''}`}
@@ -521,6 +540,10 @@ function WorkspaceDetails({token, sessionVersion, workspace, events, eventsLoadi
       )}
       <ModerationReportQueue key={`${workspace.id}`} token={token} orgId={workspace.id} />
       {workspace.accreditation_status === 'approved' && <StaffMembership orgId={workspace.id} role={workspace.role} />}
+      {workspace.accreditation_status === 'approved' && (
+        <OwnershipTransferPanel key={`${token}:${workspace.id}`} orgId={workspace.id}
+          role={workspace.role} onChanged={onOwnershipChanged} />
+      )}
     </div>
   );
 }
@@ -530,7 +553,7 @@ function OrganizationWorkspaceContent() {
   const searchParams = useSearchParams();
   const selectedOrgId = searchParams.get('orgId');
   const selectedEventId = searchParams.get('eventId');
-  const {token, authLoading, error: sessionError, version} = useSession();
+  const {token, authLoading, error: sessionError, version, refreshActor} = useSession();
   const organizations = useApiResource<MyOrganizations>(token ? '/me/organizations' : null, token);
   const ownedWorkspaces = organizations.data?.owned_workspaces ?? [];
   const grants = organizations.data?.grants ?? [];
@@ -682,7 +705,14 @@ function OrganizationWorkspaceContent() {
                         eventsLoading={events.loading}
                         eventsError={events.error}
                         reloadEvents={events.reload}
+                        reloadWorkspace={workspace.reload}
                         selectedEventId={selectedEventId}
+                        onOwnershipChanged={async () => {
+                          organizations.reload();
+                          workspace.reload();
+                          events.reload();
+                          await refreshActor();
+                        }}
                       />
                     )}
                   </Feedback>

@@ -90,6 +90,7 @@ class EventChangeInput(BaseModel):
 
 
 class EventPublic(BaseModel):
+    is_featured: bool = False
     id: str
     org_id: str
     organization_name: str
@@ -108,6 +109,7 @@ class EventPublic(BaseModel):
     remaining_spots: int
     interest_count: int
     banner_key: BannerKey
+    banner_url: str | None = None
     cost_label: str
     registration_mode: Literal["instant", "approval"]
     review_window_minutes: int | None

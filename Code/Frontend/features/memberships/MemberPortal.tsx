@@ -7,6 +7,7 @@ import { formatDate, formatTime } from '@/lib/date';
 import { useApiResource } from '@/lib/use-api-resource';
 import { useSession } from '@/lib/session';
 import { AnnouncementReader } from '@/features/announcements/AnnouncementReader';
+import { MediaImage } from '@/features/media/MediaImage';
 import type { Organization, MembershipApplicationOut, MembershipInviteOut, MembershipSelfOut,
   MembershipApplicationInput, MembershipKeyInput } from '@/lib/types';
 import styles from './member-portal.module.css';
@@ -272,6 +273,7 @@ function MemberPortalView({
                         setLeavingId(null);
                       }}
                     >
+                      {organization.logo_url && <MediaImage mediaUrl={organization.logo_url} alt="" className={styles.logoPreview} />}
                       <span className={styles.organizationName}>{organization.name}</span>
                       <span className={styles.organizationDescription}>{organization.description}</span>
                       <span className={styles.choiceHint}>{organization.id === activeOrgId ? 'Selected' : 'View membership options'}</span>

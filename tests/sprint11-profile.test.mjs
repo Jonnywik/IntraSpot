@@ -48,7 +48,9 @@ test('profile form keeps editable values and associates validation accessibly', 
     assert.ok(input?.includes('disabled={saving || refreshingActor}'), `${field} is locked during save/refresh`);
   }
   assert.match(source, /method: 'PATCH'/);
-  assert.match(source, /body: \{ nickname, age_bracket: ageBracket, tags \}/);
+  assert.match(source, /body: \{\s*nickname,\s*age_bracket: ageBracket,\s*tags,/);
+  assert.match(source, /pronouns: fields\.pronouns\.trim\(\) \|\| null/);
+  assert.match(source, /icebreaker: fields\.icebreaker\.trim\(\) \|\| null/);
 });
 
 test('Settings only labels a preference scope as saved after persistence succeeds', async () => {

@@ -10,6 +10,7 @@ import { useApiResource } from '@/lib/use-api-resource';
 import type { OrganizationApplication } from '@/lib/types';
 import { ModerationReportQueue } from '@/features/moderation/report-queue';
 import { AnnouncementReportQueue } from '@/features/moderation/AnnouncementReportQueue';
+import { FeaturedAdminQueue } from '@/features/featured/FeaturedControls';
 import styles from './platform-admin.module.css';
 
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
@@ -299,6 +300,7 @@ function OrganizationAdminContent() {
             </section>
 
             <ModerationReportQueue key={'platform:' + token} token={token} />
+            <FeaturedAdminQueue key={'featured:' + token} token={token} />
             <AnnouncementReportQueue key={'announcements:' + token} token={token} />
           </>
         )}

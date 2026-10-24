@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { EventArtwork } from "@/app/event-artwork";
+import { FeaturedBadge } from "@/features/featured/FeaturedBadge";
 import { Feedback } from "@/components/feedback";
 import { RegistrationAction } from "@/features/registrations/RegistrationAction";
 import { useApiResource } from "@/lib/use-api-resource";
@@ -14,6 +15,8 @@ import { usePreferences } from "@/lib/preferences";
 import { formatDate, formatTime } from "@/lib/date";
 import type { PublicEvent } from "@/lib/types";
 import { EventSocial } from "@/features/communication/EventSocial";
+import { SaveEventButton } from "@/features/planning/SaveEventButton";
+import { ConflictWarning } from "@/features/planning/ConflictWarning";
 import styles from "./attendee-events.module.css";
 
 function publicEventTags(event: PublicEvent): string[] {
@@ -42,6 +45,7 @@ export function EventDetail() {
   );
   const [updatedEvent, setUpdatedEvent] = useState<PublicEvent | null>(null);
   const [countsError, setCountsError] = useState(false);
+  const [planningRevision, setPlanningRevision] = useState(0);
   const event = updatedEvent?.id === eventId ? updatedEvent : eventResource.data;
   const tags = event ? publicEventTags(event) : [];
   const coarseArea = event ? publicEventArea(event) : null;
@@ -50,6 +54,7 @@ export function EventDetail() {
     try {
       const current = await api<PublicEvent>("/events/" + encodeURIComponent(eventId), {token});
       setUpdatedEvent(current);
+      setPlanningRevision(value => value + 1);
       setCountsError(false);
     } catch { setCountsError(true); }
   }
@@ -78,9 +83,11 @@ export function EventDetail() {
                 {event.event_type === "flash" && (
                   <span className={styles.eventTypeBadge}>{t("Flash event")}</span>
                 )}
+                {event.is_featured && <FeaturedBadge />}
                 <h2>{event.title}</h2>
               </div>
               <EventArtwork event={event} priority />
+              <SaveEventButton key={`${event.id}:${version}`} eventId={event.id} />
               <p>{event.description}</p>
               <dl className={styles.detailFacts}>
                 <div><dt>{t("Date and time")}</dt><dd>{formatDate(event.starts_at, preferences.language)} · {formatTime(event.starts_at, preferences.language)}</dd></div>
@@ -120,6 +127,7 @@ export function EventDetail() {
                   </button>
                 </div>
               )}
+              <ConflictWarning key={`${event.id}:${version}`} eventId={event.id} revision={planningRevision} />
               <RegistrationAction key={`${event.id}:${version}`} event={event} onOutcome={() => void refreshCounts()} />
             </article>
           )}

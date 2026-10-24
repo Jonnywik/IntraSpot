@@ -41,7 +41,7 @@ def test_sprint8_downgrade_refuses_membership_history(db, make_org):
     with pytest.raises(RuntimeError, match='Sprint 8 data exists'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0005')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0010'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0015'
         assert connection.scalar(text('SELECT COUNT(*) FROM membership_audits')) == 1
 
 

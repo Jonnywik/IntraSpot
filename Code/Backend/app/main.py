@@ -27,7 +27,7 @@ def create_app():
                    'Fictional local demonstration only. Not approved for production.')
     app = FastAPI(title='IntraSpot local MVP', version='0.1.0', description=description)
     app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins,
-                       allow_methods=['GET', 'POST', 'PATCH', 'DELETE'],
+                       allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
                        allow_headers=['Authorization', 'Content-Type', 'Idempotency-Key', 'If-Match'],
                        expose_headers=['X-Request-ID'])
     app.add_exception_handler(DomainError, domain_error)

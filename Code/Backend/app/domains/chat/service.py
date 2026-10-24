@@ -22,6 +22,7 @@ from app.domains.events.models import Event
 from app.domains.identity.models import User
 from app.domains.identity.service import email_is_eligible
 from app.domains.organizations.models import Organization
+from app.domains.personas.service import project_author_labels
 from app.domains.registrations.models import Registration
 
 CHAT_RETENTION = timedelta(hours=72)
@@ -77,14 +78,9 @@ def _content_item(
     event: Event,
     at: datetime,
     author: SimpleNamespace,
-    persona_shared: bool = False,
+    show_persona: bool = False,
 ) -> ContentItem:
-    label = author_label(
-        author,
-        viewer_id,
-        persona_shared=persona_shared,
-        before_end=at < event.ends_at,
-    )
+    label = author_label(author, viewer_id, show_persona=show_persona)
     locally_hidden = is_locally_hidden(db, viewer_id, 'message', message.id)
     removed = message.removed_at is not None
     return ContentItem(
@@ -164,19 +160,11 @@ def get_chat_thread(
 
     statement = select(
         ChatMessage,
-        Registration.persona_shared,
         User.id,
         User.nickname,
-        User.persona_visible,
-    ).select_from(ChatMessage).join(User, User.id == ChatMessage.author_id).outerjoin(
-        Registration,
-        and_(
-            Registration.event_id == ChatMessage.event_id,
-            Registration.user_id == ChatMessage.author_id,
-            Registration.status == 'confirmed',
-            unrevoked_registration(),
-        ),
-    ).where(ChatMessage.event_id == event.id)
+    ).select_from(ChatMessage).join(User, User.id == ChatMessage.author_id).where(
+        ChatMessage.event_id == event.id,
+    )
 
     if after_sequence is not None:
         statement = statement.where(ChatMessage.sequence > after_sequence).order_by(ChatMessage.sequence)
@@ -191,6 +179,24 @@ def get_chat_thread(
     if after_sequence is None:
         rows.reverse()
 
+    author_rows = db.execute(
+        select(ChatMessage.author_id, User.nickname)
+        .select_from(ChatMessage)
+        .outerjoin(User, User.id == ChatMessage.author_id)
+        .join(Registration, and_(
+            Registration.event_id == ChatMessage.event_id,
+            Registration.user_id == ChatMessage.author_id,
+            Registration.status == 'confirmed',
+            unrevoked_registration(),
+        ))
+        .where(ChatMessage.event_id == event.id, ChatMessage.removed_at.is_(None))
+        .distinct()
+    ).all()
+    author_labels, visible_personas = project_author_labels(
+        db, event, user_id, author_rows,
+        at=timestamp,
+        allow_broad=True,
+    )
     items = [
         _content_item(
             db,
@@ -201,11 +207,10 @@ def get_chat_thread(
             author=SimpleNamespace(
                 id=author_id,
                 nickname=nickname,
-                persona_visible=persona_visible,
             ),
-            persona_shared=bool(persona_shared),
+            show_persona=author_id in visible_personas,
         )
-        for message, persona_shared, author_id, nickname, persona_visible in rows
+        for message, author_id, nickname in rows
     ]
     next_before = None
     if items:
@@ -238,6 +243,7 @@ def get_chat_thread(
         items=items,
         next_before=next_before,
         removed_ids=removed_ids,
+        author_labels=author_labels,
     )
 
 

@@ -19,6 +19,7 @@ export async function api<T>(path: string, options: {
   token?: string | null; method?: string; body?: unknown;
   idempotencyKey?: string; signal?: AbortSignal;
   ifMatch?: string;
+  responseType?: 'blob';
 } = {}): Promise<T> {
   if (!path.startsWith('/') || path.startsWith('//')) {
     throw new ApiError(0, 'invalid_api_path', 'An internal API path is required.');
@@ -37,21 +38,23 @@ export async function api<T>(path: string, options: {
     throw new ApiError(0, 'isolated_api_required', 'Google development sign-in requires its separate local backend.');
   }
   const headers: Record<string, string> = {};
+  const binaryBody = typeof Blob !== 'undefined' && options.body instanceof Blob;
   if (options.token) headers.Authorization = `Bearer ${options.token}`;
-  if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+  if (options.body !== undefined) headers['Content-Type'] = binaryBody ? (options.body as Blob).type : 'application/json';
   if (options.idempotencyKey) headers['Idempotency-Key'] = options.idempotencyKey;
   if (options.ifMatch) headers['If-Match'] = `"${options.ifMatch}"`;
   let response: Response;
   try {
     response = await fetch(`${base.origin}/api/v1${path}`, {
       method: options.method || 'GET', headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: options.body === undefined ? undefined : binaryBody ? options.body as Blob : JSON.stringify(options.body),
       signal: options.signal, cache: 'no-store', credentials: 'omit',
     });
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') throw error;
     throw new ApiError(0, 'connection_failed', 'Cannot reach the local backend. Check it is running, then retry.');
   }
+  if (response.ok && options.responseType === 'blob') return await response.blob() as T;
   const body = await response.json().catch(() => null);
   if (!response.ok) throw new ApiError(response.status,
     body?.error?.code || 'request_failed',

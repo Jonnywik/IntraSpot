@@ -9,7 +9,10 @@ import { usePreferences } from '@/lib/preferences';
 import { useSession } from '@/lib/session';
 import { useApiResource } from '@/lib/use-api-resource';
 import type { PublicEvent, Registration } from '@/lib/types';
+import { EventPersonaSharing } from '@/features/personas/EventPersonaSharing';
+import type { RegistrationBlockWarning } from '@/features/personas/types';
 import styles from '@/features/events/attendee-events.module.css';
+import { ConflictWarning } from '@/features/planning/ConflictWarning';
 
 type AttendeeRegistration = Omit<Registration, 'status'> & {
   status: 'confirmed' | 'waitlisted' | 'pending' | 'reconfirmation_required' | 'cancelled' | 'rejected';
@@ -23,6 +26,11 @@ function formatDeadline(value: string | null | undefined, language: 'en' | 'fil'
 }
 
 export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; onOutcome?: () => void }) {
+  const { actor, token } = useSession();
+  return <RegistrationActionSession key={`${event.id}:${actor?.id ?? 'guest'}:${token ?? ''}`} event={event} onOutcome={onOutcome} />;
+}
+
+function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; onOutcome?: () => void }) {
   const { actor, token, authLoading } = useSession();
   const t = useT();
   const { preferences } = usePreferences();
@@ -35,9 +43,18 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
     item.event_id === event.id && ['confirmed', 'waitlisted', 'pending', 'reconfirmation_required'].includes(item.status),
   ) ?? null;
   const [personaShared, setPersonaShared] = useState(false);
+  const [blockWarning, setBlockWarning] = useState(false);
+  const [serverWarning, setServerWarning] = useState(false);
+  const [blockWarningAcknowledged, setBlockWarningAcknowledged] = useState(false);
+  const [warningState, setWarningState] = useState<'idle' | 'loading' | 'clear' | 'warning' | 'error'>('idle');
   const [now, setNow] = useState<number | null>(null);
-  const attemptKey = useRef<{ eventId: string; key: string; personaShared: boolean } | null>(null);
+  const attemptKey = useRef<{
+    eventId: string;
+    key: string;
+    payload: { persona_shared: boolean; blocked_attendee_acknowledged: boolean };
+  } | null>(null);
   const controller = useRef<AbortController | null>(null);
+  const warningController = useRef<AbortController | null>(null);
   const dialog = useRef<HTMLElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const outcome = useRef<HTMLDivElement>(null);
@@ -45,8 +62,12 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
   const confirmationTitleId = `${confirmationDialogId}-title`;
   const confirmationFactsId = `${confirmationDialogId}-facts`;
   const personaHelpId = `${confirmationDialogId}-persona-help`;
+  const blockWarningHelpId = `${confirmationDialogId}-block-warning-help`;
 
-  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => () => {
+    controller.current?.abort();
+    warningController.current?.abort();
+  }, []);
 
   useEffect(() => {
     const firstUpdate = window.setTimeout(() => setNow(Date.now()), 0);
@@ -64,7 +85,7 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
     function closeOnEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         event.preventDefault();
-        setOpen(false);
+        closeConfirmation();
         return;
       }
       if (event.key !== 'Tab' || !dialog.current) return;
@@ -100,7 +121,38 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
     if (submittedResult) outcome.current?.focus();
   }, [submittedResult]);
 
+  async function refreshBlockWarning() {
+    if (!token) return;
+    const requestController = new AbortController();
+    warningController.current?.abort();
+    warningController.current = requestController;
+    setWarningState('loading');
+    try {
+      const response = await api<RegistrationBlockWarning>(
+        `/events/${encodeURIComponent(event.id)}/registration-block-warning`,
+        { token, signal: requestController.signal },
+      );
+      if (requestController.signal.aborted) return;
+      setBlockWarning(response.warning);
+      setWarningState(response.warning ? 'warning' : 'clear');
+    } catch {
+      if (!requestController.signal.aborted) setWarningState('error');
+    } finally {
+      if (warningController.current === requestController) warningController.current = null;
+    }
+  }
+
+  function closeConfirmation() {
+    warningController.current?.abort();
+    setOpen(false);
+  }
+
   const retryable = error !== null && (error.status === 0 || error.status >= 500);
+  const blockedWarningConflict = error?.code === 'blocked_attendee_warning';
+  const requiresBlockAcknowledgement = blockWarning || serverWarning;
+  const registrationErrorMessage = blockedWarningConflict
+    ? t('A block warning needs your attention before you register.')
+    : error ? t(error.message) : null;
   const profileClue = error !== null &&
     ['profile_incomplete', 'registration_ineligible', 'plm_email_required'].includes(error.code);
   const registrationMode = event.registration_mode;
@@ -117,24 +169,42 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
       setNow(Date.now());
       return;
     }
+    if (error && retryable && attemptKey.current?.eventId === event.id) {
+      setOpen(true);
+      return;
+    }
     if (error && !retryable) {
       attemptKey.current = null;
       setError(null);
     }
+    setBlockWarning(false);
+    setServerWarning(false);
+    setBlockWarningAcknowledged(false);
+    setWarningState('loading');
     setOpen(true);
+    void refreshBlockWarning();
   }
 
   async function submitRegistration() {
     if (!token || !actor?.eligible || !actor.profile_complete || submitting) return;
+    const previousAttempt = attemptKey.current?.eventId === event.id ? attemptKey.current : null;
+    if (warningState === 'loading' || (warningState === 'idle' && !previousAttempt)) return;
+    if (requiresBlockAcknowledgement && !blockWarningAcknowledged) return;
     if (!Number.isFinite(startsAt) || startsAt <= Date.now()) {
       setNow(Date.now());
-      setOpen(false);
+      closeConfirmation();
       return;
     }
 
-    const savedAttempt = attemptKey.current?.eventId === event.id
-      ? attemptKey.current
-      : { eventId: event.id, key: window.crypto.randomUUID(), personaShared: approvalRequired && personaShared };
+    const payload = {
+      persona_shared: approvalRequired && personaShared,
+      blocked_attendee_acknowledged: blockWarningAcknowledged,
+    };
+    const savedAttempt = previousAttempt &&
+      previousAttempt.payload.persona_shared === payload.persona_shared &&
+      previousAttempt.payload.blocked_attendee_acknowledged === payload.blocked_attendee_acknowledged
+      ? previousAttempt
+      : { eventId: event.id, key: window.crypto.randomUUID(), payload };
     attemptKey.current = savedAttempt;
 
     const requestController = new AbortController();
@@ -147,7 +217,7 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
       const registration = await api<AttendeeRegistration>(`/events/${encodeURIComponent(event.id)}/registrations`, {
         token,
         method: 'POST',
-        body: { persona_shared: savedAttempt.personaShared },
+        body: savedAttempt.payload,
         idempotencyKey: savedAttempt.key,
         signal: requestController.signal,
       });
@@ -158,9 +228,18 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
       onOutcome?.();
     } catch (caught) {
       if (requestController.signal.aborted) return;
-      setError(caught instanceof ApiError
+      if (caught instanceof ApiError && caught.code === 'blocked_attendee_warning') {
+        attemptKey.current = null;
+        setError(caught);
+        setServerWarning(true);
+        setBlockWarning(true);
+        setBlockWarningAcknowledged(false);
+        void refreshBlockWarning();
+      } else {
+        setError(caught instanceof ApiError
         ? caught
         : new ApiError(0, 'request_failed', 'The registration result could not be confirmed. Retry with the same request key.'));
+      }
     } finally {
       if (!requestController.signal.aborted) setSubmitting(false);
       if (controller.current === requestController) controller.current = null;
@@ -190,6 +269,14 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
     return (
       <div className={`panel stack ${styles.registrationOutcome} ${outcomeStyle}`} role="status" aria-live="polite" tabIndex={-1} ref={outcome}>
         {result.status === 'confirmed' ? <p>{t('Your registration is confirmed.')}</p> : null}
+        {result.status === 'confirmed' ? (
+          <EventPersonaSharing
+            key={`${event.id}:${actor.id}:${token}`}
+            eventId={event.id}
+            actorId={actor.id}
+            token={token}
+          />
+        ) : null}
         {result.status === 'pending' ? (
           <div>
             <p>{reviewDeadline
@@ -259,7 +346,7 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
 
       {error && !open ? (
         <div className="panel error" role="alert">
-          <p>{t(error.message)}</p>
+          <p>{registrationErrorMessage}</p>
           {profileClue ? <p><Link href="/profile">{t('Review your profile before trying again.')}</Link></p> : null}
           {retryable ? (
             <button className="button button-secondary" type="button" onClick={() => { setOpen(true); void submitRegistration(); }}>
@@ -304,6 +391,7 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
                     : t('Instant confirmation.')}
               </dd></div>
             </dl>
+            <ConflictWarning eventId={event.id} />
             {approvalRequired ? (
               <div className={`stack ${styles.personaConsentBlock}`}>
                 <label className={styles.personaConsent} htmlFor={personaConsentId}>
@@ -327,18 +415,62 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
                 ) : null}
               </div>
             ) : null}
-            {error ? (
+            {warningState === 'loading' ? <p role="status">{t('Checking for a block warning…')}</p> : null}
+            {warningState === 'error' && !serverWarning ? (
+              <div role="alert">
+                <p className="muted">{t('The warning could not be checked. You may continue, but the server will check before accepting registration.')}</p>
+                <button className="button button-secondary" type="button" onClick={() => void refreshBlockWarning()}>
+                  {t('Retry block warning check')}
+                </button>
+              </div>
+            ) : null}
+            {requiresBlockAcknowledgement ? (
+              <section className={`panel error ${styles.personaConsentBlock}`} role="alert" aria-describedby={blockWarningHelpId}>
+                <p id={blockWarningHelpId}>{t(serverWarning
+                  ? 'The server found that someone you blocked is confirmed for this event. Their identity is not shown.'
+                  : 'Someone you blocked is confirmed for this event. Their identity is not shown.')}</p>
+                {blockedWarningConflict ? <p>{registrationErrorMessage}</p> : null}
+                {serverWarning && warningState === 'error' ? (
+                  <div>
+                    <p>{t('We could not refresh the warning. Confirm to proceed; the server will check again before admission.')}</p>
+                    <button className="button button-secondary" type="button" onClick={() => void refreshBlockWarning()}>
+                      {t('Retry block warning check')}
+                    </button>
+                  </div>
+                ) : null}
+                <label className={styles.personaConsent} htmlFor={`${confirmationDialogId}-block-acknowledged`}>
+                  <input
+                    id={`${confirmationDialogId}-block-acknowledged`}
+                    type="checkbox"
+                    checked={blockWarningAcknowledged}
+                    disabled={submitting || warningState === 'loading' || (retryable && error !== null)}
+                    aria-describedby={blockWarningHelpId}
+                    onChange={change => setBlockWarningAcknowledged(change.target.checked)}
+                  />
+                  <span>{t('I understand and want to continue with registration.')}</span>
+                </label>
+              </section>
+            ) : null}
+            {error && !blockedWarningConflict ? (
               <div className="panel error" role="alert" aria-live="assertive">
-                <p>{t(error.message)}</p>
+                <p>{registrationErrorMessage}</p>
                 {profileClue ? <p><Link href="/profile">{t('Review your profile before trying again.')}</Link></p> : null}
               </div>
             ) : null}
             <div className={`actions ${styles.sheetActions}`}>
-              {(!error || retryable) ? (
-                <button className="button" type="button" onClick={() => { void submitRegistration(); }} disabled={submitting} aria-live="polite">
+              {(!error || retryable || blockedWarningConflict) ? (
+                <button
+                  className="button"
+                  type="button"
+                  onClick={() => { void submitRegistration(); }}
+                  disabled={submitting || warningState === 'loading' || (requiresBlockAcknowledgement && !blockWarningAcknowledged)}
+                  aria-live="polite"
+                >
                   {submitting
                     ? t('Submitting…')
-                    : error
+                    : blockedWarningConflict
+                      ? t('Continue with registration')
+                      : error
                       ? t('Retry registration')
                       : isFull
                         ? t('Join waitlist')
@@ -347,7 +479,7 @@ export function RegistrationAction({ event, onOutcome }: { event: PublicEvent; o
                           : t('Confirm your registration')}
                 </button>
               ) : null}
-              <button className="button button-secondary" type="button" onClick={() => setOpen(false)} disabled={submitting}>
+              <button className="button button-secondary" type="button" onClick={closeConfirmation} disabled={submitting}>
                 {error && !retryable ? t('Close') : t('Cancel')}
               </button>
             </div>

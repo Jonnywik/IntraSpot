@@ -43,7 +43,7 @@ def require_manager_membership(
         OrgMembership.user_id == actor.user_id,
         OrgMembership.active.is_(True),
         OrgMembership.role.in_(MANAGER_ROLES),
-    ))
+    ).execution_options(populate_existing=True))
     if membership is None:
         raise DomainError('organization_forbidden', 'You do not have access to this organization workspace.', 403)
     return organization, membership

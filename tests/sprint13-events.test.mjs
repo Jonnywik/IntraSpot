@@ -123,7 +123,7 @@ test('draft event type round-trips, defaults legacy events to scheduled, and enf
   assert.match(draft, /disabled=\{form\.eventType === "flash"\}/);
   assert.match(draft, /form\.eventType !== "flash" && <option value="approval">/);
   assert.match(draft, /Flash events use instant registration and have no review window\./);
-  assert.match(draft, /event=\{\{ banner_key: form\.bannerKey \|\| null, event_type: form\.eventType, title: previewTitle \}\}/);
+  assert.match(draft, /event=\{\{ banner_key: form\.bannerKey \|\| null, banner_url: currentDraft\.banner_url \?\? null, event_type: form\.eventType, title: previewTitle \}\}/);
 
   const publishIssues = draft.slice(draft.indexOf('function publishIssues'), draft.indexOf('function isDraftConflict'));
   assert.match(publishIssues, /Flash events must start within 24 hours of publication/);

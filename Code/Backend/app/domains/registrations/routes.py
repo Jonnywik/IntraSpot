@@ -11,6 +11,7 @@ from app.domains.registrations.schemas import (
     MyRegistration,
     RegistrationDecisionInput,
     RegistrationInput,
+    RegistrationBlockWarning,
     RegistrationReconfirmationInput,
     RegistrationResult,
     RegistrationReview,
@@ -31,6 +32,17 @@ def _response(outcome: service.RegistrationOutcome, response: Response) -> dict[
     return outcome.result
 
 
+@router.get(
+    '/events/{event_id}/registration-block-warning',
+    response_model=RegistrationBlockWarning,
+)
+def registration_block_warning(
+    event_id: UUID,
+    actor: Annotated[Actor, Depends(current_actor)],
+):
+    return {'warning': service.registration_block_warning(actor.user_id, str(event_id))}
+
+
 @router.post('/events/{event_id}/registrations', response_model=RegistrationResult)
 def register(
     event_id: UUID,
@@ -47,6 +59,9 @@ def register(
         str(event_id),
         idempotency_key,
         persona_shared=payload.persona_shared if payload is not None else False,
+        blocked_attendee_acknowledged=(
+            payload.blocked_attendee_acknowledged if payload is not None else False
+        ),
     )
     return _response(outcome, response)
 

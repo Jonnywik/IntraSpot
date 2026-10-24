@@ -1,0 +1,236 @@
+.planning {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.sectionControls,
+.viewControls,
+.monthControls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sectionControls,
+.viewControls {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.75rem;
+}
+
+.control,
+.monthButton,
+.dayButton {
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  font: inherit;
+}
+
+.control,
+.monthButton {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+}
+
+.control[aria-pressed='true'],
+.dayButton[aria-pressed='true'] {
+  border-color: var(--blue);
+  box-shadow: inset 0 0 0 1px var(--blue);
+}
+
+.calendar {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.monthControls {
+  justify-content: space-between;
+}
+
+.monthControls h2 {
+  margin: 0;
+  text-align: center;
+}
+
+.weekdayGrid,
+.dayGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.weekday {
+  padding: 0.35rem 0.15rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--ink);
+  font-size: 0.8rem;
+}
+
+.legendMark {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-left: 3px solid var(--blue);
+}
+
+.legendMark.waitlisted {
+  border-left-style: dotted;
+}
+
+.legendMark.pending {
+  border-left-style: dashed;
+}
+
+.legendMark.reconfirmation {
+  border-left: 4px double var(--gold);
+}
+
+.legendMark.cancelled,
+.legendMark.rejected {
+  border-left-style: dotted;
+}
+
+.legendMark.saved {
+  border-left-color: var(--gold);
+}
+
+.dayButton {
+  min-width: 0;
+  min-height: 5.5rem;
+  padding: 0.45rem;
+  text-align: left;
+  vertical-align: top;
+  cursor: pointer;
+}
+
+.dayButton:focus-visible,
+.control:focus-visible,
+.monthButton:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.outsideMonth {
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+.dayNumber {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 700;
+}
+
+.markers {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.marker {
+  display: block;
+  overflow: hidden;
+  border-left: 3px solid var(--blue);
+  padding-left: 0.25rem;
+  font-size: 0.7rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.confirmed {
+  border-left-style: solid;
+}
+
+.waitlisted {
+  border-left-style: dotted;
+}
+
+.pending {
+  border-left-style: dashed;
+}
+
+.reconfirmation {
+  border-left: 4px double var(--gold);
+}
+
+.cancelled,
+.rejected {
+  border-left-style: dotted;
+  text-decoration: line-through;
+}
+
+.saved {
+  border-left-color: var(--gold);
+  border-left-style: solid;
+}
+
+.selectedDay {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.selectedDay h3 {
+  margin: 0;
+}
+
+.undated {
+  display: grid;
+  gap: 0.75rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+
+@media (max-width: 40rem) {
+  .weekdayGrid,
+  .dayGrid {
+    gap: 0.2rem;
+  }
+
+  .dayButton {
+    min-height: 4.2rem;
+    padding: 0.3rem;
+  }
+
+  .marker {
+    border-left-width: 2px;
+    padding-left: 0.15rem;
+    font-size: 0.64rem;
+  }
+
+  .markerCount {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planning *,
+  .planning *::before,
+  .planning *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

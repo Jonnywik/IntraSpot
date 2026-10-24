@@ -73,6 +73,7 @@ def intake_registration(
     idempotency_key: str,
     *,
     persona_shared: bool = False,
+    blocked_attendee_acknowledged: bool = False,
 ) -> str:
     """Commit one durable admission receipt before any registration result is computed."""
     _validate_idempotency_key(idempotency_key)
@@ -94,6 +95,8 @@ def intake_registration(
                     raise DomainError('idempotency_key_reused', 'This idempotency key was already used for another event.', 409)
                 if existing.persona_shared != persona_shared:
                     raise DomainError('idempotency_key_reused', 'This idempotency key was already used with a different persona-sharing choice.', 409)
+                if existing.blocked_attendee_acknowledged != blocked_attendee_acknowledged:
+                    raise DomainError('idempotency_key_reused', 'This idempotency key was already used with different registration choices.', 409)
                 receipt_id = existing.id
             else:
                 event_order = db.execute(
@@ -104,6 +107,22 @@ def intake_registration(
                 ).scalar_one_or_none()
                 if event_order is None:
                     raise DomainError('event_not_found', 'The event could not be found.', 404)
+                if not blocked_attendee_acknowledged:
+                    user = db.get(User, user_id)
+                    timestamp = now()
+                    if (
+                        user is not None
+                        and user.active
+                        and email_is_eligible(user.email, user.email_verified)
+                        and profile_is_complete(user)
+                        and _is_public_future_event(db, event_id, timestamp)
+                        and _has_blocked_confirmed_attendee(db, user_id, event_id)
+                    ):
+                        raise DomainError(
+                            'blocked_attendee_warning',
+                            'A blocked attendee is currently registered for this event. Acknowledge the warning to continue.',
+                            409,
+                        )
                 receipt = RegistrationReceipt(
                     id=uid(),
                     user_id=user_id,
@@ -111,6 +130,7 @@ def intake_registration(
                     idempotency_key=idempotency_key,
                     event_order=event_order,
                     persona_shared=persona_shared,
+                    blocked_attendee_acknowledged=blocked_attendee_acknowledged,
                 )
                 db.add(receipt)
                 db.flush()
@@ -146,12 +166,14 @@ def submit_registration(
     idempotency_key: str,
     *,
     persona_shared: bool = False,
+    blocked_attendee_acknowledged: bool = False,
 ) -> RegistrationOutcome:
     receipt_id = intake_registration(
         user_id,
         event_id,
         idempotency_key,
         persona_shared=persona_shared,
+        blocked_attendee_acknowledged=blocked_attendee_acknowledged,
     )
     catch_up_event(event_id)
     return registration_outcome(receipt_id)
@@ -166,6 +188,54 @@ def registration_outcome(receipt_id: str) -> RegistrationOutcome:
         if receipt.result is None or receipt.http_status is None:
             raise DomainError('registration_processing_pending', 'The registration request is still processing. Retry with the same idempotency key.', 503)
         return RegistrationOutcome(dict(receipt.result), receipt.http_status)
+
+
+def _is_public_future_event(db: Session, event_id: str, at: datetime) -> bool:
+    return db.scalar(
+        select(Event.id)
+        .join(Organization, Organization.id == Event.org_id)
+        .where(
+            Event.id == event_id,
+            Event.status == 'published',
+            Event.starts_at > at,
+            Organization.accreditation_status == 'approved',
+        )
+    ) is not None
+
+
+def _has_blocked_confirmed_attendee(db: Session, user_id: str, event_id: str) -> bool:
+    from app.domains.memberships.models import EventAccessRevocation
+    from app.domains.personas.models import UserBlock
+
+    revoked = select(EventAccessRevocation.id).where(
+        EventAccessRevocation.event_id == Registration.event_id,
+        EventAccessRevocation.user_id == Registration.user_id,
+        EventAccessRevocation.cutoff_order >= Registration.admission_order,
+    ).exists()
+    return db.scalar(
+        select(1)
+        .select_from(UserBlock)
+        .join(Registration, Registration.user_id == UserBlock.target_id)
+        .where(
+            UserBlock.blocker_id == user_id,
+            Registration.event_id == event_id,
+            Registration.status == 'confirmed',
+            ~revoked,
+        )
+        .limit(1)
+    ) is not None
+
+
+def registration_block_warning(user_id: str, event_id: str) -> bool:
+    factory = session_factory()
+    with factory() as db:
+        user = db.get(User, user_id)
+        if user is None or not user.active or not email_is_eligible(user.email, user.email_verified):
+            raise DomainError('registration_ineligible', 'An eligible active account is required.', 403)
+        timestamp = now()
+        if not _is_public_future_event(db, event_id, timestamp):
+            raise DomainError('event_not_found', 'The event could not be found.', 404)
+        return _has_blocked_confirmed_attendee(db, user_id, event_id)
 
 
 def _registration_result(db: Session, registration: Registration) -> dict[str, Any]:
@@ -752,8 +822,14 @@ def list_registration_reviews(reviewer_id: str, event_id: str) -> list[dict[str,
             for row in registrations
             if row.persona_shared and event.ends_at is not None and timestamp < event.ends_at
         }
-        personas = {}
+        blocked_ids = set()
         if opted_in_ids:
+            from app.domains.personas.service import blocked_user_ids
+
+            blocked_ids = set(blocked_user_ids(db, reviewer_id))
+        visible_persona_ids = opted_in_ids - blocked_ids
+        personas = {}
+        if visible_persona_ids:
             rows = db.execute(
                 select(
                     User.id,
@@ -762,7 +838,7 @@ def list_registration_reviews(reviewer_id: str, event_id: str) -> list[dict[str,
                     User.tags,
                     User.pronouns,
                     User.icebreaker,
-                ).where(User.id.in_(opted_in_ids))
+                ).where(User.id.in_(visible_persona_ids))
             ).all()
             personas = {
                 row.id: {
@@ -1000,11 +1076,14 @@ def list_my_registrations(user_id: str) -> list[dict[str, Any]]:
             .order_by(Event.starts_at.asc().nulls_last(), Event.id.asc())
         ).all()
         timestamp = now()
+        from app.domains.featured.service import active_featured_event_ids
+        featured_ids = active_featured_event_ids(db, [event for _, event, _ in rows], at=timestamp)
         results = []
         for registration, event, organization in rows:
             result = _registration_result(db, registration)
             result.update({
                 'event_title': event.title,
+                'is_featured': event.id in featured_ids,
                 'starts_at': event.starts_at,
                 'ends_at': event.ends_at,
                 'organization_name': organization.name,

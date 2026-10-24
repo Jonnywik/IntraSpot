@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { EventArtwork } from "@/app/event-artwork";
+import { FeaturedBadge } from "@/features/featured/FeaturedBadge";
 import { Feedback } from "@/components/feedback";
+import { MediaUploader } from "@/features/media/MediaUploader";
+import type { MediaMutationOut } from "@/features/media/types";
 import { ApiError, api } from "@/lib/api";
 import { fromUtcToManila, formatDate, formatTime, toUtcFromManila } from "@/lib/date";
 import { useT } from "@/lib/i18n";
@@ -243,6 +246,7 @@ function DraftEditorContent({
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [reloading, setReloading] = useState(false);
+  const [mediaBusy, setMediaBusy] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [messageKey, setMessageKey] = useState<string | null>(null);
   const currentDraft = draft ?? draftResource.data;
@@ -256,6 +260,8 @@ function DraftEditorContent({
   const queuedSaveRef = useRef(false);
   const accountSwitchAcceptedRef = useRef(false);
   const mutationInFlightRef = useRef(false);
+  const mediaBusyRef = useRef(false);
+  const mediaStartRevisionRef = useRef<number | null>(null);
 
   const orgId = currentDraft?.org_id || requestedOrgId;
   const workspaceResource = useApiResource<Workspace>(
@@ -277,6 +283,16 @@ function DraftEditorContent({
   const hasDraftVersion = Boolean(currentDraft?.draft_version);
   const metadataValidation = metadataIssues(form);
   const issues = [...publishIssues(form), ...metadataValidation];
+  const mediaMutationDisabled = Boolean(
+    !canEdit ||
+    !hasDraftVersion ||
+    mediaBusy ||
+    isDirty ||
+    saving ||
+    publishing ||
+    reloading ||
+    saveStatus !== "saved",
+  );
 
   useEffect(() => {
     formRef.current = form;
@@ -286,7 +302,7 @@ function DraftEditorContent({
   }, [form, currentDraft, editRevision, savedRevision]);
 
   function updateForm(nextForm: DraftForm) {
-    if (publishing) return;
+    if (publishing || mediaBusyRef.current) return;
     formRef.current = nextForm;
     setFormState(nextForm);
     const nextRevision = editRevisionRef.current + 1;
@@ -344,7 +360,7 @@ function DraftEditorContent({
   }
 
   const saveLatestDraft = useCallback(async () => {
-    if (accountSwitchAcceptedRef.current) return;
+    if (accountSwitchAcceptedRef.current || mediaBusyRef.current) return;
     if (saveInFlightRef.current) {
       if (editRevisionRef.current > activeSaveRevisionRef.current) queuedSaveRef.current = true;
       return;
@@ -447,7 +463,7 @@ function DraftEditorContent({
 
   async function reloadSavedDraft() {
     const current = draftRef.current ?? currentDraft;
-    if (!token || !current || reloading || saving || publishing) return;
+    if (!token || !current || reloading || saving || publishing || mediaBusyRef.current || mutationInFlightRef.current) return;
     if (!window.confirm(t("Reload the saved draft and replace the contents currently in this editor?"))) return;
     setReloading(true);
     setErrorKey(null);
@@ -488,6 +504,7 @@ function DraftEditorContent({
       !latestDraft.draft_version ||
       saving ||
       publishing ||
+      mediaBusyRef.current ||
       editRevisionRef.current !== savedRevisionRef.current ||
       saveStatus !== "saved" ||
       publishIssues(latestForm).length > 0 ||
@@ -524,6 +541,47 @@ function DraftEditorContent({
       setPublishing(false);
     }
   }
+
+  const onBannerBusyChange = useCallback((busy: boolean) => {
+    mediaBusyRef.current = busy;
+    mediaStartRevisionRef.current = busy ? editRevisionRef.current : null;
+    setMediaBusy(busy);
+  }, []);
+  const onBannerConflict = useCallback(() => {
+    setSaveStatus("conflict");
+  }, []);
+  const onBannerChanged = useCallback((result: MediaMutationOut) => {
+    const latestDraft = draftRef.current ?? currentDraft;
+    if (!latestDraft) return;
+
+    const nextDraft: VersionedPrivateEvent = {
+      ...latestDraft,
+      banner_url: result.media_url,
+      ...(result.draft_version ? { draft_version: result.draft_version } : {}),
+    };
+    draftRef.current = nextDraft;
+    setDraft(nextDraft);
+
+    if (!result.draft_version) {
+      setSaveStatus("conflict");
+      setErrorKey("The banner changed, but its save version is missing. Reload the saved draft before continuing.");
+      return;
+    }
+
+    const latestForm = formRef.current ?? form;
+    const mediaStartRevision = mediaStartRevisionRef.current;
+    if (
+      result.media_url &&
+      !latestForm.bannerKey &&
+      mediaStartRevision !== null &&
+      editRevisionRef.current === mediaStartRevision &&
+      savedRevisionRef.current === mediaStartRevision
+    ) {
+      const nextForm = { ...latestForm, bannerKey: "heritage" as BannerKey };
+      formRef.current = nextForm;
+      setFormState(nextForm);
+    }
+  }, [currentDraft, form]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
@@ -628,6 +686,7 @@ function DraftEditorContent({
     hasDraftVersion &&
     issues.length === 0 &&
     !isDirty &&
+    !mediaBusy &&
     !saving &&
     !publishing &&
     saveStatus === "saved",
@@ -735,6 +794,7 @@ function DraftEditorContent({
         <EventPreview
           t={t}
           event={currentDraft}
+          token={token}
           title={currentDraft.title || t("Untitled event")}
           summary={currentDraft.summary}
           description={currentDraft.description ?? ""}
@@ -781,7 +841,7 @@ function DraftEditorContent({
         }}
         noValidate
       >
-        <fieldset className={styles.sections} disabled={publishing || reloading}>
+        <fieldset className={styles.sections} disabled={publishing || reloading || mediaBusy}>
           <legend className={styles.visuallyHidden}>{t("Event fields")}</legend>
           <section className={styles.card} aria-labelledby="draft-basics-heading">
             <div className={styles.sectionHeading}>
@@ -840,6 +900,18 @@ function DraftEditorContent({
                 {t("Cost label")}
                 <input maxLength={100} value={form.costLabel} onChange={(event) => updateField("costLabel", event.target.value)} />
               </label>
+            </div>
+            <div className={`${styles.field} ${styles.descriptionField}`}>
+              <MediaUploader
+                endpoint={`/events/${encodeURIComponent(currentDraft.id)}/banner`}
+                token={token}
+                ifMatch={currentDraft.draft_version ?? undefined}
+                disabled={mediaMutationDisabled}
+                currentUrl={currentDraft.banner_url ?? null}
+                onChanged={onBannerChanged}
+                onBusyChange={onBannerBusyChange}
+                onConflict={onBannerConflict}
+              />
             </div>
             <label className={`${styles.field} ${styles.descriptionField}`}>
               {t("Tags (optional)")}
@@ -972,7 +1044,7 @@ function DraftEditorContent({
               <button
                 className="button button-secondary"
                 type="submit"
-                disabled={!isDirty || saving || publishing || saveStatus === "conflict" || !hasDraftVersion}
+                disabled={!isDirty || saving || publishing || mediaBusy || saveStatus === "conflict" || !hasDraftVersion}
                 aria-label={t("Save draft")}
               >
                 {t("Save draft")}
@@ -982,13 +1054,13 @@ function DraftEditorContent({
                   {t("Publish")}
                 </button>
               ) : (
-                <button className="button" type="button" disabled={!canPublish} onClick={() => void publishDraft()}>
+                <button className="button" type="button" disabled={!canPublish || mediaBusy} onClick={() => void publishDraft()}>
                   {t("Publish")}
                 </button>
               )}
             </div>
             {saveStatus === "conflict" || !hasDraftVersion ? (
-              <button className={styles.textButton} type="button" disabled={reloading} onClick={() => void reloadSavedDraft()}>
+              <button className={styles.textButton} type="button" disabled={reloading || mediaBusy} onClick={() => void reloadSavedDraft()}>
                 {reloading ? t("Reloading saved draft…") : t("Reload saved draft")}
               </button>
             ) : null}
@@ -1009,7 +1081,8 @@ function DraftEditorContent({
 
           <EventPreview
             t={t}
-            event={{ banner_key: form.bannerKey || null, event_type: form.eventType, title: previewTitle }}
+            event={{ banner_key: form.bannerKey || null, banner_url: currentDraft.banner_url ?? null, event_type: form.eventType, title: previewTitle }}
+            token={token}
             title={previewTitle}
             summary={form.summary}
             description={form.description}
@@ -1034,6 +1107,7 @@ function DraftEditorContent({
 function EventPreview({
   t,
   event,
+  token,
   title,
   summary,
   description,
@@ -1049,7 +1123,8 @@ function EventPreview({
   coarseArea,
 }: {
   t: ReturnType<typeof useT>;
-  event: Pick<PrivateEvent, "banner_key" | "event_type" | "title">;
+  event: Pick<PrivateEvent, "banner_key" | "banner_url" | "event_type" | "title"> & {is_featured?: boolean};
+  token?: string | null;
   title: string;
   summary: string;
   description: string;
@@ -1073,8 +1148,9 @@ function EventPreview({
         </div>
         <span className={styles.previewDot} aria-hidden="true" />
       </div>
-      <EventArtwork event={event} />
+      <EventArtwork event={event} token={token} />
       <div className={styles.previewContent}>
+        {event.is_featured && <FeaturedBadge />}
         {event.event_type === "flash" && (
           <span className={styles.eventTypeBadge}>{t("Flash event")}</span>
         )}

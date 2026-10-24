@@ -728,9 +728,9 @@ def test_public_search_sort_and_projection_hide_private_fields(client, db, make_
     assert set(card) == {
         "id", "org_id", "organization_name", "title", "summary", "description",
         "starts_at", "ends_at", "venue_name", "venue_address", "capacity",
-        "confirmed_count", "reserved_count", "remaining_spots", "interest_count", "banner_key",
+        "confirmed_count", "reserved_count", "remaining_spots", "interest_count", "banner_key", "banner_url",
         "cost_label", "registration_mode", "review_window_minutes", "material_revision",
-        "status", "published_at", "event_type", "tags", "coarse_area", "recommendation_reasons",
+        "status", "published_at", "event_type", "tags", "coarse_area", "recommendation_reasons", "is_featured",
     }
 
     newest = client.get("/api/v1/events", params={"sort": "newest"})

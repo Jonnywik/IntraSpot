@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { api, ApiError } from '@/lib/api';
 import { useT } from '@/lib/i18n';
+import { PersonaActions } from '@/features/personas/PersonaActions';
 import type { Actor, ContentItem, ReportReceipt } from '@/lib/types';
 import styles from './communication.module.css';
 
@@ -192,6 +193,15 @@ export function ContentSafetyControls({
             ) : null}
           </form>
         </details>
+      ) : null}
+      {canReport && actor ? (
+        <PersonaActions
+          key={`${eventId}:${item.author_id}:${actor.id}:${token}`}
+          eventId={eventId}
+          targetUserId={item.author_id}
+          actorId={actor.id}
+          token={token}
+        />
       ) : null}
       {hideError ? <span className={styles.errorText} role="alert">{translateMessage(hideError, t)}</span> : null}
     </div>

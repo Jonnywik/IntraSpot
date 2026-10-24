@@ -31,6 +31,7 @@ class OrganizationOut(BaseModel):
     id: str
     name: str
     description: str
+    logo_url: str | None = None
     accreditation_status: Literal['pending', 'approved', 'rejected']
     created_at: datetime
 

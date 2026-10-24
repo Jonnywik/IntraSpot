@@ -16,11 +16,16 @@ import {discoveryMessages} from '../Code/Frontend/lib/discovery-messages.ts';
 import {announcementMessages} from '../Code/Frontend/lib/announcement-messages.ts';
 import {announcementReportMessages} from '../Code/Frontend/lib/announcement-report-messages.ts';
 import {authMessages} from '../Code/Frontend/lib/auth-messages.ts';
+import {mediaMessages} from '../Code/Frontend/features/media/messages.ts';
+import {planningMessages} from '../Code/Frontend/features/planning/messages.ts';
+import {featuredMessages} from '../Code/Frontend/features/featured/messages.ts';
+import {personaMessages} from '../Code/Frontend/features/personas/messages.ts';
+import {ownershipMessages} from '../Code/Frontend/features/ownership/messages.ts';
 import {formatDate, formatTime} from '../Code/Frontend/lib/date.ts';
 
 const dictionaries = [sharedMessages,eventMessages,socialMessages,attendeeMessages,
   workspaceMessages,platformMessages,draftMessages,inboxMessages,mobileMessages,discoveryMessages,
-  announcementMessages,announcementReportMessages,authMessages];
+  announcementMessages,announcementReportMessages,authMessages,mediaMessages,planningMessages,featuredMessages,personaMessages,ownershipMessages];
 const filipino = {...Object.fromEntries(Object.entries(messages).map(([key,value])=>[key,value.fil])),...Object.assign({},...dictionaries)};
 const placeholders = value => [...value.matchAll(/\{([A-Za-z0-9_]+)\}/g)].map(match=>match[1]).sort();
 
@@ -51,6 +56,12 @@ test('Attendee and management interface literal messages have Filipino translati
     'features/announcements/AnnouncementReader.tsx',
     'features/announcements/AnnouncementManager.tsx',
     'features/identity/GoogleSignIn.tsx','app/auth/callback/page.tsx',
+    'features/planning/SaveEventButton.tsx','features/planning/ConflictWarning.tsx',
+    'features/planning/SavedEvents.tsx','features/planning/EventCalendar.tsx',
+    'features/featured/FeaturedControls.tsx','features/featured/FeaturedBadge.tsx',
+    'features/personas/PersonaActions.tsx','features/personas/BlockList.tsx',
+    'features/personas/EventPersonaSharing.tsx',
+    'features/ownership/OwnershipTransferPanel.tsx',
   ];
   const missing = new Set();
   for (const file of files) {

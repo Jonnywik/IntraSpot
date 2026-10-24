@@ -73,6 +73,9 @@ class Event(Base):
     venue_address: Mapped[str | None] = mapped_column(String(500), nullable=True)
     capacity: Mapped[int | None] = mapped_column(Integer, nullable=True)
     banner_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    banner_media_id: Mapped[str | None] = mapped_column(
+        ForeignKey('media_assets.id', name='fk_events_banner_media', use_alter=True), nullable=True,
+    )
     cost_label: Mapped[str] = mapped_column(String(100), nullable=False, default="Free", server_default="Free")
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="draft", server_default="draft")
     registration_mode: Mapped[str] = mapped_column(String(16), nullable=False, default="instant", server_default="instant")
