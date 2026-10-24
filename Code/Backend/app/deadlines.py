@@ -15,6 +15,7 @@ def run_once() -> int:
     from app.domains.chat.service import purge_event_chat_locked
     from app.domains.memberships.applications import catch_up_invitations_locked
     from app.domains.announcements.report_service import catch_up_announcement_reports_locked
+    from app.domains.eventsafety.service import sweep_expired_reports, sweep_expired_suspensions
     from app.domains.organizations.models import Organization
     from app.db.models import now
 
@@ -38,13 +39,15 @@ def run_once() -> int:
             org = db.scalar(select(Organization).where(Organization.id == org_id).with_for_update())
             if org is not None:
                 boundary = now()
+                sweep_expired_suspensions(db, org_id=org.id, at=boundary)
+                sweep_expired_reports(db, org_id=org.id, at=boundary)
                 catch_up_invitations_locked(db, org.id, boundary)
                 catch_up_announcement_reports_locked(db, org.id, boundary)
     return len(event_ids)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='Catch up local registrations, reports, invitations and chat cleanup.')
+    parser = argparse.ArgumentParser(description='Catch up local registrations, safety/report expiry, invitations and chat cleanup.')
     parser.add_argument('--once', action='store_true', help='Process once and exit.')
     parser.add_argument('--interval', type=int, default=30, help='Polling interval in seconds (1–3600).')
     args = parser.parse_args()

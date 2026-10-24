@@ -13,6 +13,16 @@ export function isUncertainSafetyFailure(status) {
   return status === null || status === 0 || status === 408 || status === 429 || status >= 500;
 }
 
+export function eventReportDecisionOutcome(result, reportId, action, version) {
+  const statuses = {dismiss: 'dismissed', hide: 'hidden', remove: 'removed', uphold: 'upheld'};
+  if (!result || typeof result !== 'object' || Array.isArray(result) ||
+    typeof action !== 'string' || !Object.hasOwn(statuses, action) ||
+    !Number.isSafeInteger(version) || version < 1 || !Number.isSafeInteger(result.version) ||
+    result.id !== reportId || result.version !== version + 1) return 'uncertain';
+  if (result.status === 'expired') return 'expired';
+  return result.status === statuses[action] ? 'applied' : 'uncertain';
+}
+
 export function parseBoundedEventEvidence(evidence) {
   if (typeof evidence !== 'string' || evidence.length > 4096) return null;
 

@@ -18,8 +18,8 @@ def test_social_clock_is_sampled_after_event_lock(client, db, make_event, make_u
     boundary = event.starts_at
     monkeypatch.setattr(service, 'now', lambda: boundary - timedelta(seconds=1))
     original = service._published_event
-    def advance_clock_after_lock(session, event_id, *, lock=False):
-        result = original(session, event_id, lock=lock)
+    def advance_clock_after_lock(session, event_id, *, lock=False, **visibility):
+        result = original(session, event_id, lock=lock, **visibility)
         if lock:
             monkeypatch.setattr(service, 'now', lambda: boundary)
         return result

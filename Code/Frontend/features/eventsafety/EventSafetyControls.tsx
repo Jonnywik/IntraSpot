@@ -98,7 +98,7 @@ function EventSafetyControlsContext({eventId, token}: {eventId: string; token: s
       if (status === 409) {
         attemptRef.current = null;
         setAttempt(null);
-        setFeedback({contextKey, key: 'This event changed while you were reviewing it. The latest safety status is loaded. Review before making another change.', tone: 'warning'});
+        setFeedback({contextKey, key: 'This event changed while you were reviewing it. Refresh and review the latest safety status before making another change.', tone: 'warning'});
       } else if (isUncertainSafetyFailure(status)) {
         setFeedback({contextKey, key: 'The event safety change could not be confirmed. Retry the same request.', tone: 'warning'});
       } else {
@@ -138,7 +138,7 @@ function EventSafetyControlsContext({eventId, token}: {eventId: string; token: s
     const current = resource.data;
     setConfirmation(null);
     if (!reviewed || reviewed.contextKey !== contextKey || !resource.fresh || !current || current.version !== reviewed.version) {
-      setFeedback({contextKey, key: 'This event changed while you were reviewing it. The latest safety status is loaded. Review before making another change.', tone: 'warning'});
+      setFeedback({contextKey, key: 'This event changed while you were reviewing it. Refresh and review the latest safety status before making another change.', tone: 'warning'});
       resource.refresh();
       return;
     }

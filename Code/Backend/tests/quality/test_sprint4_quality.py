@@ -120,8 +120,8 @@ def test_event_list_statement_growth_is_bounded(client, db, make_event):
     finally:
         sa_event.remove(eng, "before_cursor_execute", before_cursor)
 
-    # Event rows, aggregated attendance, and one batched Featured lookup.
-    assert second == first == 3
+    # Rows, attendance, Featured and bounded suspension-expiry lookup stay constant.
+    assert 0 < first == second <= 4
 
 
 # --- D3: unbounded summary payload (NOW-FAILS) ---

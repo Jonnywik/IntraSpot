@@ -4,7 +4,7 @@ import {useCallback, useEffect, useRef, useState, type MouseEvent} from 'react';
 import {ApiError, api} from '@/lib/api';
 import {formatDate, formatTime} from '@/lib/date';
 import {usePreferences} from '@/lib/preferences';
-import {captureSafetyCommand, eventReportActions, isUncertainSafetyFailure, matchesSafetyCommand, parseBoundedEventEvidence, type SafetyCommand} from './safety-helpers.mjs';
+import {captureSafetyCommand, eventReportActions, eventReportDecisionOutcome, isUncertainSafetyFailure, matchesSafetyCommand, parseBoundedEventEvidence, type SafetyCommand} from './safety-helpers.mjs';
 import type {EventReportDecisionInput, EventReportReview, SafetyAuditOut, SafetyReportAction, SafetyReportReason} from './types';
 import {SafetyDialog} from './SafetyDialog';
 import {EventSafetyControls} from './EventSafetyControls';
@@ -137,19 +137,24 @@ function EventSafetyQueueContext({token, orgId}: {token: string; orgId?: string}
         method: 'POST', token, body: command.body as EventReportDecisionInput, signal: controller.signal,
       });
       if (controller.signal.aborted) return;
-      if (!result || result.id !== reportId || result.version <= Number(command.body.version)) {
+      const outcome = eventReportDecisionOutcome(result, reportId, command.body.action, command.body.version);
+      if (outcome === 'uncertain') {
         throw new Error('The report decision could not be confirmed.');
       }
       attemptRef.current = null;
       setAttempt(null);
-      setFeedback({contextKey, key: 'The report decision was saved.', tone: 'success'});
+      if (outcome === 'expired') {
+        setFeedback({contextKey, key: 'This report expired before your decision was applied. No decision was saved. Refresh the queue to review the latest status.', tone: 'warning'});
+      } else {
+        setFeedback({contextKey, key: 'The report decision was saved.', tone: 'success'});
+      }
     } catch (error) {
       if (controller.signal.aborted) return;
       const status = statusOf(error);
       if (status === 409) {
         attemptRef.current = null;
         setAttempt(null);
-        setFeedback({contextKey, key: 'This report or event changed while you were reviewing it. The latest queue is loaded. Review before deciding again.', tone: 'warning'});
+        setFeedback({contextKey, key: 'This report or event changed while you were reviewing it. Refresh the queue and review the latest status before deciding again.', tone: 'warning'});
       } else if (isUncertainSafetyFailure(status)) {
         setFeedback({contextKey, key: 'The report decision could not be confirmed. Retry the same request.', tone: 'warning'});
       } else {
@@ -193,7 +198,7 @@ function EventSafetyQueueContext({token, orgId}: {token: string; orgId?: string}
     if (!reviewed || reviewed.contextKey !== contextKey || !resource.fresh || !current ||
       current.version !== reviewed.reportVersion || current.event_version !== reviewed.eventVersion ||
       !eventReportActions(current, now).includes(reviewed.action)) {
-      setFeedback({contextKey, key: 'This report or event changed while you were reviewing it. The latest queue is loaded. Review before deciding again.', tone: 'warning'});
+      setFeedback({contextKey, key: 'This report or event changed while you were reviewing it. Refresh the queue and review the latest status before deciding again.', tone: 'warning'});
       resource.refresh();
       return;
     }
@@ -246,7 +251,7 @@ function EventSafetyQueueContext({token, orgId}: {token: string; orgId?: string}
           {resource.status === 'forbidden' && <p className="panel error" role="alert">{t('Your sign-in or staff access has ended.')}</p>}
           {resource.status === 'error' && <div className={styles.feedback} data-tone="error" role="alert"><p>{t('The event safety report queue could not be loaded.')}</p><button className="button button-secondary" type="button" onClick={resource.refresh}>{t('Retry loading event reports')}</button></div>}
           {visibleFeedback && <p className={styles.feedback} data-tone={visibleFeedback.tone} role={visibleFeedback.tone === 'error' ? 'alert' : 'status'}>{t(visibleFeedback.key)}</p>}
-          {visibleAttempt && <div className={styles.attempt}><p>{t('The report decision could not be confirmed. Retry the same request.')}</p><button className="button button-secondary" type="button" disabled={busy} onClick={() => void sendDecision(visibleAttempt.command, visibleAttempt.reportId, true)}>{t(busy ? 'Saving report decision…' : 'Retry same report decision')}</button></div>}
+          {visibleAttempt && <div className={styles.attempt}><p>{t('The pending decision for report {reportId} could not be confirmed. Retry will resend that exact request.', {reportId: visibleAttempt.reportId})}</p><button className="button button-secondary" type="button" disabled={busy} onClick={() => void sendDecision(visibleAttempt.command, visibleAttempt.reportId, true)}>{t(busy ? 'Saving report decision…' : 'Retry same report decision')}</button></div>}
           {resource.fresh && reports.length === 0 && <p className={styles.muted}>{t('No event safety reports are available.')}</p>}
           {reports.length > 0 && (
             <div className={styles.queue}>

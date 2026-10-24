@@ -175,6 +175,19 @@ def _lock_event_context(db: Session, event_id: str) -> tuple[Event, str]:
     return event, org_id
 
 
+def _lock_published_events_for_suspension(db: Session, org_id: str) -> None:
+    """Close the admission race by locking event rows after the organization row."""
+    list(
+        db.scalars(
+            select(Event)
+            .where(Event.org_id == org_id, Event.status == "published")
+            .order_by(Event.id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+    )
+
+
 def _event_control(db: Session, event_id: str) -> EventControl | None:
     return db.scalar(
         select(EventControl)
@@ -939,6 +952,8 @@ def change_event_safety(
         raise _conflict("event_safety_version_conflict", "Event safety state has changed.")
     if _terminal(db, event):
         raise _conflict("event_terminal", "This event has already been cancelled or removed.")
+    if action == "hide" and event.status != "published":
+        raise _conflict("event_hide_unavailable", "Only a published event can be hidden.")
     if action == "cancel" and event.status != "published":
         raise _conflict("event_cancel_unavailable", "Only a published event can be cancelled.")
 
@@ -1048,6 +1063,9 @@ def change_organization_suspension(
     sweep_expired_suspensions(db, org_id, timestamp)
     organization_service.get_organization(db, org_id, lock=True)
     organization_service.require_platform_admin(db, actor)
+    if action == "suspend":
+        _lock_published_events_for_suspension(db, org_id)
+        organization_service.require_platform_admin(db, actor)
     suspension = db.scalar(
         select(OrganizationSuspension)
         .where(OrganizationSuspension.org_id == org_id)

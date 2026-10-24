@@ -1,6 +1,16 @@
 # IntraSpot local MVP
 
-## Current work — Sprint 21 manual staff attendance
+## Current work — Sprint 23 integrated verification and handoff
+
+The Sprint 1–22 local system has completed the Sprint 23 developer checkpoint,
+targeted security fixes and handoff. Use the [local developer handoff](local-handoff.md)
+for the existing profile/port layout, startup/deadline runner, serial checks,
+settled rules and explicit release boundaries. Current evidence is in the
+[Sprint 23 acceptance record](../validation/sprint-23-acceptance-2026-10-24.md).
+The source-of-truth notes remain the canonical Obsidian AI Index and topic notes.
+GitHub checkpoints are not deployment or participant approval.
+
+### Historical Sprint 21 checkpoint
 
 Desktop staff workspaces now provide closed-by-default manual check-in,
 confirmed-only registration references, mark/clear correction and audited,
