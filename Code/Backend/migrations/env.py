@@ -14,6 +14,7 @@ from app.domains.featured.models import FeaturedRequest, FeaturedDecision
 from app.domains.personas.models import UserBlock, EventPersonaVisibility
 from app.domains.ownership.models import OwnershipTransfer, OwnershipTransferAudit
 from app.domains.attendance.models import AttendanceSession, AttendanceMark, AttendanceAudit
+from app.domains.eventsafety.models import EventControl, OrganizationSuspension, EventReport, SafetyAudit
 from app.domains.registrations.models import RegistrationReceipt, Registration
 from app.notifications import Notification
 from app.domains.social.models import EventReaction, EventComment

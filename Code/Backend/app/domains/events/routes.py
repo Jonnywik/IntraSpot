@@ -9,6 +9,9 @@ from app.core.auth import current_actor, optional_actor, require_eligible
 from app.core.contracts import Actor
 from app.core.errors import DomainError
 from app.core.communication import require_communication_allowed
+from app.core.event_safety import (discovery_clause, registration_is_available,
+                                   require_readable_event, require_publishable_event,
+                                   require_mutable_event)
 from app.db.models import now
 from app.db.session import get_db
 from app.domains.events.models import Event
@@ -96,6 +99,7 @@ def _public_projection(
     reserved: int | None = None,
     recommendation_reasons: list[str] | None = None,
     is_featured: bool | None = None,
+    registration_available: bool | None = None,
 ) -> EventPublic:
     if is_featured is None:
         from app.domains.featured.service import active_featured_event_ids
@@ -107,6 +111,8 @@ def _public_projection(
     capacity = event.capacity or 0
     return EventPublic(
         is_featured=is_featured,
+        registration_available=(registration_is_available(db, event)
+                                if registration_available is None else registration_available),
         id=event.id,
         org_id=event.org_id,
         organization_name=organization_name,
@@ -234,11 +240,13 @@ def list_events(
     # semantics (event.starts_at <= now()), and freezes boundary tests to this
     # module's `now` symbol (previously tests patched `func` from this module).
     boundary = now()
+    from app.domains.eventsafety.service import sweep_expired_suspensions
+    sweep_expired_suspensions(db, at=boundary)
     statement = (
         select(Event, Organization.name)
         .join(Organization, Organization.id == Event.org_id)
         .where(Event.status == "published", Event.ends_at > boundary,
-               Organization.accreditation_status == "approved")
+               Organization.accreditation_status == "approved", discovery_clause(boundary))
     )
     if not include_flash:
         statement = statement.where(Event.event_type == "scheduled")
@@ -309,6 +317,7 @@ def list_events(
             reserved_counts.get(event.id, 0),
             reason_codes_by_event.get(event.id, []),
             is_featured=event.id in featured_ids,
+            registration_available=True,
         )
         for event, organization_name in rows
     ]
@@ -317,10 +326,16 @@ def list_events(
 @router.get("/events/{event_id}", response_model=EventPublic)
 def get_public_event(
     event_id: UUID,
+    response: Response,
     db: Session = Depends(get_db, scope="function"),
     _actor: Actor | None = Depends(optional_actor),
 ):
+    response.headers["Cache-Control"] = "private, no-store"
+    response.headers["Vary"] = "Authorization"
     event = _event_or_404(db, str(event_id))
+    from app.domains.eventsafety.service import sweep_expired_suspensions
+    sweep_expired_suspensions(db, org_id=event.org_id)
+    require_readable_event(db, event, _actor.user_id if _actor else None)
     organization = db.get(Organization, event.org_id)
     if event.status != "published" or organization is None or organization.accreditation_status != "approved":
         raise DomainError("event_not_found", "Event was not found.", 404)
@@ -427,6 +442,7 @@ def patch_event_draft(
     organization = require_manager(db, actor, event.org_id, lock=True)
     _require_draft_writable(organization)
     db.refresh(event, with_for_update=True)
+    require_mutable_event(db, event)
     require_draft_version(event, if_match)
     fields = payload.model_dump(exclude_unset=True)
     event = update_draft(db, event, fields)
@@ -449,6 +465,7 @@ def change_event(
     if event is None:
         raise DomainError("event_not_found", "Event was not found.", 404)
     organization = require_manager(db, actor, event.org_id)
+    require_mutable_event(db, event)
     if event.status != "published":
         raise DomainError(
             "event_change_requires_published",
@@ -496,11 +513,14 @@ def publish_event(
     if_match: str | None = Header(default=None, max_length=128),
 ):
     event = _event_or_404(db, str(event_id))
+    from app.domains.eventsafety.service import sweep_expired_suspensions
+    sweep_expired_suspensions(db, org_id=event.org_id)
     organization = require_publishing(db, actor, event.org_id)
     # The organization lock serializes publishers for this organization, but this
     # Event may have been loaded before waiting for that lock. Refresh it under a
     # row lock so a second publisher observes the first transaction's terminal state.
     db.refresh(event, with_for_update=True)
+    require_publishable_event(db, event)
     require_draft_version(event, if_match)
     require_communication_allowed(db, actor.user_id, lock=True)
     publication_time = now()

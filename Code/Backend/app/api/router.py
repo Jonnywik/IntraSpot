@@ -14,6 +14,7 @@ def api_router():
     from app.domains.personas.routes import router as personas
     from app.domains.ownership.routes import router as ownership
     from app.domains.attendance.routes import router as attendance
+    from app.domains.eventsafety.routes import router as eventsafety
     from app.domains.registrations.routes import router as registrations
     from app.domains.social.routes import router as social
     from app.domains.chat.routes import router as chat
@@ -27,7 +28,7 @@ def api_router():
 
     router = APIRouter(prefix='/api/v1', responses={status: {'model': ErrorEnvelope}
         for status in (400, 401, 403, 404, 409, 422, 500, 503)})
-    for domain in (identity, preferences, discovery_preferences, organizations, events, media, planning, featured, personas, ownership, attendance, registrations, social, chat, moderation, announcements, announcement_reports,
+    for domain in (identity, preferences, discovery_preferences, organizations, events, media, planning, featured, personas, ownership, attendance, eventsafety, registrations, social, chat, moderation, announcements, announcement_reports,
                    membership_applications, membership_access, notification_router(), local_demo):
         router.include_router(domain)
     return router

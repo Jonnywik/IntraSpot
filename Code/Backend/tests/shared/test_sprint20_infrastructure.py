@@ -22,7 +22,7 @@ def test_transfer_migration_roundtrip_preserves_creator_and_existing_rows(db, ma
             assert connection.scalar(text("SELECT to_regclass('ownership_transfers')")) is None
         command.upgrade(config, 'head')
         with engine().connect() as connection:
-            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
+            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
             assert connection.scalar(text('SELECT count(*) FROM ownership_transfers')) == 0
     finally:
         command.upgrade(config, 'head')
@@ -52,7 +52,7 @@ def test_transfer_history_cannot_be_silently_downgraded(db, make_org, make_user)
     with pytest.raises(RuntimeError, match='transfer history exists'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0014')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
         assert connection.scalar(text('SELECT count(*) FROM ownership_transfers')) == 1
 
 

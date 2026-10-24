@@ -165,6 +165,7 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
   const personaConsentId = `registration-persona-${event.id}`;
 
   function openConfirmation() {
+    if (event.registration_available === false) return;
     if (!Number.isFinite(startsAt) || startsAt <= Date.now()) {
       setNow(Date.now());
       return;
@@ -186,7 +187,7 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
   }
 
   async function submitRegistration() {
-    if (!token || !actor?.eligible || !actor.profile_complete || submitting) return;
+    if (!token || !actor?.eligible || !actor.profile_complete || submitting || event.registration_available === false) return;
     const previousAttempt = attemptKey.current?.eventId === event.id ? attemptKey.current : null;
     if (warningState === 'loading' || (warningState === 'idle' && !previousAttempt)) return;
     if (requiresBlockAcknowledgement && !blockWarningAcknowledged) return;
@@ -312,6 +313,9 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
     return <p className="muted">{t('Complete your profile before registering.')} <Link href="/profile">{t('Update your profile')}</Link>.</p>;
   }
 
+  if (event.registration_available === false) {
+    return <p className="muted" role="status">{t('This event is not accepting new registrations.')}</p>;
+  }
   if (eventStarted) {
     return (
       <div className="stack">

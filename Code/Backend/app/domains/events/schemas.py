@@ -91,6 +91,7 @@ class EventChangeInput(BaseModel):
 
 class EventPublic(BaseModel):
     is_featured: bool = False
+    registration_available: bool = True
     id: str
     org_id: str
     organization_name: str

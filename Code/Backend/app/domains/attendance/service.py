@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.errors import DomainError
+from app.core.event_safety import event_is_terminal
 from app.db.models import now, uid
 from app.domains.events.models import Event
 from app.domains.memberships import policy as membership_policy
@@ -70,8 +71,9 @@ def _write_access(
     return event, organization
 
 
-def _require_writable(event: Event, organization: Organization) -> None:
-    if event.status != "published" or organization.accreditation_status != "approved":
+def _require_writable(db: Session, event: Event, organization: Organization) -> None:
+    if (event.status != "published" or organization.accreditation_status != "approved"
+            or event_is_terminal(db, event)):
         raise DomainError(
             "attendance_event_not_writable",
             "Attendance can be changed only for a published event of an approved organization.",
@@ -154,7 +156,8 @@ def get_attendance(db: Session, actor_id: str, event_id: str) -> dict:
         "event_id": event.id,
         "is_open": session.is_open if session is not None else False,
         "version": session.version if session is not None else 0,
-        "writable": event.status == "published" and organization.accreditation_status == "approved",
+        "writable": (event.status == "published" and organization.accreditation_status == "approved"
+                     and not event_is_terminal(db, event)),
         "confirmed_count": len(attendees),
         "checked_in_count": checked_in_count,
         "attendees": attendees,
@@ -208,7 +211,7 @@ def set_attendance_session(
     if replay is not None:
         return replay
 
-    _require_writable(event, organization)
+    _require_writable(db, event, organization)
     session = _session(db, event.id, lock=True)
     current_version = session.version if session is not None else 0
     current_open = session.is_open if session is not None else False
@@ -274,7 +277,7 @@ def set_registration_attendance(
     if replay is not None:
         return replay
 
-    _require_writable(event, organization)
+    _require_writable(db, event, organization)
     session = _session(db, event.id, lock=True)
     current_version = session.version if session is not None else 0
     if payload.version != current_version:

@@ -22,10 +22,11 @@ import { featuredMessages } from '@/features/featured/messages';
 import { personaMessages } from '@/features/personas/messages';
 import { ownershipMessages } from '@/features/ownership/messages';
 import { attendanceMessages } from '@/features/attendance/messages';
+import { safetyMessages } from '@/features/eventsafety/messages';
 
 const filipinoMessages: Record<string, string> = {...sharedMessages, ...eventMessages, ...socialMessages, ...attendeeMessages,
   ...workspaceMessages, ...platformMessages, ...draftMessages, ...inboxMessages, ...mobileMessages, ...discoveryMessages,
-  ...announcementMessages, ...announcementReportMessages, ...authMessages, ...mediaMessages, ...planningMessages, ...featuredMessages, ...personaMessages, ...ownershipMessages, ...attendanceMessages};
+  ...announcementMessages, ...announcementReportMessages, ...authMessages, ...mediaMessages, ...planningMessages, ...featuredMessages, ...personaMessages, ...ownershipMessages, ...attendanceMessages, ...safetyMessages};
 
 export type TranslationValues = Record<string, string | number>;
 export type Translate = (english: string, values?: TranslationValues) => string;

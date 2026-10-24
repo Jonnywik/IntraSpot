@@ -13,6 +13,7 @@ from app.core.communication import (
     require_communication_allowed,
 )
 from app.core.contracts import Actor
+from app.core.event_safety import require_mutable_event, require_readable_event
 from app.core.errors import DomainError
 from app.core.communication_schemas import ContentCreate, ContentItem, ContentPage
 from app.db.models import now, uid
@@ -24,13 +25,24 @@ from app.domains.social.models import EventComment, EventReaction
 from app.domains.social.schemas import REACTION_KINDS, ReactionKind, ReactionSummary
 
 
-def _published_event(db: Session, event_id: str, *, lock: bool = False) -> Event:
+def _published_event(
+    db: Session,
+    event_id: str,
+    *,
+    viewer_id: str | None = None,
+    at: datetime | None = None,
+    lock: bool = False,
+    mutable: bool = False,
+) -> Event:
     statement = select(Event).where(Event.id == event_id)
     if lock:
         statement = statement.with_for_update().execution_options(populate_existing=True)
     event = db.scalar(statement)
     if event is None or event.status != "published":
         raise DomainError("event_not_found", "Event was not found.", 404)
+    if mutable:
+        require_mutable_event(db, event)
+    require_readable_event(db, event, viewer_id=viewer_id, at=at)
     return event
 
 
@@ -78,8 +90,8 @@ def get_reaction_summary(
     at: datetime | None = None,
 ) -> ReactionSummary:
     timestamp = at or now()
-    event = _published_event(db, str(event_id))
     viewer_id = actor.user_id if actor is not None else None
+    event = _published_event(db, str(event_id), viewer_id=viewer_id, at=timestamp)
     can_react = bool(actor and actor.eligible and event.starts_at > timestamp)
     return _reaction_summary(db, event, viewer_id, can_react)
 
@@ -91,7 +103,13 @@ def set_reaction(
     desired: ReactionKind | None,
     at: datetime | None = None,
 ) -> ReactionSummary:
-    event = _published_event(db, str(event_id), lock=True)
+    event = _published_event(
+        db,
+        str(event_id),
+        viewer_id=user_id,
+        lock=True,
+        mutable=True,
+    )
     timestamp = at or now()
     _require_prestart(event, timestamp)
 
@@ -166,7 +184,11 @@ def list_comments(
 ) -> ContentPage:
     if not 1 <= limit <= 100:
         raise DomainError("invalid_limit", "Limit must be between 1 and 100.", 422)
-    event = _published_event(db, str(event_id))
+    event = _published_event(
+        db,
+        str(event_id),
+        viewer_id=actor.user_id if actor is not None else None,
+    )
     statement = (
         select(EventComment, User)
         .join(User, User.id == EventComment.author_id)
@@ -229,7 +251,13 @@ def create_comment(
     payload: ContentCreate,
     at: datetime | None = None,
 ) -> ContentItem:
-    event = _published_event(db, str(event_id), lock=True)
+    event = _published_event(
+        db,
+        str(event_id),
+        viewer_id=author_id,
+        lock=True,
+        mutable=True,
+    )
     timestamp = at or now()
 
     key = str(payload.client_key)
@@ -305,7 +333,13 @@ def delete_comment(
     author_id: str,
     at: datetime | None = None,
 ) -> ContentItem:
-    event = _published_event(db, str(event_id), lock=True)
+    event = _published_event(
+        db,
+        str(event_id),
+        viewer_id=author_id,
+        lock=True,
+        mutable=True,
+    )
     timestamp = at or now()
     _require_prestart(event, timestamp)
     comment = db.scalar(

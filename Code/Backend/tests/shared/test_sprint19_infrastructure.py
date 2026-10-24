@@ -25,7 +25,7 @@ def test_feature_migration_round_trip_preserves_existing_rows(db, make_event):
         command.upgrade(config, 'head')
         with engine().connect() as connection:
             assert connection.scalar(text('SELECT count(*) FROM featured_requests')) == 0
-            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
+            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
     finally:
         command.upgrade(config, 'head')
 
@@ -41,7 +41,7 @@ def test_feature_history_downgrade_refuses_data_loss(db, make_event):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0012')
     with engine().connect() as connection:
         assert connection.scalar(text('SELECT count(*) FROM featured_requests')) == 1
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
 
 
 def test_native_feature_exclusion_and_adjacent_windows(db, make_event):

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.communication import require_communication_allowed
 from app.core.contracts import Actor
+from app.core.event_safety import can_read_event, event_is_terminal, require_mutable_event
 from app.core.errors import DomainError
 from app.domains.events.models import Event
 from app.domains.events.service import draft_version, require_draft_version
@@ -36,6 +37,7 @@ def authorize_banner_upload(db: Session, actor: Actor, event_id: str) -> None:
     event = _event_or_404(db, event_id)
     organization = require_manager(db, actor, event.org_id)
     _require_writable_organization(organization)
+    require_mutable_event(db, event)
     if event.status != "draft":
         raise DomainError("published_event_immutable", "Published events cannot be edited.", 409)
     require_communication_allowed(db, actor.user_id)
@@ -62,6 +64,7 @@ def _locked_event(db: Session, actor: Actor, event_id: str) -> tuple[Organizatio
     # Recheck the manager grant after both rows have been serialized.
     require_manager(db, actor, organization.id)
     _require_writable_organization(organization)
+    require_mutable_event(db, event)
     if event.status != "draft":
         raise DomainError("published_event_immutable", "Published events cannot be edited.", 409)
     return organization, event
@@ -205,8 +208,18 @@ def authorize_and_read(db: Session, actor: Actor | None, media_id: str) -> bytes
         organization = db.get(Organization, event.org_id)
         if organization is None:
             raise DomainError("media_not_found", "Media was not found.", 404)
-        if event.status != "published" or organization.accreditation_status != "approved":
+        if event_is_terminal(db, event):
+            if actor is None:
+                raise DomainError("media_not_found", "Media was not found.", 404)
             _private_access(db, actor, organization.id)
+        elif event.status != "published" or organization.accreditation_status != "approved":
+            _private_access(db, actor, organization.id)
+        elif not can_read_event(
+            db,
+            event,
+            viewer_id=actor.user_id if actor is not None else None,
+        ):
+            raise DomainError("media_not_found", "Media was not found.", 404)
     else:
         raise DomainError("media_not_found", "Media was not found.", 404)
 

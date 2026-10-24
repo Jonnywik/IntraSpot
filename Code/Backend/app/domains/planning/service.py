@@ -1,7 +1,8 @@
-from sqlalchemy import delete, func, select
+from sqlalchemy import case, delete, func, select
 from sqlalchemy.dialects.postgresql import insert as postgresql_insert
 from sqlalchemy.orm import Session
 
+from app.core.event_safety import discovery_clause
 from app.core.errors import DomainError
 from app.db.models import now
 from app.domains.events.models import Event
@@ -17,7 +18,7 @@ from app.domains.planning.schemas import (
 from app.domains.registrations.models import Registration
 
 
-def _visible_public_event(db: Session, event_id: str):
+def _visible_public_event(db: Session, event_id: str, at=None):
     return db.execute(
         select(Event, Organization.name)
         .join(Organization, Organization.id == Event.org_id)
@@ -25,28 +26,44 @@ def _visible_public_event(db: Session, event_id: str):
             Event.id == event_id,
             Event.status == "published",
             Organization.accreditation_status == "approved",
+            discovery_clause(at=at),
         )
     ).first()
 
 
-def _require_visible_public_event(db: Session, event_id: str):
-    row = _visible_public_event(db, event_id)
+def _require_visible_public_event(db: Session, event_id: str, at=None):
+    row = _visible_public_event(db, event_id, at=at)
     if row is None:
         raise DomainError("event_not_found", "Event was not found.", 404)
     return row
 
 
 def list_saved_events(db: Session, user_id: str) -> list[SavedEventOut]:
+    boundary = now()
     saved_rows = db.execute(
-        select(SavedEvent, Event, Organization)
+        select(
+            SavedEvent,
+            Event,
+            Organization,
+            case(
+                (discovery_clause(at=boundary), True),
+                else_=False,
+            ).label("publicly_visible"),
+        )
         .outerjoin(Event, Event.id == SavedEvent.event_id)
         .outerjoin(Organization, Organization.id == Event.org_id)
         .where(SavedEvent.user_id == user_id)
         .order_by(SavedEvent.saved_at.desc(), SavedEvent.event_id.asc())
     ).all()
-    visible_ids = {event.id for _, event, org in saved_rows
-                   if event is not None and org is not None
-                   and event.status == 'published' and org.accreditation_status == 'approved'}
+    visible_ids = {
+        event.id
+        for _, event, org, publicly_visible in saved_rows
+        if event is not None
+        and org is not None
+        and publicly_visible
+        and event.status == "published"
+        and org.accreditation_status == "approved"
+    }
     counts = {}
     if visible_ids:
         counts = {event_id: (confirmed, reserved) for event_id, confirmed, reserved in db.execute(
@@ -59,14 +76,17 @@ def list_saved_events(db: Session, user_id: str) -> list[SavedEventOut]:
 
     result: list[SavedEventOut] = []
     from app.domains.featured.service import active_featured_event_ids
-    featured_ids = active_featured_event_ids(db, [event for _, event, _ in saved_rows
-                                                if event is not None and event.id in visible_ids])
-    for saved, event, organization in saved_rows:
+    featured_ids = active_featured_event_ids(
+        db,
+        [event for _, event, _, _ in saved_rows if event is not None and event.id in visible_ids],
+        at=boundary,
+    )
+    for saved, event, organization, _publicly_visible in saved_rows:
         public_event = None
         if event is not None and event.id in visible_ids:
             confirmed, reserved = counts.get(event.id, (0, 0))
             public_event = _public_projection(db, event, organization.name, confirmed=confirmed, reserved=reserved,
-                                              is_featured=event.id in featured_ids)
+                                              is_featured=event.id in featured_ids, registration_available=True)
         result.append(
             SavedEventOut(
                 event_id=saved.event_id,
@@ -109,8 +129,8 @@ def remove_saved_event(db: Session, user_id: str, event_id: str) -> SavedEventSt
 
 
 def event_conflicts(db: Session, user_id: str, event_id: str) -> EventConflictsOut:
-    target, _ = _require_visible_public_event(db, event_id)
     instant = now()
+    target, _ = _require_visible_public_event(db, event_id, at=instant)
     if (
         target.starts_at is None
         or target.ends_at is None
@@ -128,6 +148,7 @@ def event_conflicts(db: Session, user_id: str, event_id: str) -> EventConflictsO
             Event.id != event_id,
             Event.status == "published",
             Organization.accreditation_status == "approved",
+            discovery_clause(at=instant),
             Event.ends_at > instant,
             Event.starts_at < target.ends_at,
             Event.ends_at > target.starts_at,

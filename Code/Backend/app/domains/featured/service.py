@@ -11,6 +11,11 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.communication import require_communication_allowed
 from app.core.contracts import Actor
+from app.core.event_safety import (
+    discovery_clause,
+    event_is_terminal,
+    require_mutable_event,
+)
 from app.core.errors import DomainError
 from app.db.models import now, uid
 from app.domains.events.models import Event
@@ -110,6 +115,7 @@ def active_featured_event_ids(
             Event.status == "published",
             Event.starts_at > boundary,
             Organization.accreditation_status == "approved",
+            discovery_clause(at=boundary),
         )
     ).all()
     return {
@@ -203,6 +209,8 @@ def create_request(db: Session, actor: Actor, event_id: str) -> FeaturedRequestO
     if event is None:
         raise DomainError("event_not_found", "Event was not found.", 404)
     organization = require_manager(db, actor, event.org_id)
+    if event_is_terminal(db, event):
+        raise _conflict("featured_event_closed")
     require_communication_allowed(db, actor.user_id, lock=True)
 
     timestamp = now()
@@ -397,6 +405,7 @@ def decide_request(
     if request is None:
         raise _not_found()
     require_platform_admin(db, actor)
+    require_mutable_event(db, event)
 
     if payload.version != request.version:
         raise _conflict("featured_request_stale")

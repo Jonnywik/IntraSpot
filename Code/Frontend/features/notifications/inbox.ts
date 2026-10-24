@@ -11,6 +11,7 @@ const STAFF_ROLES = new Set(['owner', 'admin', 'moderator']);
 const REVIEW_WARNING_MESSAGE = 'A registration assigned to you still awaits review during its extension window.';
 
 export function notificationCategory(kind: string): NotificationCategory {
+  if (kind.startsWith('event_safety') || kind.startsWith('event_report') || kind.startsWith('organization_suspension') || kind === 'organization_safety') return 'safety';
   if (kind === 'membership_attendance_ended') return 'registrations';
   if (kind.startsWith('membership')) return 'clubs';
   if (kind.startsWith('ownership_transfer_')) return 'clubs';
@@ -49,6 +50,7 @@ export function notificationDestination(
   notice: Notification,
   actor: Actor | null,
 ): NotificationDestination | null {
+  if (notice.kind === 'event_safety_cancelled') return {href: '/my-events', label: 'View My Events'};
   if (notificationCategory(notice.kind) === 'safety') {
     if (actor?.platform_admin) return { href: '/admin', label: 'Open safety review' };
     if (hasStaffGrant(actor, notice.org_id)) {

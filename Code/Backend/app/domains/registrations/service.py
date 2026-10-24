@@ -7,6 +7,7 @@ from sqlalchemy import and_, case, func, select, text, update
 from sqlalchemy.orm import Session
 
 from app.core.errors import DomainError
+from app.core.event_safety import event_is_terminal, require_new_registration, discovery_clause
 from app.db.models import now, uid
 from app.db.session import session_factory
 from app.domains.events.models import Event
@@ -84,6 +85,10 @@ def intake_registration(
                 text('SELECT pg_advisory_xact_lock(:lock_id)'),
                 {'lock_id': _idempotency_lock_id(user_id, idempotency_key)},
             )
+            from app.domains.eventsafety.service import sweep_expired_suspensions
+            org_id = db.scalar(select(Event.org_id).where(Event.id == event_id))
+            if org_id is not None:
+                sweep_expired_suspensions(db, org_id=org_id)
             existing = db.scalar(
                 select(RegistrationReceipt).where(
                     RegistrationReceipt.user_id == user_id,
@@ -107,6 +112,8 @@ def intake_registration(
                 ).scalar_one_or_none()
                 if event_order is None:
                     raise DomainError('event_not_found', 'The event could not be found.', 404)
+                event = db.get(Event, event_id, populate_existing=True)
+                require_new_registration(db, event)
                 if not blocked_attendee_acknowledged:
                     user = db.get(User, user_id)
                     timestamp = now()
@@ -160,6 +167,40 @@ def reject_draft_receipts(db: Session, event_id: str) -> None:
     )
 
 
+def cancel_event_participation_locked(db: Session, event: Event, action_id: str) -> None:
+    """Terminal safety action; caller holds organization/event locks and sets flags first."""
+    from app.notifications import notify_in_app
+
+    timestamp = now()
+    registrations = list(db.scalars(select(Registration).where(
+        Registration.event_id == event.id, Registration.status.in_(ACTIVE_STATUSES),
+    ).order_by(Registration.id).with_for_update()))
+    recipients = {registration.user_id: registration.id for registration in registrations}
+    for registration in registrations:
+        registration.status = 'cancelled'
+        registration.updated_at = timestamp
+        _clear_review(registration)
+        _clear_reconfirmation(registration)
+    db.execute(update(RegistrationReceipt).where(
+        RegistrationReceipt.event_id == event.id,
+        RegistrationReceipt.result.is_(None), RegistrationReceipt.http_status.is_(None),
+        RegistrationReceipt.processed_at.is_(None),
+    ).values(result={'error': {'code': 'event_terminal',
+                              'message': 'This event has been cancelled or removed.'}},
+             http_status=409, processed_at=timestamp))
+    members = db.scalars(select(User).join(OrgMembership, OrgMembership.user_id == User.id).where(
+        OrgMembership.org_id == event.org_id, OrgMembership.active.is_(True), User.active.is_(True)))
+    for member in members:
+        if email_is_eligible(member.email, member.email_verified):
+            recipients.setdefault(member.id, None)
+    for user_id, registration_id in recipients.items():
+        notify_in_app(db, user_id=user_id, event_id=event.id, org_id=event.org_id,
+                      registration_id=registration_id, kind='event_safety_cancelled',
+                      message='This event has been cancelled or removed. Existing registrations have ended.',
+                      dedupe_key=f'event_safety_cancelled:{action_id}:{user_id}')
+    db.flush()
+
+
 def submit_registration(
     user_id: str,
     event_id: str,
@@ -199,6 +240,7 @@ def _is_public_future_event(db: Session, event_id: str, at: datetime) -> bool:
             Event.status == 'published',
             Event.starts_at > at,
             Organization.accreditation_status == 'approved',
+            discovery_clause(at),
         )
     ) is not None
 
@@ -411,6 +453,8 @@ def _promote_open_seats_locked(
     capacity: int | None = None,
     starts_at: datetime | None = None,
 ) -> list[Registration]:
+    if event_is_terminal(db, event):
+        return []
     proposed_capacity = event.capacity if capacity is None else capacity
     proposed_start = event.starts_at if starts_at is None else starts_at
     if proposed_capacity is None or proposed_start is None or proposed_start <= at:
@@ -503,6 +547,7 @@ def _process_receipt(db: Session, event: Event, receipt: RegistrationReceipt) ->
     if current is not None:
         return _registration_result(db, current), 200
 
+    require_new_registration(db, event)
     timestamp = now()
     has_seat = _seat_count(db, event.id) < event.capacity
     if event.registration_mode == 'approval':

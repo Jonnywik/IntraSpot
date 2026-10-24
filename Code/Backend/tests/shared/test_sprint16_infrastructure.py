@@ -67,5 +67,5 @@ def test_media_downgrade_refuses_to_erase_existing_assets(db, make_org):
     with pytest.raises(RuntimeError, match='Sprint 16 media data exists'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0010')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
     assert db.scalar(select(MediaAsset.id).where(MediaAsset.id == asset_id)) == asset_id

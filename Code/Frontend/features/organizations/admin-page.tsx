@@ -11,6 +11,7 @@ import type { OrganizationApplication } from '@/lib/types';
 import { ModerationReportQueue } from '@/features/moderation/report-queue';
 import { AnnouncementReportQueue } from '@/features/moderation/AnnouncementReportQueue';
 import { FeaturedAdminQueue } from '@/features/featured/FeaturedControls';
+import { EventSafetyQueue, OrganizationSuspensionPanel } from '@/features/eventsafety';
 import styles from './platform-admin.module.css';
 
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
@@ -272,6 +273,7 @@ function OrganizationAdminContent() {
                           {application.description || t('No description was provided.')}
                         </p>
                         <DecisionHistory decisions={application.decisions} />
+                        {application.accreditation_status === 'approved' && <OrganizationSuspensionPanel key={`suspension:${token}:${application.id}`} orgId={application.id} token={token} />}
                         {application.accreditation_status === 'pending' && (
                           <div className={styles.applicationActions}>
                             <button
@@ -300,6 +302,7 @@ function OrganizationAdminContent() {
             </section>
 
             <ModerationReportQueue key={'platform:' + token} token={token} />
+            <EventSafetyQueue key={'event-safety:' + token} token={token} />
             <FeaturedAdminQueue key={'featured:' + token} token={token} />
             <AnnouncementReportQueue key={'announcements:' + token} token={token} />
           </>

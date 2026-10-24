@@ -24,6 +24,7 @@ import { MediaUploader } from '@/features/media/MediaUploader';
 import { MediaImage } from '@/features/media/MediaImage';
 import { OwnershipTransferPanel } from '@/features/ownership/OwnershipTransferPanel';
 import { AttendancePanel } from '@/features/attendance/AttendancePanel';
+import { EventSafetyControls, EventSafetyQueue, OrganizationSuspensionPanel } from '@/features/eventsafety';
 
 function draftHref(orgId: string, eventId?: string) {
   const params = new URLSearchParams({orgId});
@@ -342,6 +343,7 @@ function OrganizationEvents({workspace, events, loading, error, onRetry, token, 
                   )}
                 </div>
                 {event.status === 'published' && workspace.accreditation_status === 'approved' && <AttendancePanel key={`attendance:${token}:${event.id}`} eventId={event.id} token={token} />}
+                {event.status === 'published' && workspace.accreditation_status === 'approved' && <EventSafetyControls key={`safety:${token}:${event.id}`} eventId={event.id} token={token} />}
                 {event.status === 'published' && isManager && (
                   <div className={styles.eventTools}>
                     <RegistrationReview
@@ -422,6 +424,10 @@ function ModeratorReviews({grant, token, selectedEventId}: {
       </section>
       {grant.accreditation_status === 'approved' && <StaffMembership orgId={grant.org_id} role={grant.role} />}
       <ModerationReportQueue key={`${token}:${grant.org_id}`} token={token} orgId={grant.org_id} />
+      {grant.accreditation_status === 'approved' && <>
+        <EventSafetyQueue key={`safety:${token}:${grant.org_id}`} token={token} orgId={grant.org_id} />
+        <OrganizationSuspensionPanel key={`suspension:${token}:${grant.org_id}`} token={token} orgId={grant.org_id} />
+      </>}
       <section className={`panel ${styles.eventsPanel}`} aria-label={t('Published events for registration review')}>
         <header className={styles.eventsHeader}>
           <div>
@@ -476,6 +482,7 @@ function ModeratorReviews({grant, token, selectedEventId}: {
                     onReviewed={feedback => { setReviewFeedback(feedback); events.reload(); }}
                   />
                   <AttendancePanel key={`attendance:${token}:${event.id}`} eventId={event.id} token={token} />
+                  <EventSafetyControls key={`safety:${token}:${event.id}`} eventId={event.id} token={token} />
                 </article>
               ))}
             </div>
@@ -542,6 +549,10 @@ function WorkspaceDetails({token, sessionVersion, workspace, events, eventsLoadi
         />
       )}
       <ModerationReportQueue key={`${workspace.id}`} token={token} orgId={workspace.id} />
+      {workspace.accreditation_status === 'approved' && <>
+        <EventSafetyQueue key={`safety:${token}:${workspace.id}`} token={token} orgId={workspace.id} />
+        <OrganizationSuspensionPanel key={`suspension:${token}:${workspace.id}`} token={token} orgId={workspace.id} />
+      </>}
       {workspace.accreditation_status === 'approved' && <StaffMembership orgId={workspace.id} role={workspace.role} />}
       {workspace.accreditation_status === 'approved' && (
         <OwnershipTransferPanel key={`${token}:${workspace.id}`} orgId={workspace.id}

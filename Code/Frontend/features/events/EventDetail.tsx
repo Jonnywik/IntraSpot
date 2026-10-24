@@ -17,6 +17,7 @@ import type { PublicEvent } from "@/lib/types";
 import { EventSocial } from "@/features/communication/EventSocial";
 import { SaveEventButton } from "@/features/planning/SaveEventButton";
 import { ConflictWarning } from "@/features/planning/ConflictWarning";
+import { EventReportButton } from "@/features/eventsafety";
 import styles from "./attendee-events.module.css";
 
 function publicEventTags(event: PublicEvent): string[] {
@@ -88,6 +89,7 @@ export function EventDetail() {
               </div>
               <EventArtwork event={event} priority />
               <SaveEventButton key={`${event.id}:${version}`} eventId={event.id} />
+              {token && <EventReportButton key={`safety:${version}:${event.id}`} eventId={event.id} token={token} />}
               <p>{event.description}</p>
               <dl className={styles.detailFacts}>
                 <div><dt>{t("Date and time")}</dt><dd>{formatDate(event.starts_at, preferences.language)} · {formatTime(event.starts_at, preferences.language)}</dd></div>

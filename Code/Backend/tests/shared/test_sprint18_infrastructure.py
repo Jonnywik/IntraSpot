@@ -22,7 +22,7 @@ def test_sprint18_roundtrip_preserves_old_profile_and_feature_tables(db, make_us
             assert connection.scalar(text("SELECT to_regclass('user_blocks')")) is None
         command.upgrade(config, 'head')
         with engine().connect() as connection:
-            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
+            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
             assert connection.scalar(text('SELECT count(*) FROM user_blocks')) == 0
     finally:
         command.upgrade(config, 'head')
@@ -36,5 +36,5 @@ def test_sprint18_downgrade_refuses_to_erase_privacy_choices(db, make_user):
     with pytest.raises(RuntimeError, match='privacy choices exist'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0013')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
         assert connection.scalar(text('SELECT count(*) FROM user_blocks')) == 1
