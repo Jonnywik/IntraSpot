@@ -1,5 +1,13 @@
 @C:\Users\mikae\.codex\RTK.md
 
+## Sprint delivery
+
+Standing user instruction, 2026-10-24: commit and push each sprint checkpoint to
+GitHub after its implementation and verification. Exclude local credentials,
+databases, caches and generated builds; keep unresolved acceptance/security gates
+explicit. A push is not deployment or release approval. Never force-push or
+overwrite remote work; report any blocked verification or Git operation honestly.
+
 ## graphify
 
 Canonical project knowledge lives in the Obsidian notes at `C:\Users\mikae\OneDrive\Documents\Obsidian Vault\Hermes\Projects\IntraSpot\`. The workspace copies of `Development Handoff.md` and `IDEA.md` are not the source of truth.

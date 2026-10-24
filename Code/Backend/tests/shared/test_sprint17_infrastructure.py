@@ -20,7 +20,7 @@ def test_empty_saved_events_migration_round_trip_preserves_event(db, make_event)
         command.upgrade(config, 'head')
         with engine().connect() as connection:
             assert connection.scalar(text('SELECT count(*) FROM saved_events')) == 0
-            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0015'
+            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
     finally:
         db.rollback()
         command.upgrade(config, 'head')
@@ -36,4 +36,4 @@ def test_populated_saved_events_downgrade_refuses_loss(db, make_event, make_user
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0011')
     with engine().connect() as connection:
         assert connection.scalar(text('SELECT count(*) FROM saved_events')) == 1
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0015'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'

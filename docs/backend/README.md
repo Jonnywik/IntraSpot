@@ -1,6 +1,24 @@
 # IntraSpot local MVP
 
-## Current work — Sprint 20 manual ownership transfer
+## Current work — Sprint 21 manual staff attendance
+
+Desktop staff workspaces now provide closed-by-default manual check-in,
+confirmed-only registration references, mark/clear correction and audited,
+versioned, retry-safe commands. Authorized owners/admins/moderators can keep it
+open after event end. Existing participation, capacity and chat are unchanged.
+Attendees can present their own matching reference without disclosing profiles.
+
+Explicit additive `mvp_0016` preserved all existing development data. See the
+[contract](Sprint-21.md), [interaction handoff](../design/sprint21-interaction-handoff.md)
+and [acceptance record](../validation/sprint-21-acceptance-2026-10-24.md).
+Live browser and Next.js security/build gates remain open. Event-level
+cancellation/removal integration is an explicit Sprint 22 dependency, not a
+completed check. No QR, helper role, mobile management or deployment.
+
+User instruction, 2026-10-24: commit and push verified sprint checkpoints while
+keeping unresolved gates explicit; exclude credentials, databases and builds.
+
+### Historical Sprint 20 checkpoint
 
 Sprint 20 adds desktop-only nomination of an active eligible organization admin,
 a seven-day acceptance deadline, decline/revoke, scoped history, and atomic role

@@ -31,7 +31,7 @@ def test_announcement_expand_and_empty_rollback_preserve_flash_and_preferences(d
             assert 'announcements' not in inspect(connection).get_table_names()
         command.upgrade(config, 'head')
         with engine().connect() as connection:
-            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0015'
+            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
             assert set(('announcements', 'announcement_revisions', 'announcement_reactions',
                         'announcement_reports', 'announcement_report_decisions')) <= set(inspect(connection).get_table_names())
             assert connection.scalar(text('SELECT show_flash FROM user_preferences WHERE user_id=:id'), {'id': user_id}) is False
@@ -54,5 +54,5 @@ def test_announcement_rollback_refuses_data_and_preserves_it(db, make_org):
     with pytest.raises(RuntimeError, match='Sprint 14 announcement data exists'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0009')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0015'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
         assert connection.scalar(select(Announcement.body).where(Announcement.id == post_id)) == 'Preserve this local content.'

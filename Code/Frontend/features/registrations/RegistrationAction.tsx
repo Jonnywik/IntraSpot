@@ -269,6 +269,7 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
     return (
       <div className={`panel stack ${styles.registrationOutcome} ${outcomeStyle}`} role="status" aria-live="polite" tabIndex={-1} ref={outcome}>
         {result.status === 'confirmed' ? <p>{t('Your registration is confirmed.')}</p> : null}
+        {result.status === 'confirmed' && <p className="muted" style={{overflowWrap: 'anywhere'}}>{t('Registration reference: {reference}', {reference: result.id})}</p>}
         {result.status === 'confirmed' ? (
           <EventPersonaSharing
             key={`${event.id}:${actor.id}:${token}`}

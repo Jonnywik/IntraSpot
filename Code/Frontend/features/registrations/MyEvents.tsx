@@ -126,6 +126,7 @@ function RegistrationCard({
         <span className={`status-chip ${registration.status} ${attendeeStyles.statusBadge}`}>{statusLabel(registration.status, t)}</span>
       </header>
       <p>{eventDate(registration.starts_at, t, language)}</p>
+      {registration.status === 'confirmed' && <p className="muted" style={{overflowWrap: 'anywhere'}}>{t('Registration reference: {reference}', {reference: registration.id})}</p>}
       {registration.status === 'waitlisted' ? <WaitlistDetails registration={registration} /> : null}
       {registration.status === 'pending' ? (
         <>

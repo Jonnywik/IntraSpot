@@ -21,11 +21,12 @@ import {planningMessages} from '../Code/Frontend/features/planning/messages.ts';
 import {featuredMessages} from '../Code/Frontend/features/featured/messages.ts';
 import {personaMessages} from '../Code/Frontend/features/personas/messages.ts';
 import {ownershipMessages} from '../Code/Frontend/features/ownership/messages.ts';
+import {attendanceMessages} from '../Code/Frontend/features/attendance/messages.ts';
 import {formatDate, formatTime} from '../Code/Frontend/lib/date.ts';
 
 const dictionaries = [sharedMessages,eventMessages,socialMessages,attendeeMessages,
   workspaceMessages,platformMessages,draftMessages,inboxMessages,mobileMessages,discoveryMessages,
-  announcementMessages,announcementReportMessages,authMessages,mediaMessages,planningMessages,featuredMessages,personaMessages,ownershipMessages];
+  announcementMessages,announcementReportMessages,authMessages,mediaMessages,planningMessages,featuredMessages,personaMessages,ownershipMessages,attendanceMessages];
 const filipino = {...Object.fromEntries(Object.entries(messages).map(([key,value])=>[key,value.fil])),...Object.assign({},...dictionaries)};
 const placeholders = value => [...value.matchAll(/\{([A-Za-z0-9_]+)\}/g)].map(match=>match[1]).sort();
 
@@ -62,6 +63,7 @@ test('Attendee and management interface literal messages have Filipino translati
     'features/personas/PersonaActions.tsx','features/personas/BlockList.tsx',
     'features/personas/EventPersonaSharing.tsx',
     'features/ownership/OwnershipTransferPanel.tsx',
+    'features/attendance/AttendancePanel.tsx',
   ];
   const missing = new Set();
   for (const file of files) {

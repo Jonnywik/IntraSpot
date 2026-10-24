@@ -1,0 +1,238 @@
+.root {
+  min-width: 0;
+  margin-top: 16px;
+}
+
+.expandButton {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  text-align: left;
+}
+
+.expandButton > span {
+  width: 1.25em;
+  text-align: center;
+}
+
+.content {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface, var(--paper));
+}
+
+.content[hidden] {
+  display: none;
+}
+
+.header,
+.actions,
+.attendeeStatus,
+.historyEntry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.header h3 {
+  margin: 0 0 4px;
+}
+
+.muted,
+.correctionNote {
+  margin: 0;
+  color: var(--muted);
+}
+
+.sessionStatus,
+.attendeeStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-alt, var(--paper));
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.sessionStatus[data-open='true'] > span,
+.attendeeStatus[data-checked-in='true'] > span {
+  color: var(--blue);
+}
+
+.sessionStatus[data-open='false'] > span,
+.attendeeStatus[data-checked-in='false'] > span {
+  color: var(--muted);
+}
+
+.counts {
+  margin: 0;
+  font-weight: 650;
+}
+
+.actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.search {
+  display: grid;
+  gap: 6px;
+  max-width: 480px;
+  font-weight: 650;
+}
+
+.roster,
+.historyList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.attendee {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.historyReference {
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.correctionNote {
+  font-size: 0.9rem;
+}
+
+.history {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.history summary {
+  min-height: 40px;
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.historyList {
+  margin-top: 8px;
+}
+
+.historyEntry {
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+
+.historyEntry p {
+  flex: 1 1 100%;
+  margin: 0;
+}
+
+.historyEntry time,
+.historyEntry > span {
+  color: var(--muted);
+}
+
+.retryBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-alt, var(--paper));
+}
+
+.retryBox p {
+  margin: 0;
+}
+
+.dialog {
+  width: min(480px, calc(100vw - 32px));
+  max-width: 100%;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface, var(--paper));
+  color: var(--ink);
+  box-shadow: var(--shadow-rest, 0 16px 48px rgb(17 47 106 / 22%));
+}
+
+.dialog::backdrop {
+  background: rgb(17 47 106 / 44%);
+}
+
+.dialogContent {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
+.dialogContent h3,
+.dialogContent p {
+  margin: 0;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .attendee {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .attendee > button {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 767px) {
+  .root {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expandButton,
+  .attendee > button {
+    transition: none;
+  }
+}

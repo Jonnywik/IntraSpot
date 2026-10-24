@@ -47,7 +47,7 @@ def test_downgrade_refuses_to_discard_approval_data(db, make_event):
     with pytest.raises(RuntimeError, match='Sprint 6 data exists'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0002')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0015'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
     db.expire_all()
     assert db.get(Event, event_id).registration_mode == 'approval'
 

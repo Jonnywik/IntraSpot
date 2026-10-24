@@ -17,7 +17,7 @@ def test_preferences_downgrade_refuses_saved_choices(client, token_for, make_use
     with pytest.raises(RuntimeError, match='Sprint 9 preferences exist'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0006')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0015'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0016'
         assert connection.execute(text('SELECT language, theme FROM user_preferences')).one() == ('fil', 'dark')
 
 
@@ -46,6 +46,6 @@ def test_readiness_requires_current_reviewed_migration(client):
         assert response.json()['error']['code'] == 'database_not_ready'
         assert client.get('/health').status_code == 200
         command.upgrade(config, 'head')
-        assert client.get('/ready').json() == {'status': 'ready', 'migration': 'mvp_0015'}
+        assert client.get('/ready').json() == {'status': 'ready', 'migration': 'mvp_0016'}
     finally:
         command.upgrade(config, 'head')

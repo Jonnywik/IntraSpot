@@ -23,6 +23,7 @@ import { AnnouncementManager } from '@/features/announcements/AnnouncementManage
 import { MediaUploader } from '@/features/media/MediaUploader';
 import { MediaImage } from '@/features/media/MediaImage';
 import { OwnershipTransferPanel } from '@/features/ownership/OwnershipTransferPanel';
+import { AttendancePanel } from '@/features/attendance/AttendancePanel';
 
 function draftHref(orgId: string, eventId?: string) {
   const params = new URLSearchParams({orgId});
@@ -340,6 +341,7 @@ function OrganizationEvents({workspace, events, loading, error, onRetry, token, 
                     </>
                   )}
                 </div>
+                {event.status === 'published' && workspace.accreditation_status === 'approved' && <AttendancePanel key={`attendance:${token}:${event.id}`} eventId={event.id} token={token} />}
                 {event.status === 'published' && isManager && (
                   <div className={styles.eventTools}>
                     <RegistrationReview
@@ -473,6 +475,7 @@ function ModeratorReviews({grant, token, selectedEventId}: {
                     onOpenChange={open => setActiveReviewEventId(open ? event.id : null)}
                     onReviewed={feedback => { setReviewFeedback(feedback); events.reload(); }}
                   />
+                  <AttendancePanel key={`attendance:${token}:${event.id}`} eventId={event.id} token={token} />
                 </article>
               ))}
             </div>
