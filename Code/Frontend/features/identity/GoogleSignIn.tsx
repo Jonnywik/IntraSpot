@@ -18,6 +18,8 @@ export function GoogleSignIn() {
   const t = useT();
   const [busy, setBusy] = useState(false);
   const [startFailed, setStartFailed] = useState(false);
+  const sessionVerified = Boolean(actor && !authLoading && !error);
+  const verificationFailed = Boolean(!authLoading && error && (token || error.status === 401));
   const available = useSyncExternalStore(
     subscribeToAuthConfig,
     browserAuthConfigured,
@@ -38,10 +40,14 @@ export function GoogleSignIn() {
 
   return (
     <div className={styles.controls}>
-      {authLoading && <span role="status">{t('Checking development session…')}</span>}
+      {authLoading && <span role="status">{t(token ? 'Verifying account with the local IntraSpot API…' : 'Checking development session…')}</span>}
+      {sessionVerified && <span role="status" className={styles.sessionStatus}>{t('IntraSpot session verified.')}</span>}
+      {verificationFailed && <span role="status">{t('Local account verification failed. Sign in again or retry local verification.')}</span>}
+      {sessionVerified && actor && (
+        <span role="status">{t(actor.eligible ? 'PLM email eligibility confirmed.' : 'Not eligible for PLM-only actions.')}</span>
+      )}
       {token ? (
         <>
-          <span role="status" className={styles.sessionStatus}>{t('Google session active')}</span>
           <button className="button button-secondary" type="button" onClick={signOut}>
             {t('Sign out')}
           </button>

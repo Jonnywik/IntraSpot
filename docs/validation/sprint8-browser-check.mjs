@@ -14,7 +14,12 @@ page.setDefaultTimeout(15000);
 const passed=[], errors=[];
 page.on('pageerror',()=>errors.push('uncaught_browser_error'));
 const visible = locator => locator.waitFor({state:'visible'});
-const section = id => page.locator(`[aria-labelledby="${id}"]`);
+const section = id => page.locator(`[aria-labelledby="${id}"]`).or(page.locator('details').filter({has:page.locator(`#${id}`)}));
+async function openPanel(id) {
+  const panel=section(id);
+  await panel.waitFor({state:'attached'});
+  if(await panel.getAttribute('open')===null) await panel.locator('summary').click();
+}
 async function account(label) {
   await page.getByLabel('Choose a fictional local account').selectOption({label});
   await page.getByRole('button',{name:'Use fictional account',exact:true}).click();
@@ -30,8 +35,11 @@ async function clubs() {
 }
 async function workspace(moderator=false) {
   await page.getByRole('link',{name:'Organization',exact:true}).click();
-  if(moderator) await page.getByRole('link',{name:'Review published event registrations',exact:true}).click();
+  if(moderator) await page.getByRole('navigation',{name:'Moderator review workspaces',exact:true}).getByRole('link').filter({hasText:'Fictional Membership Society'}).click();
   else await page.getByRole('navigation',{name:'Owner and admin workspaces'}).getByRole('link').filter({hasText:'Fictional Membership Society'}).click();
+  await openPanel('membership-review-title');
+  if(!moderator) await openPanel('membership-invitations-title');
+  await openPanel('membership-roster-title');
   await visible(section('membership-review-title').getByRole('heading',{name:'Applications',exact:true}));
 }
 function pendingReview() {
@@ -54,6 +62,7 @@ try {
   await visible(page.getByText('Awaiting organization review',{exact:true}));
   await account('Fictional student 5'); await workspace(true);
   await pendingReview().getByRole('button',{name:'Approve membership',exact:true}).click();
+  await pendingReview().getByRole('button',{name:'Confirm membership decision',exact:true}).click();
   await visible(page.getByText('No pending membership applications.',{exact:true}));
   await account('Fictional visitor (not PLM)'); await clubs();
   await visible(page.getByText('Your membership is on file, but member features are locked.',{exact:true}));
@@ -86,6 +95,7 @@ try {
   assert.equal(await section('membership-review-title').getByText(/Age bracket:|Email:|Pronouns:/).count(),0);
   await review.getByRole('combobox',{name:/^Rejection reason/}).selectOption('requirements_not_met');
   await review.getByRole('button',{name:'Reject application',exact:true}).click();
+  await review.getByRole('button',{name:'Confirm membership decision',exact:true}).click();
   await visible(page.getByText('No pending membership applications.',{exact:true}));
   assert.equal(await section('membership-review-title').getByText(/Nickname:/).count(),0);
   passed.push('Lost application response retries one key; pending basic consent expires after categorized rejection');

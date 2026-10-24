@@ -35,6 +35,11 @@ try {
   const card = page.locator('.event-card').first();
   const target = card.locator('.event-card-link');
   const resting = await card.boundingBox();
+  console.log(JSON.stringify({geometry:await page.evaluate(() => {
+    const selectors=['.site-header','.local-demo-bar','.discovery-heading','.filters','.event-card'];
+    return selectors.map(selector=>{const element=document.querySelector(selector);const box=element.getBoundingClientRect();
+      return {selector,top:box.top,height:box.height,children:[...element.children].map(child=>({tag:child.tagName,height:child.getBoundingClientRect().height}))};});
+  })}));
   check(resting.y + resting.height <= 900, `First complete card ends at ${resting.y+resting.height}px`);
   await target.hover();
   await page.waitForTimeout(300);

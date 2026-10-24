@@ -135,9 +135,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .loading-indicator { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--line); border-top-color: var(--blue); border-radius: 50%; animation: loading-turn 850ms linear infinite; flex: 0 0 18px; }
 .feedback-content { display: flex; align-items: center; gap: 12px; }
 .feedback-content p { margin: 0; }
-.discovery-heading { position: relative; padding-right: 130px; min-height: 110px; }
+.discovery-heading { position: relative; padding-right: 130px; min-height: 96px; }
 .heritage-aside { position: absolute; right: 0; top: 0; display: grid; justify-items: center; gap: 4px; width: 112px; }
-.heritage-aside svg { width: 90px; height: 84px; overflow: visible; opacity: .7; pointer-events: none; }
+.heritage-aside svg { width: 90px; height: 52px; overflow: visible; opacity: .7; pointer-events: none; }
 .heritage-decoration { color: var(--decorative-gold); }
 .heritage-foliage { animation: heritage-drift 12s ease-in-out infinite; transform-origin: center; }
 .heritage-aside[data-paused='true'] .heritage-foliage { animation-play-state: paused; }

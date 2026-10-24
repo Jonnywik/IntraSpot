@@ -13,7 +13,7 @@
 }
 
 .discoveryHeading {
-  min-height: 110px;
+  min-height: 96px;
 }
 
 .discoveryHeading > p:first-child {
@@ -213,6 +213,10 @@
   overflow-wrap: anywhere;
 }
 
+.eventCard :global(.event-summary) {
+  margin-block: 0 8px;
+}
+
 .eventCardCta {
   gap: 8px;
   margin-top: 2px;
@@ -226,7 +230,7 @@
 }
 
 .registrationMode {
-  margin: 10px 0 0;
+  margin: 0;
 }
 
 .reasonChips {
@@ -260,6 +264,10 @@
 .eventFacts > span {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.discoverFeed .eventCard .eventFacts {
+  margin-bottom: 0;
 }
 
 .eventCounts {
@@ -455,6 +463,10 @@
 }
 
 @media (min-width: 768px) {
+  .rankingHint {
+    flex: 1 1 300px;
+  }
+
   .searchLabel,
   .sortLabel,
   .searchHint {

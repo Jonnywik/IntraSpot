@@ -383,7 +383,7 @@ async function assertCorruptGuestPreferencesRecovery() {
       version: 1,
       preferences: {
         language: 'en', theme: 'light', text_size: 'standard', high_contrast: false,
-        reduced_motion: false, decoration_paused: false,
+        reduced_motion: false, decoration_paused: false, show_flash: true,
       },
     }, 'Reset replaces corrupt guest storage with a valid complete default record');
 
@@ -719,12 +719,19 @@ try {
   passed.push('High-contrast and decoration-pause preferences remain operable and readable');
 
   // Open, keyboard-operate, and dismiss the existing registration sheet without submitting.
+  // Account B is already confirmed for the chat fixture; use the unregistered account.
+  await useAccount(fixtures.accountALabel);
   await page.setViewportSize({width: 1440, height: 900});
   await page.goto(`${base}/events?eventId=${encodeURIComponent(fixtures.eventId)}`, {waitUntil: 'networkidle'});
   const trigger = page.locator('button[aria-haspopup="dialog"][aria-controls^="registration-confirmation-"]');
   await trigger.click();
   const dialog = page.getByRole('dialog');
   await dialog.waitFor({state: 'visible'});
+  // The later block-warning check temporarily disables confirmation.
+  await page.waitForFunction(id => {
+    const buttons=document.getElementById(id)?.querySelectorAll('button');
+    return buttons?.length >= 2 && [...buttons].every(button => !button.disabled);
+  }, await dialog.getAttribute('id'));
   assert.equal(await dialog.evaluate(element => element.contains(document.activeElement)), true);
   const buttons = dialog.getByRole('button');
   const firstButton = buttons.first();

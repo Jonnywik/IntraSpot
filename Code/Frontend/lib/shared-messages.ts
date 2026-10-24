@@ -8,6 +8,7 @@ export const sharedMessages: Record<string, string> = {
   'Sample event artwork for {title}': 'Halimbawang larawan para sa {title}',
   'Skip to content': 'Lumaktaw sa nilalaman',
   'Main navigation': 'Pangunahing nabigasyon',
+  'Discover': 'Tuklasin',
   'Mobile navigation': 'Nabigasyon sa mobile',
   'Clubs': 'Mga samahan',
   'Organization': 'Organisasyon',

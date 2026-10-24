@@ -1,8 +1,8 @@
 # IntraSpot local developer handoff
 
-Checkpoint: Sprint 23, 2026-10-24. This is a local developer handoff, not a
+Checkpoint: Sprint 24, started 2026-10-24. This is a local developer handoff, not a
 real-user launch. Current evidence and remaining gates belong in the
-[Sprint 23 acceptance record](../validation/sprint-23-acceptance-2026-10-24.md).
+[Sprint 24 acceptance record](../validation/sprint-24-acceptance-2026-10-24.md).
 Requirements remain in the canonical Obsidian AI Index and linked topic notes;
 workspace copies and generated Graphify output are navigation, not authority.
 
@@ -101,6 +101,51 @@ come from the reviewed OpenAPI file; regenerate only when the API contract chang
 The current security patch pins Next/eslint-config-next to 16.4.1; the lockfile
 updates the compatible Zod development dependency. Never suppress an advisory to
 make a build pass, or use `npm audit fix --force` as an unreviewed upgrade plan.
+
+### Rendered browser gates
+
+The ten opt-in Sprint 5–14 gates and the Sprint 24 accessibility matrix use the
+same named scratch PostgreSQL database and must run serially. They temporarily
+own loopback API **8002** and frontend **3000**. Stop only your own normal
+port-3000 static server first; the separate real app on 3001/8011 stays available.
+Do not reuse a build pointing at development API 8001 for tests that create data.
+
+Build the fictional test export from `Code/Frontend` in its existing configured
+fictional terminal:
+
+```powershell
+$env:NEXT_PUBLIC_API_URL = 'http://127.0.0.1:8002'
+rtk proxy npm.cmd run build
+```
+
+From `Code/Backend`, run the new matrix:
+
+```powershell
+$env:RUN_SPRINT24_BROWSER = '1'
+rtk proxy .venv/Scripts/python.exe -m pytest tests/shared/test_sprint24_browser.py -q
+```
+
+Historical gates use `RUN_SPRINT5_BROWSER` through `RUN_SPRINT14_BROWSER` and
+their corresponding `tests/shared/test_sprint*_browser.py` or
+`test_sprint*_quality.py` files. Use the explicit paths shown in each file;
+PowerShell does not expand a wildcard argument for pytest. The existing bundled
+Playwright package and installed Microsoft Edge are required. A restricted-process
+browser-launch failure is unavailable infrastructure, not a passing UI test.
+Preserve raw run artifacts separately; do not overwrite historical evidence in
+a checkpoint or discard unrelated local changes.
+
+After the last gate, restore the normal frontend before leaving the app running:
+
+```powershell
+$env:NEXT_PUBLIC_API_URL = 'http://127.0.0.1:8001'
+rtk proxy npm.cmd run build
+rtk proxy npm.cmd start
+```
+
+Real sign-in now labels API-verified sessions and server-derived PLM eligibility
+separately. A verified non-PLM Google account can browse while PLM-only actions
+remain denied. The user deferred further positive PLM verification during Sprint
+24; leave that gate open and keep credentials under their control.
 
 If a process stops, inspect its own terminal, preserve the existing database
 container/volume, and restart only that process. Do not use Docker factory reset.

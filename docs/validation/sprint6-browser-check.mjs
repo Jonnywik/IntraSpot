@@ -79,8 +79,10 @@ try {
   const sharedRow = managed.locator('article').filter({has:page.getByRole('heading',{name:'Fictional student 1',exact:true})});
   await visible(sharedRow);
   await sharedRow.getByRole('button',{name:'Approve',exact:true}).click();
+  await sharedRow.getByRole('button',{name:'Confirm decision',exact:true}).click();
   await visible(managed.getByText('Registration approved.',{exact:true}));
   await managed.getByRole('button',{name:'Approve',exact:true}).click();
+  await managed.getByRole('button',{name:'Confirm decision',exact:true}).click();
   await visible(managed.getByText('0 awaiting review',{exact:false}));
   passed.push('Owner approves both pending requests; only opted-in persona appears in staff review');
 
@@ -94,8 +96,9 @@ try {
   const facultyId = rows.find(item=>item.registration.persona_shared===false && item.registration.status==='confirmed').registration.id;
   const change = managed.locator('details').filter({has:page.getByText('Propose a material event change',{exact:true})});
   await change.locator('summary').click();
+  await change.getByRole('spinbutton',{name:'Capacity',exact:true}).waitFor({state:'visible'});
   assert.equal(await change.getByLabel('Capacity selection mode',{exact:true}).inputValue(),'exact');
-  await change.getByLabel('Capacity',{exact:true}).fill('1');
+  await change.getByRole('spinbutton',{name:'Capacity',exact:true}).fill('1');
   await change.getByLabel('Reconfirmation deadline (Manila time)',{exact:true}).fill(futureManila());
   await change.locator('label').filter({hasText:`Registrant ${facultyId.slice(0,8)}`}).getByRole('checkbox').check();
   await change.getByRole('button',{name:'Submit material change',exact:true}).click();
@@ -123,7 +126,7 @@ try {
   managed = await workspace('Fictional Pool Gathering');
   const poolChange = managed.locator('details').filter({has:page.getByText('Propose a material event change',{exact:true})});
   await poolChange.locator('summary').click();
-  await poolChange.getByLabel('Capacity',{exact:true}).fill('2');
+  await poolChange.getByRole('spinbutton',{name:'Capacity',exact:true}).fill('2');
   await poolChange.getByLabel('Reconfirmation deadline (Manila time)',{exact:true}).fill(futureManila());
   await poolChange.getByLabel('Capacity selection mode',{exact:true}).selectOption('newest_in_pool');
   await visible(poolChange.getByText(/3 occupied seats/));

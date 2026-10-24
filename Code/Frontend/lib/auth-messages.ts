@@ -3,6 +3,12 @@ export const authMessages: Record<string, string> = {
   'Sign in with an eligible PLM Google account.': 'Mag-sign in gamit ang kwalipikadong PLM Google account.',
   'Google sign-in': 'Pag-sign in sa Google',
   'Google session active': 'Aktibo ang Google session',
+  'IntraSpot session verified.': 'Na-verify ang session sa IntraSpot.',
+  'Verifying account with the local IntraSpot API…': 'Bine-verify ng lokal na IntraSpot API ang account…',
+  'Local account verification failed. Sign in again or retry local verification.':
+    'Hindi na-verify ng lokal na API ang account. Mag-sign in muli o ulitin ang lokal na pag-verify.',
+  'PLM email eligibility confirmed.': 'Kumpirmado ang pagiging kwalipikado ng PLM email.',
+  'Not eligible for PLM-only actions.': 'Hindi kwalipikado para sa mga aksyong para lamang sa PLM.',
   'About development sign-in': 'Tungkol sa development sign-in',
   'ISOLATED DEVELOPMENT · GOOGLE SIGN-IN': 'HIWALAY NA PAG-UNLAD · PAG-SIGN IN SA GOOGLE',
   'Development-only Google sign-in. This profile uses a separate local API and Supabase Auth project.':

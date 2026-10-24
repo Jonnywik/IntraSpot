@@ -350,7 +350,7 @@ function OrganizationEvents({workspace, events, loading, error, onRetry, token, 
                       eventId={event.id}
                       eventEndsAt={event.ends_at}
                       isOpen={activePanel === `review:${event.id}`}
-                      onOpenChange={open => setActivePanel(open ? `review:${event.id}` : null)}
+                      onOpenChange={open => setActivePanel(current => open ? `review:${event.id}` : current === `review:${event.id}` ? null : current)}
                       onReviewed={reviewSummaries.reload}
                     />
                     {isManager && workspace.accreditation_status === 'approved' && (
@@ -361,7 +361,7 @@ function OrganizationEvents({workspace, events, loading, error, onRetry, token, 
                         key={`${event.id}:${event.material_revision}`}
                         event={event}
                         isOpen={activePanel === `change:${event.id}`}
-                        onOpenChange={open => setActivePanel(open ? `change:${event.id}` : null)}
+                        onOpenChange={open => setActivePanel(current => open ? `change:${event.id}` : current === `change:${event.id}` ? null : current)}
                         onChanged={() => {
                           setChangedWorkspaceId(workspace.id);
                           onRetry();
@@ -478,7 +478,7 @@ function ModeratorReviews({grant, token, selectedEventId}: {
                     eventId={event.id}
                     eventEndsAt={event.ends_at}
                     isOpen={activeReviewEventId === event.id}
-                    onOpenChange={open => setActiveReviewEventId(open ? event.id : null)}
+                    onOpenChange={open => setActiveReviewEventId(current => open ? event.id : current === event.id ? null : current)}
                     onReviewed={feedback => { setReviewFeedback(feedback); events.reload(); }}
                   />
                   <AttendancePanel key={`attendance:${token}:${event.id}`} eventId={event.id} token={token} />

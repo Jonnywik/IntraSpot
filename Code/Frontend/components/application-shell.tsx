@@ -10,7 +10,7 @@ export function ApplicationShell({children}: {children: ReactNode}) {
   const {version} = useSession();
   const t = useT();
   const management = ['/workspace', '/admin', '/draft'].includes(path);
-  return <><SiteHeader/><main id="main-content" className={`workspace ${management ? 'management' : 'attendee'} ${path === '/' ? 'discovery-workspace' : path === '/chat' ? 'chat-workspace' : ''}`}>
+  return <><SiteHeader/><main id="main-content" tabIndex={-1} className={`workspace ${management ? 'management' : 'attendee'} ${path === '/' ? 'discovery-workspace' : path === '/chat' ? 'chat-workspace' : ''}`}>
     {path === '/auth/callback' ? <div>{children}</div> :
       <div key={version}>{path === '/' ? <DiscoveryLayout>{children}</DiscoveryLayout> : children}</div>}
   </main><footer className="site-footer">IntraSpot · {t('Same people. Brighter tomorrows.')}<br/>{process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase'

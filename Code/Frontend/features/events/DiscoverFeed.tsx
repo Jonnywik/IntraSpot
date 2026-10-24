@@ -254,14 +254,14 @@ export function DiscoverFeed() {
                           {reasons.map((reason) => <li key={reason}>{t(RECOMMENDATION_LABELS[reason])}</li>)}
                         </ul>
                       )}
-                      <p className={`muted ${styles.registrationMode}`}>
-                        {event.registration_mode === "approval"
-                          ? t("Organizer approval required")
-                          : t("Instant confirmation")}
-                      </p>
                       <div className={`event-facts ${styles.eventFacts}`}>
                         <span>{formatDate(event.starts_at, preferences.language)} · {formatTime(event.starts_at, preferences.language)}</span>
                         <span>{event.venue_name}</span>
+                        <span className={`muted ${styles.registrationMode}`}>
+                          {event.registration_mode === "approval"
+                            ? t("Organizer approval required")
+                            : t("Instant confirmation")}
+                        </span>
                       </div>
                       <dl className={styles.eventCounts} aria-label={t("Event counts")}>
                         <div><dt>{t("Interested")}</dt><dd>{event.interest_count}</dd></div>

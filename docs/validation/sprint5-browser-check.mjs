@@ -143,8 +143,11 @@ try {
   await account('Fictional platform admin');
   await page.getByRole('link',{name:'Platform admin',exact:true}).click();
   const application=page.locator('article').filter({has:page.getByRole('heading',{name:'Fictional Sprint Five Club',exact:true})});
-  await application.getByRole('button',{name:'Approve after offline check',exact:true}).click();
-  await visible(page.getByRole('status',{name:'Recorded accreditation decision'}));
+  await application.getByRole('button',{name:'Approve after offline assessment',exact:true}).click();
+  const approvalDialog = page.getByRole('dialog', {name:'Confirm approval',exact:true});
+  await visible(approvalDialog);
+  await approvalDialog.getByRole('button', {name:'Confirm approval',exact:true}).click();
+  await visible(page.getByRole('status').filter({hasText:'Decision recorded for Fictional Sprint Five Club.'}));
   passed.push('Platform admin records authoritative offline accreditation decision');
 
   await account('Fictional organizer');
@@ -158,12 +161,13 @@ try {
   await page.getByLabel('Venue name',{exact:true}).fill('Fictional PLM Courtyard');
   await page.getByLabel('Venue address',{exact:true}).fill('Intramuros, Manila');
   await page.getByLabel('Capacity',{exact:true}).fill('5');
-  await page.getByLabel('Artwork theme',{exact:true}).selectOption('heritage');
+  await page.getByRole('combobox',{name:/^Artwork theme/}).selectOption('heritage');
   await page.getByLabel('Description',{exact:true}).fill('Fictional event for local Sprint 5 acceptance only.');
   await page.getByRole('button',{name:'Save draft',exact:true}).click();
   await visible(page.getByText('Draft saved.',{exact:true}));
+  page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button',{name:'Publish',exact:true}).click();
-  await visible(page.getByText('Event published.',{exact:true}));
+  await visible(page.getByRole('status').filter({hasText:'This event is now published.'}));
   await page.getByRole('button',{name:'Continue as guest',exact:true}).click();
   await page.goto(`${base}/events?eventId=${draftId}`,{waitUntil:'networkidle'});
   await visible(page.getByRole('heading',{name:'Fictional Newly Published Event',level:1}));

@@ -1,0 +1,55 @@
+{
+  "method": "Distinct latest browser gate results across serial runs, not a single clean sweep",
+  "participantValidation": false,
+  "physicalDeviceValidation": false,
+  "runs": [
+    {
+      "evidence": "s24-browser-first.xml",
+      "passed": 6,
+      "failed": 4,
+      "skipped": 0
+    },
+    {
+      "evidence": "s24-focused-third.xml",
+      "passed": 1,
+      "failed": 3,
+      "skipped": 0
+    },
+    {
+      "evidence": "s24-focused-fourth.xml",
+      "passed": 3,
+      "failed": 2,
+      "skipped": 0
+    },
+    {
+      "evidence": "s24-focused-fifth.xml",
+      "passed": 2,
+      "failed": 1,
+      "skipped": 0
+    },
+    {
+      "evidence": "s24-s9-ready.xml",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "latest": {
+    "tests.shared.test_sprint5_browser::test_four_persisted_browser_journeys": "passed",
+    "tests.shared.test_sprint6_browser::test_approval_and_reconfirmation_browser_journeys": "passed",
+    "tests.shared.test_sprint7_browser::test_communication_and_safety_browser_journeys": "passed",
+    "tests.shared.test_sprint8_browser::test_membership_browser_journeys": "passed",
+    "tests.shared.test_sprint9_quality::test_sprint9_preferences_browser_quality": "passed",
+    "tests.shared.test_sprint10_quality::test_sprint10_management_browser_quality": "passed",
+    "tests.shared.test_sprint11_quality::test_sprint11_mobile_browser_journeys": "passed",
+    "tests.shared.test_sprint12_quality::test_sprint12_discovery_browser_quality": "passed",
+    "tests.shared.test_sprint13_quality::test_sprint13_flash_browser_quality": "passed",
+    "tests.shared.test_sprint14_quality::test_sprint14_announcement_browser_quality": "passed",
+    "tests.shared.test_sprint24_browser::test_current_accessibility_matrix": "passed"
+  },
+  "counts": {
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0
+  }
+}
