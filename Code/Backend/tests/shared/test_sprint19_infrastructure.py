@@ -4,6 +4,7 @@ from datetime import timedelta
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
@@ -25,7 +26,7 @@ def test_feature_migration_round_trip_preserves_existing_rows(db, make_event):
         command.upgrade(config, 'head')
         with engine().connect() as connection:
             assert connection.scalar(text('SELECT count(*) FROM featured_requests')) == 0
-            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
+            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()
     finally:
         command.upgrade(config, 'head')
 
@@ -41,7 +42,7 @@ def test_feature_history_downgrade_refuses_data_loss(db, make_event):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0012')
     with engine().connect() as connection:
         assert connection.scalar(text('SELECT count(*) FROM featured_requests')) == 1
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()
 
 
 def test_native_feature_exclusion_and_adjacent_windows(db, make_event):

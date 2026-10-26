@@ -1,12 +1,28 @@
 export class ApiError extends Error {
   status: number;
   code: string;
-  constructor(status: number, code: string, message: string) {
+  retryAfterSeconds?: number;
+  constructor(status: number, code: string, message: string, retryAfterSeconds?: number) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    if (retryAfterSeconds !== undefined) this.retryAfterSeconds = retryAfterSeconds;
   }
+}
+
+const MAX_RETRY_AFTER_SECONDS = 3600;
+const IMF_FIXDATE = /^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$/;
+
+function parseRetryAfter(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const header = value.trim();
+  if (/^\d+$/.test(header)) return Math.min(Number(header), MAX_RETRY_AFTER_SECONDS);
+  if (!IMF_FIXDATE.test(header)) return undefined;
+
+  const timestamp = Date.parse(header);
+  if (!Number.isFinite(timestamp) || new Date(timestamp).toUTCString() !== header) return undefined;
+  return Math.min(MAX_RETRY_AFTER_SECONDS, Math.max(0, Math.ceil((timestamp - Date.now()) / 1000)));
 }
 
 const RESERVED_DNS_SUFFIXES = ['localhost', 'local', 'test', 'example', 'invalid', 'internal', 'onion', 'arpa'];
@@ -109,6 +125,11 @@ export async function api<T>(path: string, options: {
   const body = await response.json().catch(() => null);
   if (!response.ok) throw new ApiError(response.status,
     body?.error?.code || 'request_failed',
-    body?.error?.message || 'The request could not be completed. Please retry.');
+    response.status === 503
+      ? deployment === 'hosted'
+        ? 'The IntraSpot API is temporarily unavailable. Please retry shortly.'
+        : 'The local backend is temporarily unavailable. Check that it is running, then retry.'
+      : body?.error?.message || 'The request could not be completed. Please retry.',
+    parseRetryAfter(response.headers.get('Retry-After')));
   return body as T;
 }

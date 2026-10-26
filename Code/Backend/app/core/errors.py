@@ -28,7 +28,10 @@ def error_response(request: Request, status: int, code: str, message: str):
 
 
 async def domain_error(request: Request, exc: DomainError):
-    return error_response(request, exc.status, exc.code, exc.message)
+    response = error_response(request, exc.status, exc.code, exc.message)
+    if exc.status == 429:
+        response.headers['Retry-After'] = str(max(1, int(getattr(exc, 'retry_after', 60))))
+    return response
 
 
 async def validation_error(request: Request, exc: RequestValidationError):

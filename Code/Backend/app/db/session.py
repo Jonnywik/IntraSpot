@@ -20,7 +20,9 @@ def engine():
     settings = get_settings()
     pool_size, max_overflow = (3, 2) if settings.environment == 'hosted' else (15, 5)
     return create_engine(settings.database_url, pool_pre_ping=True,
-                         pool_size=pool_size, max_overflow=max_overflow)
+                         pool_size=pool_size, max_overflow=max_overflow,
+                         pool_timeout=0.25 if settings.environment == 'hosted' else 30,
+                         connect_args={'connect_timeout': 2})
 
 
 def session_factory():

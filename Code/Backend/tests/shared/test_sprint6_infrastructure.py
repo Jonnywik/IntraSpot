@@ -7,6 +7,7 @@ from datetime import timedelta
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import func, select, text
 
 from app.core.config import ROOT, get_settings
@@ -47,7 +48,7 @@ def test_downgrade_refuses_to_discard_approval_data(db, make_event):
     with pytest.raises(RuntimeError, match='Sprint 6 data exists'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0002')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()
     db.expire_all()
     assert db.get(Event, event_id).registration_mode == 'approval'
 

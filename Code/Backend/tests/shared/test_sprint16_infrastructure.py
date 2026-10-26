@@ -2,6 +2,7 @@
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from pydantic import ValidationError
 from sqlalchemy import select, text
 from sqlalchemy.engine import make_url
@@ -67,5 +68,5 @@ def test_media_downgrade_refuses_to_erase_existing_assets(db, make_org):
     with pytest.raises(RuntimeError, match='Sprint 16 media data exists'):
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0010')
     with engine().connect() as connection:
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()
     assert db.scalar(select(MediaAsset.id).where(MediaAsset.id == asset_id)) == asset_id

@@ -2,6 +2,7 @@
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import text
 
 from app.core.config import ROOT
@@ -57,7 +58,7 @@ def test_discovery_rollback_refuses_new_data(db, make_event, metadata):
     with pytest.raises(RuntimeError, match="Sprint 12 discovery data exists"):
         command.downgrade(Config(str(ROOT / "alembic.ini")), "mvp_0007")
     with engine().connect() as connection:
-        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "mvp_0017"
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()
         if metadata == "private_preferences":
             assert connection.scalar(text("SELECT coarse_area FROM user_discovery_preferences")) == "intramuros"
         else:

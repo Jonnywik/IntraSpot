@@ -33,6 +33,10 @@ def hosted_settings(tmp_path, **changes):
         'supabase_url': 'https://projectref12345678.supabase.co',
         'supabase_publishable_key': 'sb_publishable_configuration_test_key',
         'public_api_url': 'https://api.intraspot.example',
+        'maintenance_enabled': True,
+        'rate_limit_enabled': True,
+        'rate_limit_secret': 'configuration-fixture-limiter-key-12345',
+        'trusted_proxy': 'koyeb',
         'cors_origins': ['https://intraspot.example'],
     }
     return Settings(_env_file=None, **(values | changes))
@@ -149,6 +153,10 @@ def test_hosted_profile_reads_process_environment_without_dotenv(monkeypatch, tm
     monkeypatch.setenv('SUPABASE_URL', 'https://projectref12345678.supabase.co')
     monkeypatch.setenv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_configuration_test_key')
     monkeypatch.setenv('PUBLIC_API_URL', 'https://api.intraspot.example')
+    monkeypatch.setenv('MAINTENANCE_ENABLED', 'true')
+    monkeypatch.setenv('RATE_LIMIT_ENABLED', 'true')
+    monkeypatch.setenv('RATE_LIMIT_SECRET', 'configuration-fixture-limiter-key-12345')
+    monkeypatch.setenv('TRUSTED_PROXY', 'koyeb')
     monkeypatch.setenv('CORS_ORIGINS', json.dumps(['https://intraspot.example']))
     monkeypatch.delenv('MIGRATION_DATABASE_URL', raising=False)
     (tmp_path / 'ca.pem').touch()

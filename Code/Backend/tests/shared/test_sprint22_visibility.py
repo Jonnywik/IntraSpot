@@ -173,7 +173,7 @@ def test_banner_public_reads_follow_policy_and_private_draft_manager_access_rema
 ):
     owner, organization, event = _owned_event(make_event, make_org, make_user)
     public_asset = _attach_banner(db, event, owner)
-    monkeypatch.setattr(media_service, "read_webp", lambda _media_id: b"test-webp")
+    monkeypatch.setattr(media_service, "read_webp", lambda _media_id, *, db=None: b"test-webp")
     _set_restriction(db, event, restriction)
 
     with pytest.raises(DomainError) as hidden:

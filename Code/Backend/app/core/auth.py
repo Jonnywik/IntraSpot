@@ -65,11 +65,17 @@ def current_actor(request: Request, db: Session = Depends(get_db, scope="functio
     actor = _actor_from_authorization(request.headers.get("authorization"), db, required=True)
     if actor is None:
         raise _authentication_error()
+    from app.rate_limits import check_account
+    check_account(request, actor, db=db)
     return actor
 
 
 def optional_actor(request: Request, db: Session = Depends(get_db, scope="function")) -> Actor | None:
-    return _actor_from_authorization(request.headers.get("authorization"), db, required=False)
+    actor = _actor_from_authorization(request.headers.get("authorization"), db, required=False)
+    if actor is not None:
+        from app.rate_limits import check_account
+        check_account(request, actor, db=db)
+    return actor
 
 
 def require_eligible(actor: Actor = Depends(current_actor)) -> Actor:

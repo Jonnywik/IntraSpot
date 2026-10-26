@@ -113,6 +113,25 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -203,6 +222,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -317,6 +355,25 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -407,6 +464,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -521,6 +597,25 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -611,6 +706,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -725,6 +839,25 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -819,6 +952,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -933,6 +1085,25 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -1023,6 +1194,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1125,6 +1315,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1252,6 +1461,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -1361,6 +1589,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -1469,6 +1716,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -1649,6 +1915,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -1758,6 +2043,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -1872,6 +2176,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -1991,6 +2314,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -2105,6 +2447,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -2214,6 +2575,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -2350,6 +2730,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -2469,6 +2868,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -2597,6 +3015,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -2722,6 +3159,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -2900,6 +3356,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -3019,6 +3494,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -3171,6 +3665,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -3278,6 +3791,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -3372,6 +3904,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3490,6 +4041,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -3598,6 +4168,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -3705,6 +4294,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -3816,6 +4424,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -3925,6 +4552,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -4039,6 +4685,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -4155,6 +4820,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -4275,6 +4959,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -4399,6 +5102,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -4511,6 +5233,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -4632,6 +5373,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -4756,6 +5516,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -4853,6 +5632,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4967,6 +5765,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -5080,6 +5897,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -5198,6 +6034,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -5329,6 +6184,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -5438,6 +6312,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -5552,6 +6445,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -5672,6 +6584,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -5803,6 +6734,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -5923,6 +6873,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -6017,6 +6986,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6146,6 +7134,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -6266,6 +7273,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -6375,6 +7401,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -6494,6 +7539,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -6603,6 +7667,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -6722,6 +7805,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -6836,6 +7938,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -6945,6 +8066,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -7085,6 +8225,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -7198,6 +8357,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -7329,6 +8507,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -7449,6 +8646,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -7543,6 +8759,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -7661,6 +8896,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -7770,6 +9024,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -7888,6 +9161,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -8028,6 +9320,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -8145,6 +9456,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -8266,6 +9596,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -8363,6 +9712,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -8530,6 +9898,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -8653,6 +10040,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -8773,6 +10179,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -8867,6 +10292,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -8975,6 +10419,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -9104,6 +10567,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -9213,6 +10695,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -9333,6 +10834,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -9471,6 +10991,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -9588,6 +11127,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -9726,6 +11284,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -9835,6 +11412,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -9970,6 +11566,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -10087,6 +11702,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -10201,6 +11835,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -10310,6 +11963,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -10428,6 +12100,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -10549,6 +12240,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -10651,6 +12361,25 @@
               }
             }
           },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -10745,6 +12474,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -10862,6 +12610,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -10999,6 +12766,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -11119,6 +12905,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -11231,6 +13036,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -11325,6 +13149,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -11442,6 +13285,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -11573,6 +13435,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -11693,6 +13574,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -11804,6 +13704,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -11925,6 +13844,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -12019,6 +13957,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -12137,6 +14094,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -12247,6 +14223,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -12341,6 +14336,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -12463,6 +14477,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -12576,6 +14609,25 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -12707,6 +14759,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -12837,6 +14908,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -12957,6 +15047,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -13054,6 +15163,25 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -13175,6 +15303,25 @@
             },
             "description": "Unprocessable Content"
           },
+          "429": {
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
           "500": {
             "content": {
               "application/json": {
@@ -13272,6 +15419,145 @@
           },
           "422": {
             "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/operations": {
+      "get": {
+        "tags": [
+          "operations"
+        ],
+        "summary": "Status",
+        "operationId": "status_api_v1_platform_operations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before explicitly retrying the same operation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1.0
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -16133,6 +18419,67 @@
         ],
         "title": "LocalDemoAccount"
       },
+      "MaintenanceView": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "last_started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Started At"
+          },
+          "last_success_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Success At"
+          },
+          "last_error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error Code"
+          },
+          "processed_count": {
+            "type": "integer",
+            "title": "Processed Count"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "title": "Duration Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "last_started_at",
+          "last_success_at",
+          "last_error_code",
+          "processed_count",
+          "duration_ms"
+        ],
+        "title": "MaintenanceView"
+      },
       "MeResponse": {
         "properties": {
           "id": {
@@ -17217,6 +19564,32 @@
           "created_at"
         ],
         "title": "NotificationPublic"
+      },
+      "OperationsView": {
+        "properties": {
+          "maintenance": {
+            "items": {
+              "$ref": "#/components/schemas/MaintenanceView"
+            },
+            "type": "array",
+            "title": "Maintenance"
+          },
+          "pending_receipts": {
+            "type": "integer",
+            "title": "Pending Receipts"
+          },
+          "due_registrations": {
+            "type": "integer",
+            "title": "Due Registrations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "maintenance",
+          "pending_receipts",
+          "due_registrations"
+        ],
+        "title": "OperationsView"
       },
       "OrgGrantResponse": {
         "properties": {

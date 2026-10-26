@@ -25,10 +25,16 @@ def api_router():
     from app.domains.memberships.routes_access import router as membership_access
     from app.notifications import notification_router
     from app.local_demo import router as local_demo
+    from app.operations import router as operations
 
     router = APIRouter(prefix='/api/v1', responses={status: {'model': ErrorEnvelope}
-        for status in (400, 401, 403, 404, 409, 422, 500, 503)})
+        for status in (400, 401, 403, 404, 409, 422, 429, 500, 503)})
+    router.responses[429]['headers'] = {'Retry-After': {
+        'description': 'Seconds to wait before explicitly retrying the same operation.',
+        'schema': {'type': 'integer', 'minimum': 1},
+    }}
     for domain in (identity, preferences, discovery_preferences, organizations, events, media, planning, featured, personas, ownership, attendance, eventsafety, registrations, social, chat, moderation, announcements, announcement_reports,
                    membership_applications, membership_access, notification_router(), local_demo):
         router.include_router(domain)
+    router.include_router(operations)
     return router

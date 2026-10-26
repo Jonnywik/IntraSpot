@@ -54,6 +54,11 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_publishable_key: str | None = Field(default=None, repr=False)
     public_api_url: str | None = None
+    maintenance_enabled: bool = False
+    maintenance_interval_seconds: Literal[30] = 30
+    rate_limit_enabled: bool = False
+    rate_limit_secret: str | None = Field(default=None, repr=False)
+    trusted_proxy: Literal['none', 'koyeb'] = 'none'
     jwt_issuer: str = 'urn:intraspot:local'
     jwt_audience: str = 'intraspot-api'
     jwt_public_key_file: Path = ROOT / '.local/public.pem'
@@ -61,11 +66,15 @@ class Settings(BaseSettings):
 
     @model_validator(mode='after')
     def validate_local_boundary(self):
+        if self.rate_limit_enabled and (not self.rate_limit_secret or len(self.rate_limit_secret) < 32):
+            raise ValueError('Rate limiting requires a separate key of at least 32 characters')
         if self.environment == 'hosted':
             self._validate_hosted_boundary()
             return self
         if self.environment not in {'local', 'test'}:
             raise ValueError('Only isolated local/test development is enabled; production is disabled')
+        if self.trusted_proxy != 'none':
+            raise ValueError('Local profiles cannot trust forwarded client addresses')
         url = make_url(self.database_url)
         if url.drivername != 'postgresql+psycopg' or url.host not in {'127.0.0.1', 'localhost'} or url.port != 5433:
             raise ValueError('MVP database must be isolated loopback PostgreSQL on port 5433')
@@ -96,6 +105,8 @@ class Settings(BaseSettings):
         return self
 
     def _validate_hosted_boundary(self):
+        if not self.maintenance_enabled or not self.rate_limit_enabled or self.trusted_proxy != 'koyeb':
+            raise ValueError('Hosted evaluation requires maintenance, rate limiting and the Koyeb-only edge boundary')
         if self.auth_provider != 'supabase' or self.fixture_auth:
             raise ValueError('Hosted configuration requires Supabase auth with fixture auth disabled')
         if self.media_provider != 'supabase' or not re.fullmatch(r'sb_secret_[A-Za-z0-9_-]{10,256}', self.supabase_storage_secret or ''):

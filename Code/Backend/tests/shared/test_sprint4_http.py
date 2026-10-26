@@ -43,6 +43,7 @@ def live_api():
                     pass
                 assert time.monotonic() < deadline, 'Isolated test API readiness timed out.'
                 time.sleep(0.1)
+            client.test_process_id = process.pid
             yield client
     finally:
         process.terminate()
@@ -63,7 +64,8 @@ def test_http_capacity_promotion_isolation_and_restart(make_event, make_user, to
         return {'Authorization': f'Bearer {tokens[user.id]}'}
 
     with live_api() as client:
-        first_instance = client.get('/health').json()['instance_id']
+        first_instance = client.test_process_id
+        assert client.get('/health').json() == {'status': 'ok'}
         assert client.get('/api/v1/events').status_code == 200
 
         def register(user):
@@ -100,7 +102,8 @@ def test_http_capacity_promotion_isolation_and_restart(make_event, make_user, to
 
     # Stop the real server, then prove a new process uses the same durable rows.
     with live_api() as client:
-        assert client.get('/health').json()['instance_id'] != first_instance
+        assert client.test_process_id != first_instance
+        assert client.get('/health').json() == {'status': 'ok'}
         replay = client.post(
             f'/api/v1/events/{event.id}/registrations',
             headers=auth(promoted) | {'Idempotency-Key': keys[promoted.id]},

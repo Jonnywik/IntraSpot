@@ -2,6 +2,7 @@
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import text
 
 from app.core.config import ROOT
@@ -20,7 +21,7 @@ def test_empty_saved_events_migration_round_trip_preserves_event(db, make_event)
         command.upgrade(config, 'head')
         with engine().connect() as connection:
             assert connection.scalar(text('SELECT count(*) FROM saved_events')) == 0
-            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
+            assert connection.scalar(text('SELECT version_num FROM alembic_version')) == ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()
     finally:
         db.rollback()
         command.upgrade(config, 'head')
@@ -36,4 +37,4 @@ def test_populated_saved_events_downgrade_refuses_loss(db, make_event, make_user
         command.downgrade(Config(str(ROOT / 'alembic.ini')), 'mvp_0011')
     with engine().connect() as connection:
         assert connection.scalar(text('SELECT count(*) FROM saved_events')) == 1
-        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == 'mvp_0017'
+        assert connection.scalar(text('SELECT version_num FROM alembic_version')) == ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()

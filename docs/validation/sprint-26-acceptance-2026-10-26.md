@@ -51,3 +51,7 @@ revalidate current references/holds and implement guarded cleanup; until then,
 ambiguous reservations remain conservatively charged. Do not schedule the
 unbounded operator reconciliation scan inside the request loop. Human/device/
 screen-reader and positive live PLM gates remain deferred and unclaimed.
+
+## Remote CI follow-up
+
+Run 40326335393 at b153409: frontend passed; backend returned 721 passes, 30 failures and 11 opt-in browser skips. Twenty-seven failures used hard-coded pre-upgrade migration expectations; three media visibility mocks did not accept the new request-session keyword. These are corrected in the following checkpoint with affected suites rerun. This run is not recorded as green.

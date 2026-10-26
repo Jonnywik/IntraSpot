@@ -30,4 +30,4 @@ COPY --chown=intraspot:intraspot Code/Backend/alembic.ini /app/alembic.ini
 USER intraspot:intraspot
 EXPOSE 8000
 
-CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port \"${PORT:-8000}\" --workers 1"]
+CMD ["python", "-m", "app.hosted_entrypoint"]

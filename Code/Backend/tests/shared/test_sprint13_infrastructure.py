@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
@@ -40,7 +41,7 @@ def test_flash_expand_and_default_only_rollback_preserve_existing_data(db, make_
             ), {"id": user_id}).one() == ("fil", "dark", recorded_at)
         command.upgrade(config(), "head")
         with engine().connect() as connection:
-            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "mvp_0017"
+            assert connection.scalar(text("SELECT version_num FROM alembic_version")) == ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()
             assert connection.execute(text(
                 "SELECT show_flash, language, theme, updated_at FROM user_preferences WHERE user_id=:id"
             ), {"id": user_id}).one() == (True, "fil", "dark", recorded_at)
@@ -67,7 +68,7 @@ def test_flash_rollback_refuses_new_state(db, make_user, make_event, kind):
     with pytest.raises(RuntimeError, match="Sprint 13 Flash data"):
         command.downgrade(config(), "mvp_0008")
     with engine().connect() as connection:
-        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "mvp_0017"
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_current_head()
         if kind == "hidden_preference":
             assert connection.scalar(text("SELECT show_flash FROM user_preferences")) is False
         else:
