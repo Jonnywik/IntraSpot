@@ -1,0 +1,25 @@
+# Send only backend runtime inputs to Docker; dotenv files, local data, and builds stay out.
+**
+!Code/
+!Code/Backend/
+!Code/Backend/pyproject.toml
+!Code/Backend/uv.lock
+!Code/Backend/alembic.ini
+!Code/Backend/app/
+!Code/Backend/app/**
+!Code/Backend/migrations/
+!Code/Backend/migrations/**
+
+# Keep credentials, local signing/media files, caches, and generated artifacts excluded.
+**/.env
+**/.env.*
+**/.local/
+**/.cache/
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.py[cod]
+**/*.pem
+**/*.key
+**/*.db
+**/*.sqlite*

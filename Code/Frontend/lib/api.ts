@@ -9,8 +9,39 @@ export class ApiError extends Error {
   }
 }
 
+const RESERVED_DNS_SUFFIXES = ['localhost', 'local', 'test', 'example', 'invalid', 'internal', 'onion', 'arpa'];
+
+function frontendDeployment(): 'local' | 'hosted' | null {
+  const value = process.env.NEXT_PUBLIC_DEPLOYMENT;
+  if (value === undefined) return 'local';
+  return value === 'local' || value === 'hosted' ? value : null;
+}
+
+function exactHostedRoot(value?: string): URL | null {
+  if (!value || value !== value.trim()) return null;
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    const publicDnsHost = hostname.includes('.') && !hostname.endsWith('.') &&
+      hostname.split('.').every(label => /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label)) &&
+      !hostname.includes(':') && !hostname.startsWith('[') &&
+      !/^\d+(?:\.\d+){3}$/.test(hostname) && !hostname.split('.').every(label => /^\d+$/.test(label)) &&
+      !RESERVED_DNS_SUFFIXES.some(suffix => hostname === suffix || hostname.endsWith(`.${suffix}`)) &&
+      hostname !== 'home.arpa' && !hostname.endsWith('.home.arpa');
+    if (
+      url.protocol !== 'https:' || !publicDnsHost || url.port || url.username || url.password ||
+      url.pathname !== '/' || url.search || url.hash ||
+      (value !== url.origin && value !== `${url.origin}/`)
+    ) return null;
+    return url;
+  } catch {
+    return null;
+  }
+}
+
 export function localDemoEnabled(): boolean {
-  return (!process.env.NEXT_PUBLIC_AUTH_MODE || process.env.NEXT_PUBLIC_AUTH_MODE === 'fixture') &&
+  return frontendDeployment() === 'local' &&
+    (!process.env.NEXT_PUBLIC_AUTH_MODE || process.env.NEXT_PUBLIC_AUTH_MODE === 'fixture') &&
     process.env.NEXT_PUBLIC_LOCAL_DEMO === 'true' &&
     typeof window !== 'undefined' && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
 }
@@ -30,12 +61,30 @@ export async function api<T>(path: string, options: {
   if (pathname.includes('\\') || pathname.split('/').some(part => part === '.' || part === '..') || path.includes('#')) {
     throw new ApiError(0, 'invalid_api_path', 'An internal API path is required.');
   }
-  const base = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001');
-  if (base.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(base.hostname) || base.username || base.password) {
-    throw new ApiError(0, 'local_api_required', 'This MVP connects only to a local backend.');
-  }
-  if (process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase' && base.href !== 'http://127.0.0.1:8011/') {
-    throw new ApiError(0, 'isolated_api_required', 'Google development sign-in requires its separate local backend.');
+  const deployment = frontendDeployment();
+  let base: URL;
+  if (deployment === 'hosted') {
+    const apiRoot = exactHostedRoot(process.env.NEXT_PUBLIC_API_URL);
+    const frontendRoot = exactHostedRoot(process.env.NEXT_PUBLIC_FRONTEND_ORIGIN);
+    const currentOrigin = typeof window === 'undefined' ? undefined : window.location.origin;
+    if (
+      process.env.NEXT_PUBLIC_AUTH_MODE !== 'supabase' ||
+      process.env.NEXT_PUBLIC_LOCAL_DEMO !== 'false' ||
+      !apiRoot || !frontendRoot ||
+      (typeof window !== 'undefined' && currentOrigin !== frontendRoot.origin)
+    ) throw new ApiError(0, 'hosted_config_invalid', 'Hosted API configuration is invalid.');
+    base = apiRoot;
+  } else {
+    if (deployment !== 'local') {
+      throw new ApiError(0, 'deployment_config_invalid', 'Frontend deployment configuration is invalid.');
+    }
+    base = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001');
+    if (base.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(base.hostname) || base.username || base.password) {
+      throw new ApiError(0, 'local_api_required', 'This MVP connects only to a local backend.');
+    }
+    if (process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase' && base.href !== 'http://127.0.0.1:8011/') {
+      throw new ApiError(0, 'isolated_api_required', 'Google development sign-in requires its separate local backend.');
+    }
   }
   const headers: Record<string, string> = {};
   const binaryBody = typeof Blob !== 'undefined' && options.body instanceof Blob;
@@ -52,7 +101,9 @@ export async function api<T>(path: string, options: {
     });
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') throw error;
-    throw new ApiError(0, 'connection_failed', 'Cannot reach the local backend. Check it is running, then retry.');
+    throw new ApiError(0, 'connection_failed', deployment === 'hosted'
+      ? 'Cannot reach the IntraSpot API. Check that it is available, then retry.'
+      : 'Cannot reach the local backend. Check it is running, then retry.');
   }
   if (response.ok && options.responseType === 'blob') return await response.blob() as T;
   const body = await response.json().catch(() => null);

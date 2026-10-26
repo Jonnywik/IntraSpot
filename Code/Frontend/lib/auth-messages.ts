@@ -10,6 +10,8 @@ export const authMessages: Record<string, string> = {
   'PLM email eligibility confirmed.': 'Kumpirmado ang pagiging kwalipikado ng PLM email.',
   'Not eligible for PLM-only actions.': 'Hindi kwalipikado para sa mga aksyong para lamang sa PLM.',
   'About development sign-in': 'Tungkol sa development sign-in',
+  'Hosted configuration · real-user release approval remains open.':
+    'Naka-host na configuration · hindi pa aprubado para sa paggamit ng mga totoong user.',
   'ISOLATED DEVELOPMENT · GOOGLE SIGN-IN': 'HIWALAY NA PAG-UNLAD · PAG-SIGN IN SA GOOGLE',
   'Development-only Google sign-in. This profile uses a separate local API and Supabase Auth project.':
     'Para lamang sa development ang Google sign-in na ito. Gumagamit ang profile na ito ng hiwalay na lokal na API at Supabase Auth project.',

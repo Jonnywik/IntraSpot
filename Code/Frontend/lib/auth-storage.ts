@@ -7,7 +7,9 @@ export interface AuthStorageAdapter {
 export interface RealAuthEnvironment {
   authMode?: string;
   localDemo?: string;
+  deployment?: string;
   apiUrl?: string;
+  frontendOrigin?: string;
   supabaseUrl?: string;
   supabasePublishableKey?: string;
 }
@@ -44,6 +46,90 @@ const PKCE_TTL_MS = 10 * 60 * 1000;
 const MAX_SLOT_LENGTH = 16_384;
 const MAX_ENTRY_LENGTH = 4096;
 const MAX_ENTRIES = 10;
+const RESERVED_DNS_SUFFIXES = ['localhost', 'local', 'test', 'example', 'invalid', 'internal', 'onion', 'arpa'];
+
+export interface HostedConfigEnvironment {
+  deployment?: string;
+  authMode?: string;
+  localDemo?: string;
+  apiUrl?: string;
+  frontendOrigin?: string;
+  supabaseUrl?: string;
+  supabasePublishableKey?: string;
+}
+
+export interface HostedConfig {
+  apiUrl: string;
+  frontendOrigin: string;
+  callbackUrl: string;
+  projectRef: string;
+  supabaseUrl: string;
+  supabasePublishableKey: string;
+}
+
+export function getFrontendDeployment(value?: string): 'local' | 'hosted' | null {
+  if (value === undefined) return 'local';
+  return value === 'local' || value === 'hosted' ? value : null;
+}
+
+function exactHttpsRoot(value?: string): URL | null {
+  if (!value || value !== value.trim()) return null;
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    const publicDnsHost = hostname.includes('.') && !hostname.endsWith('.') &&
+      hostname.split('.').every(label => /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label)) &&
+      !hostname.includes(':') && !hostname.startsWith('[') &&
+      !/^\d+(?:\.\d+){3}$/.test(hostname) && !hostname.split('.').every(label => /^\d+$/.test(label)) &&
+      !RESERVED_DNS_SUFFIXES.some(suffix => hostname === suffix || hostname.endsWith(`.${suffix}`)) &&
+      hostname !== 'home.arpa' && !hostname.endsWith('.home.arpa');
+    if (
+      url.protocol !== 'https:' ||
+      !publicDnsHost ||
+      url.port ||
+      url.username ||
+      url.password ||
+      url.pathname !== '/' ||
+      url.search ||
+      url.hash ||
+      (value !== url.origin && value !== `${url.origin}/`)
+    ) return null;
+    return url;
+  } catch {
+    return null;
+  }
+}
+
+export function resolveHostedConfig(
+  environment: HostedConfigEnvironment,
+  currentOrigin?: string,
+): HostedConfig | null {
+  if (
+    getFrontendDeployment(environment.deployment) !== 'hosted' ||
+    environment.authMode !== 'supabase' ||
+    environment.localDemo !== 'false'
+  ) return null;
+
+  const apiUrl = exactHttpsRoot(environment.apiUrl);
+  const frontendOrigin = exactHttpsRoot(environment.frontendOrigin);
+  const supabaseUrl = exactHttpsRoot(environment.supabaseUrl);
+  const publishableKey = environment.supabasePublishableKey ?? '';
+  const projectMatch = supabaseUrl?.hostname.match(/^([a-z0-9-]{8,64})\.supabase\.co$/);
+  if (
+    !apiUrl || !frontendOrigin || !supabaseUrl || !projectMatch ||
+    !/^sb_publishable_[A-Za-z0-9_-]{10,256}$/.test(publishableKey) ||
+    (currentOrigin !== undefined && currentOrigin !== frontendOrigin.origin)
+  ) return null;
+
+  return {
+    apiUrl: apiUrl.origin,
+    frontendOrigin: frontendOrigin.origin,
+    callbackUrl: `${frontendOrigin.origin}/auth/callback`,
+    projectRef: projectMatch[1],
+    supabaseUrl: supabaseUrl.origin,
+    supabasePublishableKey: publishableKey,
+  };
+}
 
 export function isValidPKCEFlowId(value: unknown): value is string {
   return typeof value === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(value);
@@ -53,6 +139,25 @@ export function resolveRealAuthConfig(
   environment: RealAuthEnvironment,
   location: LocalBrowserLocation | null,
 ): RealAuthConfig | null {
+  const deployment = getFrontendDeployment(environment.deployment ?? process.env.NEXT_PUBLIC_DEPLOYMENT);
+  if (deployment === 'hosted') {
+    if (!location || location.protocol !== 'https:') return null;
+    const hosted = resolveHostedConfig({
+      ...environment,
+      deployment,
+      frontendOrigin: environment.frontendOrigin ?? process.env.NEXT_PUBLIC_FRONTEND_ORIGIN,
+    }, location.origin);
+    if (!hosted) return null;
+    return {
+      projectRef: hosted.projectRef,
+      supabaseUrl: hosted.supabaseUrl,
+      supabasePublishableKey: hosted.supabasePublishableKey,
+      apiUrl: hosted.apiUrl,
+      callbackUrl: hosted.callbackUrl,
+    };
+  }
+  if (deployment !== 'local') return null;
+
   if (
     environment.authMode !== 'supabase' ||
     environment.localDemo !== 'false' ||

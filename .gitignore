@@ -11,6 +11,7 @@ graphify-out/
 **/.next/
 **/out/
 **/out-real/
+**/out-hosted/
 **/tsconfig.tsbuildinfo
 Code/Frontend/public/local-accounts.json
 Code/Backend/.cache/

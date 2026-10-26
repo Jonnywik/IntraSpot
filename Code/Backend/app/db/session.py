@@ -12,7 +12,10 @@ class Base(DeclarativeBase):
 
 @lru_cache
 def engine():
-    return create_engine(get_settings().database_url, pool_pre_ping=True, pool_size=15, max_overflow=5)
+    settings = get_settings()
+    pool_size, max_overflow = (3, 2) if settings.environment == 'hosted' else (15, 5)
+    return create_engine(settings.database_url, pool_pre_ping=True,
+                         pool_size=pool_size, max_overflow=max_overflow)
 
 
 def session_factory():

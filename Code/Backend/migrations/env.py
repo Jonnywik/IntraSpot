@@ -35,7 +35,11 @@ def offline():
 
 
 def online():
-    engine = create_engine(get_settings().database_url, poolclass=pool.NullPool)
+    settings = get_settings()
+    url = getattr(settings, 'migration_database_url', None) or settings.database_url
+    if settings.environment == 'hosted' and not getattr(settings, 'migration_database_url', None):
+        raise RuntimeError('Explicit migration credentials are required for hosted schema changes')
+    engine = create_engine(url, poolclass=pool.NullPool)
     with engine.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
         with context.begin_transaction():
