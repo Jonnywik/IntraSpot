@@ -52,3 +52,9 @@ inspection. Remote workflow status is recorded after push, not guessed here.
 
 The deadline runner and local disk media remain explicit dependencies of Sprints
 26–27. Existing historical generated browser artifacts remain local and excluded.
+
+The first GitHub frontend run passed 155/156 but exposed a cross-platform static
+server boundary difference: an encoded backslash was rejected on Windows and
+treated as a missing filename on Linux. Reject backslashes/NUL before filesystem
+resolution on every platform; preserve the existing 400 assertion. This is a
+Sprint 25 CI follow-up, not a skipped or weakened test.

@@ -16,6 +16,7 @@ export function createStaticServer(root = resolve('out')) {
   let pathname;
   try {
     pathname = decodeURIComponent(new URL(request.url, 'http://127.0.0.1').pathname);
+    if (pathname.includes('\\') || pathname.includes('\0')) {response.writeHead(400).end(); return;}
     const candidates = [pathname === '/' ? '/index.html' : extname(pathname) ? pathname : `${pathname.replace(/\/$/,'')}.html`];
     // Next flattens segment request keys, but this exporter emits nested files.
     // Segment names encode literal dots; only these separators become directories.
