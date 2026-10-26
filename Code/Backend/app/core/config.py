@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     database_url: str = Field(repr=False)
     migration_database_url: str | None = Field(default=None, repr=False)
     media_root: Path = ROOT / '.local/media'
+    media_provider: Literal['local', 'supabase'] = 'local'
+    media_bucket: str = 'intraspot-media'
+    supabase_storage_secret: str | None = Field(default=None, repr=False)
     supabase_url: str | None = None
     supabase_publishable_key: str | None = Field(default=None, repr=False)
     public_api_url: str | None = None
@@ -95,6 +98,10 @@ class Settings(BaseSettings):
     def _validate_hosted_boundary(self):
         if self.auth_provider != 'supabase' or self.fixture_auth:
             raise ValueError('Hosted configuration requires Supabase auth with fixture auth disabled')
+        if self.media_provider != 'supabase' or not re.fullmatch(r'sb_secret_[A-Za-z0-9_-]{10,256}', self.supabase_storage_secret or ''):
+            raise ValueError('Hosted media requires private Supabase Storage and a server-only secret key')
+        if not re.fullmatch(r'[a-z0-9][a-z0-9-]{2,62}', self.media_bucket):
+            raise ValueError('Configure a valid private media bucket')
         supabase_match = re.fullmatch(
             r'https://([a-z0-9-]{8,64})\.supabase\.co', self.supabase_url or ''
         )

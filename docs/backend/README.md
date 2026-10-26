@@ -1,5 +1,11 @@
 # IntraSpot local MVP
 
+Current developer checkpoint: **Sprint 26**. Hosted configuration/CI is verified
+through `055cae5` (both GitHub jobs green); private media/accounting is described
+in [Sprint 26](Sprint-26.md) and its [acceptance record](../validation/sprint-26-acceptance-2026-10-26.md).
+Use [deployment preparation](Deployment-preparation.md) for the approved remaining
+sprints. No provider setup or real-user release is claimed.
+
 ## Current work — Sprint 24 end-to-end testing and usability fixes
 
 Sprint 24 adds rendered end-to-end verification and fixes for keyboard focus,

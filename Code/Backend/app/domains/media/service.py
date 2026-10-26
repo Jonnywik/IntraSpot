@@ -14,7 +14,7 @@ from app.domains.organizations.service import require_manager
 from app.domains.media.codec import NormalizedImage
 from app.domains.media.models import MediaAsset
 from app.domains.media.schemas import MediaMutationOut
-from app.domains.media.storage import MediaStorageError, read_webp, store_webp
+from app.domains.media.storage import MediaQuotaExceeded, MediaStorageError, read_webp, store_webp
 
 
 def _require_writable_organization(organization: Organization) -> None:
@@ -79,6 +79,19 @@ def _media_url(media_id: str) -> str:
     return f"/api/v1/media/{media_id}"
 
 
+def _store_for_organization(content: bytes, org_id: str) -> str:
+    try:
+        return store_webp(content, org_id=org_id)
+    except MediaQuotaExceeded as error:
+        raise DomainError(
+            "media_quota_exceeded",
+            "The media storage quota has been reached.",
+            error.status_code,
+        ) from None
+    except MediaStorageError:
+        raise DomainError("media_storage_unavailable", "Media storage is unavailable.", 503) from None
+
+
 def _mutation(asset: MediaAsset | None, version: str | None = None) -> MediaMutationOut:
     if asset is None:
         return MediaMutationOut(
@@ -104,10 +117,7 @@ def upload_banner(
     _require_if_match(if_match)
     require_draft_version(event, if_match)
     require_communication_allowed(db, actor.user_id, lock=True)
-    try:
-        media_id = store_webp(image.content)
-    except MediaStorageError:
-        raise DomainError("media_storage_unavailable", "Media storage is unavailable.", 500) from None
+    media_id = _store_for_organization(image.content, organization.id)
     asset = MediaAsset(
         id=media_id,
         org_id=organization.id,
@@ -151,10 +161,7 @@ def upload_logo(
     _require_writable_organization(organization)
     require_manager(db, actor, org_id)
     require_communication_allowed(db, actor.user_id, lock=True)
-    try:
-        media_id = store_webp(image.content)
-    except MediaStorageError:
-        raise DomainError("media_storage_unavailable", "Media storage is unavailable.", 500) from None
+    media_id = _store_for_organization(image.content, organization.id)
     asset = MediaAsset(
         id=media_id,
         org_id=organization.id,
@@ -223,7 +230,10 @@ def authorize_and_read(db: Session, actor: Actor | None, media_id: str) -> bytes
     else:
         raise DomainError("media_not_found", "Media was not found.", 404)
 
-    content = read_webp(asset.id)
+    try:
+        content = read_webp(asset.id, db=db)
+    except MediaStorageError:
+        raise DomainError("media_storage_unavailable", "Media storage is unavailable.", 503) from None
     if content is None:
         raise DomainError("media_not_found", "Media was not found.", 404)
     return content

@@ -26,6 +26,8 @@ def hosted_settings(tmp_path, **changes):
         'environment': 'hosted',
         'auth_provider': 'supabase',
         'fixture_auth': False,
+        'media_provider': 'supabase',
+        'supabase_storage_secret': 'sb_secret_configuration_fixture',
         'database_url': database_url(sslrootcert=ca_file),
         'migration_database_url': None,
         'supabase_url': 'https://projectref12345678.supabase.co',
@@ -53,6 +55,9 @@ def test_hosted_settings_require_supabase_and_exact_https_origins(tmp_path):
 
 
 @pytest.mark.parametrize('changes', [
+    {'media_provider': 'local'},
+    {'supabase_storage_secret': None},
+    {'media_bucket': '../public'},
     {'fixture_auth': True},
     {'auth_provider': 'fixture'},
     {'supabase_url': 'http://projectref12345678.supabase.co'},
@@ -138,6 +143,8 @@ def test_hosted_profile_reads_process_environment_without_dotenv(monkeypatch, tm
     monkeypatch.setenv('INTRASPOT_CONFIG', 'hosted')
     monkeypatch.setenv('AUTH_PROVIDER', 'supabase')
     monkeypatch.setenv('FIXTURE_AUTH', 'false')
+    monkeypatch.setenv('MEDIA_PROVIDER', 'supabase')
+    monkeypatch.setenv('SUPABASE_STORAGE_SECRET', 'sb_secret_configuration_fixture')
     monkeypatch.setenv('DATABASE_URL', database_url(sslrootcert=tmp_path / 'ca.pem'))
     monkeypatch.setenv('SUPABASE_URL', 'https://projectref12345678.supabase.co')
     monkeypatch.setenv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_configuration_test_key')

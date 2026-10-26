@@ -40,8 +40,9 @@ _RAW_IMAGE_REQUEST_BODY = {
     },
 }
 _UPLOAD_RESPONSES = {
-    413: {"model": ErrorEnvelope, "description": "Image upload exceeds 5 MiB."},
+    413: {"model": ErrorEnvelope, "description": "Image upload exceeds the file or organization storage limit."},
     415: {"model": ErrorEnvelope, "description": "Unsupported or mismatched image Content-Type."},
+    503: {"model": ErrorEnvelope, "description": "Private media storage is temporarily unavailable."},
 }
 _BANNER_RESPONSES = {
     **_UPLOAD_RESPONSES,

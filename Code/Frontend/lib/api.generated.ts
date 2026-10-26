@@ -5966,7 +5966,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Image upload exceeds 5 MiB. */
+            /** @description Image upload exceeds the file or organization storage limit. */
             413: {
                 headers: {
                     [name: string]: unknown;
@@ -6011,7 +6011,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Service Unavailable */
+            /** @description Private media storage is temporarily unavailable. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -6198,7 +6198,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Image upload exceeds 5 MiB. */
+            /** @description Image upload exceeds the file or organization storage limit. */
             413: {
                 headers: {
                     [name: string]: unknown;
@@ -6234,7 +6234,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Service Unavailable */
+            /** @description Private media storage is temporarily unavailable. */
             503: {
                 headers: {
                     [name: string]: unknown;

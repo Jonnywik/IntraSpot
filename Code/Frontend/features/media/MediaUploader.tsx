@@ -22,6 +22,12 @@ export type MediaUploaderProps = {
 
 function apiErrorMessage(error: unknown, action: "upload" | "remove", hasDraftVersion: boolean, t: Translate): string {
   if (error instanceof ApiError) {
+    if (action === "upload" && error.code === "media_quota_exceeded") {
+      return t("Image storage is full. Ask an administrator to review stored images and free space. Your current image and selected file were not changed.");
+    }
+    if (error.code === "media_storage_unavailable") {
+      return t("Image storage is temporarily unavailable. Your current image and selected file were not changed; try again later.");
+    }
     if (action === "upload" && error.status === 413) return t("The image is larger than 5 MiB.");
     if (action === "upload" && [400, 415, 422].includes(error.status)) {
       return t("The image must be a valid static JPEG, PNG, or WebP image under 5 MiB and 12 megapixels.");

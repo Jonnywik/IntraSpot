@@ -58,3 +58,8 @@ server boundary difference: an encoded backslash was rejected on Windows and
 treated as a missing filename on Linux. Reject backslashes/NUL before filesystem
 resolution on every platform; preserve the existing 400 assertion. This is a
 Sprint 25 CI follow-up, not a skipped or weakened test.
+
+Follow-up `055cae5ed7dcf37a752c6ca4dc5a1f268b7d70cf` is pushed and both GitHub
+jobs are green: [Verify candidate run](https://github.com/Jonnywik/IntraSpot/actions/runs/40319107237).
+This closes the clean-checkout CI execution gate, not provider configuration,
+branch-protection administration or release approval.

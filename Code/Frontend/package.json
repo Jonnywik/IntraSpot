@@ -11,6 +11,7 @@
     "start:real": "node scripts/serve-real.mjs",
     "lint": "eslint .",
     "test": "node --test ../../tests/sprint5-contract.test.mjs ../../tests/sprint9-localization.test.mjs ../../tests/sprint10-contract.test.mjs ../../tests/sprint11-*.test.mjs ../../tests/sprint12-*.test.mjs ../../tests/sprint13-*.test.mjs ../../tests/sprint14-*.test.mjs ../../tests/sprint15-*.test.mjs ../../tests/sprint16-*.test.mjs ../../tests/sprint17-*.test.mjs ../../tests/sprint18-*.test.mjs ../../tests/sprint19-*.test.mjs ../../tests/sprint20-*.test.mjs ../../tests/sprint21-*.test.mjs ../../tests/sprint22-*.test.mjs ../../tests/sprint23-*.test.mjs ../../tests/sprint24-*.test.mjs ../../tests/sprint25-hosted.test.mjs",
+    "test:media": "node --test ../../tests/sprint26-media.test.mjs",
     "api:types": "openapi-typescript ../../docs/backend/openapi.json -o lib/api.generated.ts"
   },
   "dependencies": {

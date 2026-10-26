@@ -2734,17 +2734,17 @@
             "description": "Internal Server Error"
           },
           "503": {
+            "description": "Private media storage is temporarily unavailable.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
                 }
               }
-            },
-            "description": "Service Unavailable"
+            }
           },
           "413": {
-            "description": "Image upload exceeds 5 MiB.",
+            "description": "Image upload exceeds the file or organization storage limit.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3031,17 +3031,17 @@
             "description": "Internal Server Error"
           },
           "503": {
+            "description": "Private media storage is temporarily unavailable.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
                 }
               }
-            },
-            "description": "Service Unavailable"
+            }
           },
           "413": {
-            "description": "Image upload exceeds 5 MiB.",
+            "description": "Image upload exceeds the file or organization storage limit.",
             "content": {
               "application/json": {
                 "schema": {

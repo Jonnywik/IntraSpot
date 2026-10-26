@@ -12,6 +12,10 @@ export const authMessages: Record<string, string> = {
   'About development sign-in': 'Tungkol sa development sign-in',
   'Hosted configuration · real-user release approval remains open.':
     'Naka-host na configuration · hindi pa aprubado para sa paggamit ng mga totoong user.',
+  'Image storage is full. Ask an administrator to review stored images and free space. Your current image and selected file were not changed.':
+    'Puno na ang storage ng mga larawan. Hilingin sa administrator na suriin ang mga nakaimbak na larawan at magbakante ng espasyo. Hindi binago ang kasalukuyang larawan at napiling file.',
+  'Image storage is temporarily unavailable. Your current image and selected file were not changed; try again later.':
+    'Pansamantalang hindi available ang storage ng mga larawan. Hindi binago ang kasalukuyang larawan at napiling file; subukan muli mamaya.',
   'ISOLATED DEVELOPMENT · GOOGLE SIGN-IN': 'HIWALAY NA PAG-UNLAD · PAG-SIGN IN SA GOOGLE',
   'Development-only Google sign-in. This profile uses a separate local API and Supabase Auth project.':
     'Para lamang sa development ang Google sign-in na ito. Gumagamit ang profile na ito ng hiwalay na lokal na API at Supabase Auth project.',
