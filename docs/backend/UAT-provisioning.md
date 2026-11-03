@@ -1,6 +1,11 @@
 # Preliminary UAT provisioning
 
-Status: in progress, 2026-11-03. No verified live application link yet.
+Status: guest UAT preview live, 2026-11-03. Signed-in UAT remains blocked on
+Google provider configuration in the new Supabase project.
+
+Frontend: https://intraspot-uat.pages.dev
+
+API: https://intraspot-uat-api.onrender.com
 
 The user authorized hosting for preliminary UAT and explicitly selected Render
 Free as the API host. Cloudflare Pages and a new isolated Supabase project remain
@@ -11,33 +16,57 @@ and importing either local development dataset are outside this authorization.
 
 | Resource | Observed state |
 | --- | --- |
-| Supabase IntraSpot UAT | Healthy, project `vhxlszpsqfsjuqhmplbv`, Tokyo; no migrations at inspection |
+| Supabase IntraSpot UAT | Healthy, project `vhxlszpsqfsjuqhmplbv`, Tokyo; explicitly migrated to `mvp_0020`, 48 application tables, zero accounts |
 | Supabase Data API | Disabled; dashboard explicitly warns client database queries are unavailable |
 | Supabase media | `intraspot-media` created with public access off, 5 MB limit, normalized `image/webp` only; no browser policies |
-| Cloudflare Pages | `intraspot-uat` name created; upload step reached, no assets deployed |
-| Render | Signed in to Mikael Carl's workspace; new web-service source form reached; no service deployed |
+| Cloudflare Pages | `intraspot-uat`, all 111 static files uploaded, deployment `95499d3d-3738-4860-9cd7-d8d26ad1d9b0` live |
+| Render | `intraspot-uat-api`, Docker/Free/Singapore, `/ready`, auto-deploy Off; deploy `dep-dbksqfp5efls73firumg` succeeded/live at code revision `0def970055303fa049142f9fa66d633c2207c770` |
 | Existing Supabase development project | Left untouched |
 
-## Remaining before a usable link
+## Remaining before signed-in UAT
 
-1. Complete the pending authorization for Render to read/build the public
-   `Jonnywik/IntraSpot` repository. Do not request GitHub write access.
-2. Privately supply the UAT database password and server-only Storage key in
-   `Code/Backend/.local/uat/bootstrap.env`. This path is Git-ignored. Never paste
-   those values into chat, logs, source, or frontend configuration.
-3. Inspect the empty application schema; establish separate runtime/migration
-   roles, explicitly apply reviewed migrations, harden grants, and prove runtime
-   schema changes and browser reads are denied. Use verified database TLS.
-4. Configure the free Render Docker service and actual assigned API hostname;
-   inject only runtime credentials, with maintenance and rate limits enabled.
-5. Configure the new project's Google provider and exact frontend callback with
+1. Configure the new project's Google provider with
    user-controlled credential entry. Do not copy the older project's secrets or
    resume the deferred positive PLM verification implicitly.
-6. Build the guarded hosted frontend from clean sources with actual public
-   origins; upload the static export and deploy Cloudflare Pages.
-7. Verify live frontend/API connectivity, CORS, guest/private boundaries,
-   trusted-proxy spoof resistance, cold-start feedback, and maintenance. Record
-   exact deployed revisions and evidence before distributing the UAT link.
+2. Add the new Supabase provider callback to the selected Google OAuth client's
+   allowed redirects, preserving existing development callbacks. The frontend
+   site URL and its exact `/auth/callback` are already saved in UAT Supabase.
+3. Perform user-controlled sign-in and provision actual consented UAT content
+   and roles through an explicitly reviewed bootstrap process. No accounts,
+   organizations or events are currently seeded. Do not claim registration or
+   administrator journeys have been tested live against this empty dataset.
+4. Complete participant, physical-device, screen-reader and release gates;
+   configure hosted backup operations before broader use. The free evaluation
+   service is not a production availability or recovery promise.
+
+## Verified provisioning evidence
+
+The empty target was inspected before DDL. Connection to Supabase's session
+pooler succeeded with `sslmode=verify-full` and the provider CA. Separate
+`app_runtime` and `app_migrator` roles were created; explicit Alembic upgrade and
+application grant hardening completed. A runtime `CREATE TABLE` attempt was
+rejected, and neither browser role had SELECT access to public application
+tables. The private bucket and normalized WebP restriction were independently
+verified through the Storage server API. Both local datasets matched their
+preservation baselines: 76 fictional rows and two real-development rows across
+the original 41 tables. No local accounts were imported.
+
+The backend's `/health`, `/ready` and guest event listing returned 200. Profile,
+notifications and operations requests without authentication returned 401.
+Exact frontend CORS preflight passed; an untrusted origin was denied. Changing
+X-Forwarded-For alone retained the same pseudonymous limiter identity; forged
+CF-Connecting-IP requests were rejected with 403 at the provider edge and
+created no additional buckets. Maintenance recorded success without an error.
+
+The guarded hosted frontend build passed TypeScript, static generation and
+credential scans. An initial restricted Windows build hit EPERM creating a
+generated Next directory; the normal-permission build succeeded. Cloudflare
+confirmed 111/111 uploads and successful publication. The live browser loaded
+Discover with its genuine empty-state result, search controls, and signed-out
+My Events instructions. A separate non-browser HTTP probe to Pages received
+403; this is not recorded as an HTTP smoke-test pass. Browser navigation was
+verified directly. Supabase's public auth settings reported Google disabled;
+the visible sign-in button is not proof authentication is ready.
 
 The current Render code checks pass: 31 focused cases; combined with existing
 Sprint 25 configuration checks, 70 passed. These are local checks, not live
