@@ -16,7 +16,7 @@ rollback revision are in [artifact evidence](sprint30-artifact-results.json).
 | Original local datasets | 41 original-table aggregates preserved: 76 fictional rows and two real-development rows |
 | Sprint 28 recovery | Paired encrypted database/object restore and post-backup erasure replay passed; linked Sprint 28 record |
 | Sprint 29 frontend/accessibility | 178 frontend checks and 93 rendered checks passed; linked Sprint 29 record |
-| Sprint 30 clean-checkout CI | Pending push/run result; do not infer success from baseline |
+| Sprint 30 clean-checkout CI | Backend and frontend passed at 07ab1f42af1a7cfacc08608499dd3991ed0e8df1; [run 41607003536](https://github.com/Jonnywik/IntraSpot/actions/runs/41607003536) |
 
 The release rehearsal built two static exports and packaged API sources without
 copying local credential files. Both versions used reviewed mvp_0020 metadata;
