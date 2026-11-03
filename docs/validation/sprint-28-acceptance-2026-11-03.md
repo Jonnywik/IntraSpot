@@ -64,6 +64,13 @@ clean-checkout GitHub CI is checked separately after push. The last reconciliati
 fixture rerun passed (1 case, 2.32 s), using a real fictional organization so the
 new parent-lock safety check can record observations.
 
+Separate Supabase verification tests: 50 passed (23.18 s). Two legacy assertions
+were updated to preserve active-user synchronization coverage and require
+inactive users to be rejected before identity fields change. These are synthetic
+provider checks, not the deferred live positive PLM test. The first GitHub run
+for `54735aa` is superseded by this test-alignment follow-up; its frontend job
+passed and the subsequent complete CI result is recorded separately.
+
 ## Remaining release gates
 
 Private off-provider destination, key custody, weekly scheduling/alerts, separate

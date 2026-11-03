@@ -548,7 +548,7 @@ def test_different_subject_cannot_claim_existing_email(db, make_user):
     assert db.scalar(select(User).where(User.email == existing.email)).id == existing.id
 
 
-def test_email_sync_preserves_profile_grants_admin_and_inactive_state(
+def test_email_sync_preserves_active_profile_grants_and_admin(
     db, make_user, make_org
 ):
     from app.domains.organizations.models import OrgMembership
@@ -561,7 +561,7 @@ def test_email_sync_preserves_profile_grants_admin_and_inactive_state(
         pronouns="they/them",
         icebreaker="Preserved prompt",
         persona_visible=True,
-        active=False,
+        active=True,
         platform_admin=True,
     )
     organization = make_org(owner=user)
@@ -578,7 +578,7 @@ def test_email_sync_preserves_profile_grants_admin_and_inactive_state(
         )
     )
     assert updated.email == identity.email and updated.email_verified is False
-    assert updated.active is False and updated.platform_admin is True
+    assert updated.active is True and updated.platform_admin is True
     assert (updated.nickname, updated.age_bracket, updated.tags) == (
         "Preserved nickname",
         "25-34",
@@ -592,7 +592,7 @@ def test_email_sync_preserves_profile_grants_admin_and_inactive_state(
     assert membership is not None and membership.role == "owner" and membership.active is True
 
 
-def test_inactive_account_remains_denied_after_trusted_email_sync(db, make_user, monkeypatch):
+def test_inactive_account_is_denied_before_trusted_email_sync(db, make_user, monkeypatch):
     user = make_user(email="old@example.invalid", active=False, platform_admin=True)
     identity = supabase_auth.VerifiedSupabaseIdentity(
         user_id=user.id, email="new@example.com", email_verified=True
@@ -608,7 +608,7 @@ def test_inactive_account_remains_denied_after_trusted_email_sync(db, make_user,
 
     db.refresh(user)
     assert error.value.status == 401
-    assert user.email == identity.email and user.email_verified is True
+    assert user.email == "old@example.invalid" and user.email_verified is True
     assert user.active is False and user.platform_admin is True
 
 
