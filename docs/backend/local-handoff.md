@@ -1,8 +1,8 @@
 # IntraSpot local developer handoff
 
-Checkpoint: Sprint 29 deployment preparation, 2026-11-03. This is a local developer handoff, not a
+Checkpoint: Sprint 30 deployment preparation, 2026-11-03. This is a local developer handoff, not a
 real-user launch. Current evidence and remaining gates belong in the
-[Sprint 29 acceptance record](../validation/sprint-29-acceptance-2026-11-03.md).
+[Sprint 30 release ledger](../validation/sprint-30-acceptance-2026-11-03.md).
 Requirements remain in the canonical Obsidian AI Index and linked topic notes;
 workspace copies and generated Graphify output are navigation, not authority.
 

@@ -9,6 +9,7 @@ import math
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import timedelta, timezone
+from threading import BoundedSemaphore
 
 from fastapi import Request
 from sqlalchemy import delete, func, select, text
@@ -29,6 +30,9 @@ SENSITIVE_WRITES_PER_MINUTE = 10
 _BUCKET_TTL = timedelta(hours=24)
 _EXPIRY_DELETE_BATCH = 100
 _ACCOUNT_STATE_KEY = "intraspot.rate_limit.account_buckets"
+# Queue short standalone limiter transactions before checking out scarce pooled
+# connections. Account limits reuse the request transaction and need no slot.
+_owned_limiter_slot = BoundedSemaphore(1)
 
 
 def _unavailable() -> DomainError:
@@ -110,9 +114,14 @@ def _database_time(db):
 @contextmanager
 def _limiter_transaction(db: Session | None = None) -> Iterator[Session]:
     if db is None:
-        with session_factory()() as owned_db:
-            with owned_db.begin():
-                yield owned_db
+        if not _owned_limiter_slot.acquire(timeout=15):
+            raise _unavailable()
+        try:
+            with session_factory()() as owned_db:
+                with owned_db.begin():
+                    yield owned_db
+        finally:
+            _owned_limiter_slot.release()
         return
 
     if db.new or db.dirty or db.deleted:

@@ -1,6 +1,6 @@
 # IntraSpot local MVP
 
-Current developer checkpoint: **Sprint 29**. Accessible recovery and rendered
+Current developer checkpoint: **Sprint 30**. See [the release ledger](../validation/sprint-30-acceptance-2026-11-03.md) and [runbook](Release-runbook.md). Accessible recovery and rendered
 critical-flow checks are described in [Sprint 29](Sprint-29.md).
 Recovery, bounded retention and
 operator-mediated erasure are described in [Sprint 28](Sprint-28.md).

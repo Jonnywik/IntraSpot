@@ -1,0 +1,77 @@
+{
+  "artifactSha256": {
+    "candidateStatic": "40ec714f32aedf27e7f90d07e64fbc35dba73f129663deb8163631b6a1da18a9",
+    "oldS28Static": "413580839720365d1b9f894e702e93856f029a76cd3e77c7921436b3cf4f0395"
+  },
+  "counts": {
+    "anonymousProfileDenials": 3,
+    "guestDiscoveryTitles": 3,
+    "healthOk": 3,
+    "phaseCount": 3,
+    "privateProfileLeaks": 0,
+    "readyOk": 3,
+    "registrationPosts": 4,
+    "registrationReceiptsPerPhase": 3,
+    "registrationRowsPerPhase": 3,
+    "unchangedRetries": 3
+  },
+  "failureCount": 0,
+  "phases": {
+    "currentCandidate": {
+      "anonymousProfileDenials": 1,
+      "authenticatedGuestRequests": 0,
+      "browserDiscoveryResponses": 1,
+      "browserPrivateProfileLeaks": 0,
+      "browserTitleMatches": 1,
+      "fixtureAccountPickers": 0,
+      "guestDiscoveryTitles": 1,
+      "guestPrivateProfileLeaks": 0,
+      "healthOk": 1,
+      "readyOk": 1,
+      "registrationPosts": 1,
+      "registrationReceipts": 1,
+      "registrationRows": 1,
+      "unchangedRetries": 1
+    },
+    "oldS28Promotion": {
+      "anonymousProfileDenials": 1,
+      "authenticatedGuestRequests": 0,
+      "browserDiscoveryResponses": 1,
+      "browserPrivateProfileLeaks": 0,
+      "browserTitleMatches": 1,
+      "fixtureAccountPickers": 0,
+      "guestDiscoveryTitles": 1,
+      "guestPrivateProfileLeaks": 0,
+      "healthOk": 1,
+      "readyOk": 1,
+      "registrationPosts": 2,
+      "registrationReceipts": 1,
+      "registrationRows": 1,
+      "unchangedRetries": 1
+    },
+    "oldS28Rollback": {
+      "anonymousProfileDenials": 1,
+      "authenticatedGuestRequests": 0,
+      "browserDiscoveryResponses": 1,
+      "browserPrivateProfileLeaks": 0,
+      "browserTitleMatches": 1,
+      "fixtureAccountPickers": 0,
+      "guestDiscoveryTitles": 1,
+      "guestPrivateProfileLeaks": 0,
+      "healthOk": 1,
+      "readyOk": 1,
+      "registrationPosts": 1,
+      "registrationReceipts": 1,
+      "registrationRows": 1,
+      "unchangedRetries": 1
+    }
+  },
+  "sourceShas": {
+    "candidateBaseCommit": "d7590a3e1ae342b3d62b02fff358116351e5b401",
+    "rollbackCommit": "54735aa76f6a2a0bfbc285f0679fc3c0762fb558"
+  },
+  "sourceTreeSha256": {
+    "candidateWorkingTree": "67550c3bd3f96d28f5b87732b7a0bcf7e97d7790fdc980aee2d9cad3cea1284d",
+    "rollbackArchive": "fcd8ac88a51f57f5e874ae9f0b4278dbd1d9deeff01f0e321803a788dcb94d53"
+  }
+}

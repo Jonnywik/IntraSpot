@@ -1,6 +1,7 @@
 import json
 import logging
 import asyncio
+from threading import BoundedSemaphore
 from uuid import uuid4
 from alembic.config import Config
 from alembic.script import ScriptDirectory
@@ -18,6 +19,7 @@ from app.db.session import engine
 from app.maintenance import lifespan
 
 log = logging.getLogger('intraspot.actions')
+_ip_admission_slots = BoundedSemaphore(32)
 
 
 def create_app():
@@ -29,9 +31,23 @@ def create_app():
     app = FastAPI(title='IntraSpot local MVP', version='0.1.0', description=description, lifespan=lifespan)
     @app.middleware('http')
     async def ip_admission(request: Request, call_next):
-        from app.rate_limits import check_ip
+        from app.rate_limits import check_ip, _eligible, _unavailable
+        if not _eligible(request):
+            return await call_next(request)
+        if not _ip_admission_slots.acquire(blocking=False):
+            return await domain_error(request, _unavailable())
+
+        def admitted_check():
+            try:
+                check_ip(request)
+            finally:
+                _ip_admission_slots.release()
+
+        task = asyncio.create_task(asyncio.to_thread(admitted_check))
+        # A disconnected caller must not release capacity while its check is queued.
+        task.add_done_callback(lambda done: done.exception() if not done.cancelled() else None)
         try:
-            await asyncio.to_thread(check_ip, request)
+            await asyncio.shield(task)
         except DomainError as exc:
             return await domain_error(request, exc)
         return await call_next(request)
