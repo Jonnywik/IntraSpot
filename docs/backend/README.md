@@ -1,6 +1,8 @@
 # IntraSpot local MVP
 
-Current developer checkpoint: **Sprint 27**. Hosted configuration/CI is verified
+Current developer checkpoint: **Sprint 28**. Recovery, bounded retention and
+operator-mediated erasure are described in [Sprint 28](Sprint-28.md).
+Hosted configuration/CI is verified
 through `055cae5` (both GitHub jobs green); private media/accounting is described
 in [Sprint 26](Sprint-26.md). Bounded maintenance and shared limits are described
 in [Sprint 27](Sprint-27.md) and its [acceptance record](../validation/sprint-27-acceptance-2026-10-26.md).

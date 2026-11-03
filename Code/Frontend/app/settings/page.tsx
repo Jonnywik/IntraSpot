@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { DiscoveryPreferences } from '@/features/preferences/DiscoveryPreferences';
+import { ErasureRequest } from '@/features/privacy/ErasureRequest';
 import { useT } from '@/lib/i18n';
 import { usePreferences, type Preferences } from '@/lib/preferences';
 import styles from '@/features/preferences/preferences.module.css';
@@ -161,5 +162,6 @@ export default function SettingsPage() {
       </div>
     </section>
     <DiscoveryPreferences />
+    <ErasureRequest />
   </>;
 }

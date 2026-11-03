@@ -292,7 +292,13 @@ def _parse_media_id(media_id: str) -> str | None:
 
 
 def _valid_object_key(media_id: str, object_key: str) -> bool:
-    return object_key == f'{media_id}.webp' and len(object_key) <= 128
+    parsed_id = _parse_media_id(media_id)
+    return (
+        parsed_id is not None
+        and parsed_id == media_id
+        and object_key == f'{parsed_id}.webp'
+        and len(object_key) <= 128
+    )
 
 
 def _read_local(media_id: str) -> bytes | None:
@@ -368,9 +374,13 @@ def object_exists(media: MediaObject) -> bool:
         path = get_settings().media_root / media.object_key
         try:
             metadata = path.lstat()
-            return stat.S_ISREG(metadata.st_mode) and metadata.st_size == media.byte_size
+            if not stat.S_ISREG(metadata.st_mode):
+                raise MediaStorageError('Media object is not a regular file')
+            return True
         except FileNotFoundError:
             return False
+        except MediaStorageError:
+            raise
         except OSError:
             raise MediaStorageError('Media storage is unavailable') from None
     if media.provider != 'supabase':
@@ -390,4 +400,49 @@ def object_exists(media: MediaObject) -> bool:
             return False
         raise MediaStorageError('Media storage is unavailable') from None
     except Exception:
+        raise MediaStorageError('Media storage is unavailable') from None
+
+
+def delete_object(media: MediaObject) -> None:
+    """Delete one validated immutable key through its configured private provider."""
+    if not _valid_object_key(media.id, media.object_key):
+        raise MediaStorageError('Media object metadata is invalid')
+    if media.provider == 'local':
+        path = get_settings().media_root / media.object_key
+        try:
+            metadata = path.lstat()
+        except FileNotFoundError:
+            return
+        except OSError:
+            raise MediaStorageError('Media storage is unavailable') from None
+        if not stat.S_ISREG(metadata.st_mode):
+            raise MediaStorageError('Media object is not a regular file')
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            return
+        except OSError:
+            raise MediaStorageError('Media storage is unavailable') from None
+        return
+    if media.provider != 'supabase':
+        raise MediaStorageError('Media storage configuration is unavailable')
+
+    root, bucket, secret = _supabase_settings()
+    _private_bucket_verified()
+    request = urllib.request.Request(
+        f'{root}/storage/v1/object/{quote(bucket, safe="")}',
+        data=json.dumps({'prefixes': [media.object_key]}).encode('utf-8'),
+        headers={
+            'apikey': secret,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        method='DELETE',
+    )
+    try:
+        with _open_http(request) as response:
+            response.read(MAX_BUCKET_RESPONSE_BYTES)
+    except Exception:
+        # A timeout can occur after the provider removed the object. Keep the DB
+        # accounting row so the next confirmed-missing pass can release it safely.
         raise MediaStorageError('Media storage is unavailable') from None

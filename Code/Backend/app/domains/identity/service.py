@@ -76,8 +76,11 @@ def get_profile_user(db: Session, user_id: str) -> User | None:
 
 
 def update_profile(db: Session, user_id: str, changes: dict[str, object]) -> User | None:
-    user = get_active_user(db, user_id)
-    if user is None:
+    user = db.scalar(
+        select(User).where(User.id == user_id).with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    if user is None or not user.active:
         return None
     for field, value in changes.items():
         setattr(user, field, value)

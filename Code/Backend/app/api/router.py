@@ -26,6 +26,7 @@ def api_router():
     from app.notifications import notification_router
     from app.local_demo import router as local_demo
     from app.operations import router as operations
+    from app.erasure_routes import router as erasure
 
     router = APIRouter(prefix='/api/v1', responses={status: {'model': ErrorEnvelope}
         for status in (400, 401, 403, 404, 409, 422, 429, 500, 503)})
@@ -37,4 +38,5 @@ def api_router():
                    membership_applications, membership_access, notification_router(), local_demo):
         router.include_router(domain)
     router.include_router(operations)
+    router.include_router(erasure)
     return router

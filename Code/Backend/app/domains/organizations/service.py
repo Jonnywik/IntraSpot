@@ -71,6 +71,13 @@ def require_publishing(db: Session, actor: Actor, org_id: str) -> Organization:
 
 def create_organization(db: Session, actor: Actor, *, name: str, description: str) -> Organization:
     _require_eligible(actor)
+    from app.domains.identity.models import User
+    from app.domains.identity.service import email_is_eligible
+    # New organization creation serializes with account erasure on its creator.
+    user = db.scalar(select(User).where(User.id == actor.user_id).with_for_update()
+                     .execution_options(populate_existing=True))
+    if user is None or not user.active or not email_is_eligible(user.email, user.email_verified):
+        raise DomainError('organization_forbidden', 'Eligible IntraSpot access is required.', 403)
     organization = Organization(
         id=uid(),
         name=name,

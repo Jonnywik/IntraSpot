@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.communication import require_communication_allowed
@@ -8,6 +8,7 @@ from app.core.contracts import Actor
 from app.core.event_safety import can_read_event, event_is_terminal, require_mutable_event
 from app.core.errors import DomainError
 from app.domains.events.models import Event
+from app.domains.eventsafety.models import EventReport
 from app.domains.events.service import draft_version, require_draft_version
 from app.domains.organizations.models import Organization
 from app.domains.organizations.service import require_manager
@@ -194,6 +195,53 @@ def _private_access(db: Session, actor: Actor | None, org_id: str) -> None:
     require_manager(db, actor, org_id)
 
 
+def _can_read_retained_report_banner(
+    db: Session, actor: Actor | None, asset: MediaAsset
+) -> bool:
+    if actor is None:
+        return False
+
+    evidence_reference = f'"banner_media_id":"{asset.id}"'
+    base = (
+        EventReport.org_id == asset.org_id,
+        EventReport.status.in_(("open", "escalated")),
+        EventReport.deadline > func.clock_timestamp(),
+        EventReport.evidence.contains(evidence_reference),
+    )
+    organization_report = db.scalar(
+        select(EventReport.id)
+        .where(*base, EventReport.stage == "organization")
+        .limit(1)
+    )
+    if organization_report is not None:
+        from app.domains.eventsafety.service import _require_staff
+
+        try:
+            _require_staff(db, actor, asset.org_id)
+        except DomainError as error:
+            if error.status != 403:
+                raise
+        else:
+            return True
+
+    platform_report = db.scalar(
+        select(EventReport.id)
+        .where(*base, EventReport.stage == "platform")
+        .limit(1)
+    )
+    if platform_report is not None:
+        from app.domains.organizations.service import require_platform_admin
+
+        try:
+            require_platform_admin(db, actor)
+        except DomainError as error:
+            if error.status != 403:
+                raise
+        else:
+            return True
+    return False
+
+
 def authorize_and_read(db: Session, actor: Actor | None, media_id: str) -> bytes:
     asset = db.get(MediaAsset, media_id)
     if asset is None:
@@ -211,22 +259,24 @@ def authorize_and_read(db: Session, actor: Actor | None, media_id: str) -> bytes
             Event.org_id == asset.org_id,
         ))
         if event is None:
-            raise DomainError("media_not_found", "Media was not found.", 404)
-        organization = db.get(Organization, event.org_id)
-        if organization is None:
-            raise DomainError("media_not_found", "Media was not found.", 404)
-        if event_is_terminal(db, event):
-            if actor is None:
+            if not _can_read_retained_report_banner(db, actor, asset):
                 raise DomainError("media_not_found", "Media was not found.", 404)
-            _private_access(db, actor, organization.id)
-        elif event.status != "published" or organization.accreditation_status != "approved":
-            _private_access(db, actor, organization.id)
-        elif not can_read_event(
-            db,
-            event,
-            viewer_id=actor.user_id if actor is not None else None,
-        ):
-            raise DomainError("media_not_found", "Media was not found.", 404)
+        else:
+            organization = db.get(Organization, event.org_id)
+            if organization is None:
+                raise DomainError("media_not_found", "Media was not found.", 404)
+            if event_is_terminal(db, event):
+                if actor is None:
+                    raise DomainError("media_not_found", "Media was not found.", 404)
+                _private_access(db, actor, organization.id)
+            elif event.status != "published" or organization.accreditation_status != "approved":
+                _private_access(db, actor, organization.id)
+            elif not can_read_event(
+                db,
+                event,
+                viewer_id=actor.user_id if actor is not None else None,
+            ):
+                raise DomainError("media_not_found", "Media was not found.", 404)
     else:
         raise DomainError("media_not_found", "Media was not found.", 404)
 

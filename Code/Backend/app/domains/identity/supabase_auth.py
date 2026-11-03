@@ -20,6 +20,7 @@ from app.core.errors import DomainError
 from app.db.session import session_factory
 from app.domains.identity.models import User
 from app.domains.identity.service import actor_for_user, get_active_user
+from app.erasure_models import ErasedAccount
 
 
 _ALLOWED_ALGORITHMS = frozenset({"ES256", "RS256"})
@@ -284,6 +285,8 @@ def verify_supabase_identity(token: str, settings: Settings) -> VerifiedSupabase
 
 
 def _synchronize_trusted_email(db: Session, user: User, identity: VerifiedSupabaseIdentity) -> User:
+    if not user.active or db.get(ErasedAccount, user.id) is not None:
+        raise _authentication_error()
     if user.email == identity.email and user.email_verified is identity.email_verified:
         return user
     try:
@@ -298,8 +301,15 @@ def _synchronize_trusted_email(db: Session, user: User, identity: VerifiedSupaba
 
 def provision_supabase_user(db: Session, identity: VerifiedSupabaseIdentity) -> User:
     for attempt in range(_PROVISION_ATTEMPTS):
-        user = db.scalar(select(User).where(User.id == identity.user_id))
+        user = db.scalar(
+            select(User)
+            .where(User.id == identity.user_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
         if user is not None:
+            if not user.active or db.get(ErasedAccount, identity.user_id) is not None:
+                raise _authentication_error()
             return _synchronize_trusted_email(db, user, identity)
 
         email_owner = db.scalar(select(User).where(User.email == identity.email))
@@ -326,7 +336,12 @@ def provision_supabase_user(db: Session, identity: VerifiedSupabaseIdentity) -> 
             return user
         except IntegrityError:
             db.expire_all()
-            concurrent_user = db.scalar(select(User).where(User.id == identity.user_id))
+            concurrent_user = db.scalar(
+                select(User)
+                .where(User.id == identity.user_id)
+                .with_for_update()
+                .execution_options(populate_existing=True)
+            )
             if concurrent_user is not None:
                 return _synchronize_trusted_email(db, concurrent_user, identity)
             email_owner = db.scalar(select(User).where(User.email == identity.email))

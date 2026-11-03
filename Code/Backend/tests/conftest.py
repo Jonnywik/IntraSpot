@@ -31,7 +31,7 @@ def assert_test_target():
 @pytest.fixture(scope='session', autouse=True)
 def migrated_test_database():
     assert_test_target()
-    admin = create_engine(local_settings.database_url, isolation_level='AUTOCOMMIT')
+    admin = create_engine(local_settings.database_url, isolation_level='AUTOCOMMIT', connect_args={'connect_timeout': 2})
     with admin.connect() as connection:
         if not connection.scalar(text("SELECT 1 FROM pg_database WHERE datname='intraspot_mvp_test'")):
             connection.execute(text('CREATE DATABASE intraspot_mvp_test'))

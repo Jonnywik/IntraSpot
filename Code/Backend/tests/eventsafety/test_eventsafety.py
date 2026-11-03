@@ -240,7 +240,7 @@ def test_moderation_snapshot_is_bounded_public_text_and_org_scoped(
     }
     assert review["id"] == receipt["id"]
     snapshot = json.loads(review["evidence"])
-    assert set(snapshot) == {"title", "summary", "description", "venue_name", "venue_address"}
+    assert set(snapshot) == {"title", "summary", "description", "venue_name", "venue_address", "banner_media_id"}
     assert snapshot["title"].startswith("<b>Fictional gathering</b>")
     assert snapshot["description"].startswith("<script>private marker</script>")
     assert len(review["evidence"].encode("utf-8")) <= 4096

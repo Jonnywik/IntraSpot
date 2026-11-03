@@ -12,6 +12,7 @@ from app.db.session import get_db
 from app.db.models import now
 from app.operations_models import MaintenanceState
 from app.domains.registrations.models import RegistrationReceipt, Registration
+from app.erasure_models import ErasureRequest
 
 router = APIRouter(prefix='/platform/operations', tags=['operations'])
 
@@ -29,6 +30,7 @@ class OperationsView(BaseModel):
     maintenance: list[MaintenanceView]
     pending_receipts: int
     due_registrations: int
+    pending_erasure_requests: int
 
 
 @router.get('', response_model=OperationsView)
@@ -44,4 +46,6 @@ def status(actor: Actor = Depends(current_actor), db: Session = Depends(get_db, 
         and_(Registration.status == 'reconfirmation_required', Registration.reconfirm_deadline <= at),
     ))) or 0
     return OperationsView(maintenance=[MaintenanceView.model_validate(row, from_attributes=True) for row in rows],
-                          pending_receipts=count, due_registrations=due)
+                          pending_receipts=count, due_registrations=due,
+                          pending_erasure_requests=db.scalar(select(func.count()).select_from(ErasureRequest)
+                              .where(ErasureRequest.status != 'completed')) or 0)

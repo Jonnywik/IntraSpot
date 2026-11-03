@@ -12,6 +12,7 @@ def identifier(value: str) -> str:
 
 
 def harden(connection, runtime_role: str, migration_role: str) -> int:
+    from app.recovery_models import BackupSnapshot, BackupObjectReference  # noqa: F401
     from app.api.router import api_router
     from app.db.session import Base
     api_router()  # Register the application metadata without running migrations.

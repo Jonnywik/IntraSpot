@@ -280,12 +280,12 @@ def test_store_and_read_work_while_parent_holds_organization_lock(make_org, monk
         assert storage.read_webp(media_id, db=parent) == content
 
 
-def test_reconciliation_dry_run_does_not_change_ledger_or_delete_object(monkeypatch, tmp_path):
+def test_reconciliation_dry_run_does_not_change_ledger_or_delete_object(monkeypatch, tmp_path, make_org):
     _assert_test_database()
     settings = get_settings()
     monkeypatch.setattr(settings, 'media_root', tmp_path)
     media_id = str(uuid4())
-    org_id = str(uuid4())
+    org_id = make_org().id
     object_path = tmp_path / f'{media_id}.webp'
     object_path.write_bytes(b'webp fixture')
     with Session(engine()) as session, session.begin():
@@ -300,7 +300,7 @@ def test_reconciliation_dry_run_does_not_change_ledger_or_delete_object(monkeypa
     start = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
     dry_run = reconciliation.reconcile_media(at=start)
-    assert dry_run[0]['orphan_seen_count'] == 1
+    assert dry_run[0]['orphan_seen_count'] == 0
     assert dry_run[0]['orphan_candidate'] is False
     with Session(engine()) as session:
         unchanged = session.get(MediaObject, media_id)

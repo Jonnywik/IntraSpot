@@ -234,10 +234,11 @@ def _event_evidence(event: Event) -> str:
         name: (getattr(event, name) or "")[:limit]
         for name, limit in limits.items()
     }
+    snapshot['banner_media_id'] = event.banner_media_id or ''
     encoded = json.dumps(snapshot, ensure_ascii=False, separators=(",", ":"))
     encoded_size = len(encoded.encode("utf-8"))
     while encoded_size > 4096:
-        largest = max(snapshot, key=lambda name: len(snapshot[name].encode("utf-8")))
+        largest = max(limits, key=lambda name: len(snapshot[name].encode("utf-8")))
         trim = max(1, (encoded_size - 4096 + 1) // 2)
         snapshot[largest] = snapshot[largest][:-trim]
         encoded = json.dumps(snapshot, ensure_ascii=False, separators=(",", ":"))

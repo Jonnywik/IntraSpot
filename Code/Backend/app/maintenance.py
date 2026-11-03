@@ -69,7 +69,7 @@ def _decode_cursor(cursor: str | None) -> tuple[str | None, str | None, str]:
         return None, None, "e"
     try:
         event_cursor, org_cursor, next_scope = cursor.split(",")
-        if not event_cursor.startswith("e") or not org_cursor.startswith("o") or next_scope not in {"e", "o"}:
+        if not event_cursor.startswith("e") or not org_cursor.startswith("o") or next_scope not in {"e", "o", "r"}:
             raise ValueError
         return event_cursor[1:] or None, org_cursor[1:] or None, next_scope
     except ValueError:
@@ -87,7 +87,9 @@ def _cursor_after(cursor: str | None, target: _Target) -> str:
     event_cursor, org_cursor, _ = _decode_cursor(cursor)
     if target.scope == "e":
         return _encode_cursor(target.target_id, org_cursor, "o")
-    return _encode_cursor(event_cursor, target.target_id, "e")
+    if target.scope == "o":
+        return _encode_cursor(event_cursor, target.target_id, "r")
+    return _encode_cursor(event_cursor, org_cursor, "e")
 
 
 def _set_timeouts(db, deadline: float) -> None:
@@ -117,7 +119,11 @@ def _next_target(factory, cursor: str | None, deadline: float) -> _Target | None
     event_cursor, org_cursor, next_scope = _decode_cursor(cursor)
     with _session(factory) as db, db.begin():
         _set_timeouts(db, deadline)
-        for scope in (next_scope, "o" if next_scope == "e" else "e"):
+        scopes = ['e', 'o', 'r']
+        start = scopes.index(next_scope)
+        for scope in scopes[start:] + scopes[:start]:
+            if scope == 'r':
+                return _Target('r', 'content-retention')
             after = event_cursor if scope == "e" else org_cursor
             target_id = _first_id(db, scope, after)
             if target_id is not None:
@@ -187,7 +193,7 @@ def _process_target(factory, target: _Target, cursor: str | None, following: str
                 catch_up_reports_locked(db, event, boundary)
                 _set_timeouts(db, deadline)
                 purge_event_chat_locked(db, event, boundary)
-        else:
+        elif target.scope == 'o':
             organization = db.scalar(
                 select(Organization).where(Organization.id == target.target_id).with_for_update()
                 .execution_options(populate_existing=True)
@@ -206,6 +212,15 @@ def _process_target(factory, target: _Target, cursor: str | None, following: str
                 catch_up_invitations_locked(db, organization.id, boundary)
                 _set_timeouts(db, deadline)
                 catch_up_announcement_reports_locked(db, organization.id, boundary)
+        else:
+            from app.retention import purge_announcement_content
+            from app.account_erasure import purge_erasure_receipts, purge_erased_content
+            _set_timeouts(db, deadline)
+            purged = purge_erasure_receipts(db, limit=10)
+            _set_timeouts(db, deadline)
+            purged += purge_erased_content(db, limit=min(40, 100-purged))
+            _set_timeouts(db, deadline)
+            purge_announcement_content(db=db, limit=max(1, 100-purged))
         _set_timeouts(db, deadline)
         _move_cursor(db, cursor, following, processed=True)
     return "processed", receipts
@@ -368,7 +383,7 @@ def run_pass() -> dict:
             summary["receipts_processed"] += receipts
             if target.scope == "e":
                 summary["events_processed"] += 1
-            else:
+            elif target.scope == 'o':
                 summary["organizations_processed"] += 1
         if summary["status"] == "ok" and (summary["failed"] or summary["skipped_busy"] or summary["skipped_backoff"]):
             summary["status"] = "partial"

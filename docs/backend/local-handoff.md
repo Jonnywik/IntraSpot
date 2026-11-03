@@ -1,8 +1,8 @@
 # IntraSpot local developer handoff
 
-Checkpoint: Sprint 27 deployment preparation, 2026-10-26. This is a local developer handoff, not a
+Checkpoint: Sprint 28 deployment preparation, 2026-11-03. This is a local developer handoff, not a
 real-user launch. Current evidence and remaining gates belong in the
-[Sprint 27 acceptance record](../validation/sprint-27-acceptance-2026-10-26.md).
+[Sprint 28 acceptance record](../validation/sprint-28-acceptance-2026-11-03.md).
 Requirements remain in the canonical Obsidian AI Index and linked topic notes;
 workspace copies and generated Graphify output are navigation, not authority.
 
@@ -32,7 +32,7 @@ rtk proxy docker compose --env-file .env.local up -d --wait
 rtk proxy .venv/Scripts/python.exe -m alembic current
 ```
 
-The reviewed schema head is `mvp_0019`. If it is behind, review the pending
+The reviewed schema head is `mvp_0020`. If it is behind, review the pending
 migration, then apply it explicitly with `rtk proxy .venv/Scripts/python.exe -m
 alembic upgrade head`. Startup never performs migrations. Preserve a database
 backup before a schema change; do not downgrade nonempty safety/attendance history.

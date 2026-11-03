@@ -47,3 +47,10 @@ retained. Full two-process promotion/failure/load rehearsal remains Sprint 30.
 Actual Koyeb ingress, verified hosted TLS/pooler/roles and Storage configuration
 remain external gates. Human, physical-device, assistive-technology and positive
 PLM checks remain pending/deferred. No participant result is claimed.
+
+## Remote checkpoint verification
+
+GitHub run [40335455807](https://github.com/Jonnywik/IntraSpot/actions/runs/40335455807)
+completed successfully for backend and frontend at
+`225da97c7e0e1d97187e28f12b9acf64fef1f58a`. This supersedes the failed Sprint 26
+remote run for the corrected migration expectations and visibility mocks.

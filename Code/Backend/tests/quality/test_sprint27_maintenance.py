@@ -25,14 +25,14 @@ def clear_maintenance_backoff():
 def test_pass_is_bounded_and_fair_across_event_and_org_scopes(db, make_org, make_event, monkeypatch):
     organizations = [make_org(), make_org()]
     events = [make_event(org=org) for org in organizations]
-    monkeypatch.setattr(maintenance, "_MAX_TARGETS", 2)
+    monkeypatch.setattr(maintenance, "_MAX_TARGETS", 3)
 
     first = maintenance.run_pass()
-    assert (first["processed"], first["events_processed"], first["organizations_processed"]) == (2, 1, 1)
+    assert (first["processed"], first["events_processed"], first["organizations_processed"]) == (3, 1, 1)
     first_event, first_org, _ = maintenance._decode_cursor(db.get(MaintenanceState, "deadline-maintenance").cursor)
 
     second = maintenance.run_pass()
-    assert (second["processed"], second["events_processed"], second["organizations_processed"]) == (2, 1, 1)
+    assert (second["processed"], second["events_processed"], second["organizations_processed"]) == (3, 1, 1)
     db.expire_all()
     second_event, second_org, _ = maintenance._decode_cursor(db.get(MaintenanceState, "deadline-maintenance").cursor)
     assert first_event in {event.id for event in events} and second_event in {event.id for event in events}

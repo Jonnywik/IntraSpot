@@ -155,7 +155,7 @@ def test_report_receipts_escalate_by_distinct_reporters_without_auto_hiding(
     first_review = next(item for item in queue.json() if item["id"] == original["id"])
     assert first_review["evidence"]
     evidence = json.loads(first_review["evidence"])
-    assert set(evidence) == {"title", "summary", "description", "venue_name", "venue_address"}
+    assert set(evidence) == {"title", "summary", "description", "venue_name", "venue_address", "banner_media_id"}
     assert len(first_review["evidence"]) <= 4096
     assert len(evidence["description"]) <= 2200
     assert reporter_a.email not in queue.text
