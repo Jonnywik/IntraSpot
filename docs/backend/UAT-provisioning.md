@@ -1,7 +1,13 @@
 # Preliminary UAT provisioning
 
-Status: guest UAT preview live, 2026-11-03. Signed-in UAT remains blocked on
-Google provider configuration in the new Supabase project.
+Status: UAT paused at the user's request, 2026-11-03. Render service
+`srv-dbksqep5efls73firrvg` is suspended; the main Pages domain displays a static
+"Testing is paused" notice. Supabase data, sample events and the original
+frontend deployment are retained. Historical deployment URLs may still serve
+the old static interface, but its backend is suspended. To resume after user
+authorization, resume Render and restore the original frontend deployment
+`95499d3d-3738-4860-9cd7-d8d26ad1d9b0` or its retained verified artifact, then
+recheck connectivity. Signed-in UAT still needs Google provider configuration.
 
 Frontend: https://intraspot-uat.pages.dev
 
