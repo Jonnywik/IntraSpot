@@ -32,9 +32,9 @@ and importing either local development dataset are outside this authorization.
    allowed redirects, preserving existing development callbacks. The frontend
    site URL and its exact `/auth/callback` are already saved in UAT Supabase.
 3. Perform user-controlled sign-in and provision actual consented UAT content
-   and roles through an explicitly reviewed bootstrap process. No accounts,
-   organizations or events are currently seeded. Do not claim registration or
-   administrator journeys have been tested live against this empty dataset.
+   and roles through an explicitly reviewed bootstrap process. Only the labeled
+   sample content described below is seeded. Do not claim registration or
+   administrator journeys have been tested live against the sample dataset.
 4. Complete participant, physical-device, screen-reader and release gates;
    configure hosted backup operations before broader use. The free evaluation
    service is not a production availability or recovery promise.
@@ -67,6 +67,19 @@ My Events instructions. A separate non-browser HTTP probe to Pages received
 403; this is not recorded as an HTTP smoke-test pass. Browser navigation was
 verified directly. Supabase's public auth settings reported Google disabled;
 the visible sign-in button is not proof authentication is ready.
+
+## User-authorized sample content, 2026-11-03
+
+After publication the user explicitly requested dummy events on the live site.
+Six upcoming scheduled events and four fictional organizations were added only
+to UAT, all named `[SAMPLE]` with descriptions explaining that no real activity,
+venue booking or PLM accreditation is represented. Events cover design, coding,
+music, volunteering, heritage and campus introductions. They use existing artwork
+and genuine zero attendance/reaction counts. One inactive, unverified, non-admin
+attribution record with a reserved `.example` address satisfies foreign keys;
+no Supabase identity, usable login, membership or authentication bypass was added.
+Deterministic IDs make the seed repeat-safe. No local dataset was imported.
+The live API returned the sample events and the live browser displayed all six.
 
 The current Render code checks pass: 31 focused cases; combined with existing
 Sprint 25 configuration checks, 70 passed. These are local checks, not live
