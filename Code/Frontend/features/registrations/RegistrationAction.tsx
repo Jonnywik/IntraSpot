@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { ApiError, api } from '@/lib/api';
+import { Feedback } from '@/components/feedback';
 import { formatDate, formatTime } from '@/lib/date';
 import { useT } from '@/lib/i18n';
+import { isRetryableApiError, recoveryMessage } from '@/lib/recovery';
 import { usePreferences } from '@/lib/preferences';
 import { useSession } from '@/lib/session';
 import { useApiResource } from '@/lib/use-api-resource';
@@ -58,6 +60,10 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
   const dialog = useRef<HTMLElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const outcome = useRef<HTMLDivElement>(null);
+  const outsideError = useRef<HTMLDivElement>(null);
+  const inlineError = useRef<HTMLDivElement>(null);
+  const warningError = useRef<HTMLElement>(null);
+  const retryingRegistrationRead = useRef(false);
   const confirmationDialogId = `registration-confirmation-${event.id}`;
   const confirmationTitleId = `${confirmationDialogId}-title`;
   const confirmationFactsId = `${confirmationDialogId}-facts`;
@@ -121,6 +127,22 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
     if (submittedResult) outcome.current?.focus();
   }, [submittedResult]);
 
+  useEffect(() => {
+    if (!retryingRegistrationRead.current || registrations.loading) return;
+    retryingRegistrationRead.current = false;
+    if (!registrations.error) {
+      if (result) outcome.current?.focus();
+      else trigger.current?.focus();
+    }
+  }, [registrations.data, registrations.error, registrations.loading, result]);
+
+  useEffect(() => {
+    if (!error) return;
+    if (!open) outsideError.current?.focus();
+    else if (error.code === 'blocked_attendee_warning') warningError.current?.focus();
+    else inlineError.current?.focus();
+  }, [error, open]);
+
   async function refreshBlockWarning() {
     if (!token) return;
     const requestController = new AbortController();
@@ -147,12 +169,17 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
     setOpen(false);
   }
 
-  const retryable = error !== null && (error.status === 0 || error.status >= 500);
+  function retryRegistrationRead() {
+    retryingRegistrationRead.current = true;
+    registrations.reload();
+  }
+
+  const retryable = isRetryableApiError(error);
   const blockedWarningConflict = error?.code === 'blocked_attendee_warning';
   const requiresBlockAcknowledgement = blockWarning || serverWarning;
   const registrationErrorMessage = blockedWarningConflict
     ? t('A block warning needs your attention before you register.')
-    : error ? t(error.message) : null;
+    : error ? recoveryMessage(error, t) : null;
   const profileClue = error !== null &&
     ['profile_incomplete', 'registration_ineligible', 'plm_email_required'].includes(error.code);
   const registrationMode = event.registration_mode;
@@ -329,11 +356,15 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
   if (now === null) {
     return <p className="muted" role="status">{t('Checking availability…')}</p>;
   }
-  if (registrations.loading) return <p className="muted" role="status">{t('Checking registration access…')}</p>;
-  if (registrations.error) return <div className="panel error" role="alert">
-    <p>{t(registrations.error.message)}</p>
-    <button className="button button-secondary" type="button" onClick={registrations.reload}>{t('Retry')}</button>
-  </div>;
+  if (registrations.loading || registrations.error) return (
+    <Feedback
+      loading={registrations.loading}
+      error={registrations.error}
+      onRetry={retryRegistrationRead}
+      focusError
+      loadingMessage="Checking registration access…"
+    />
+  );
 
   return (
     <div className="stack">
@@ -350,7 +381,7 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
       </button>
 
       {error && !open ? (
-        <div className="panel error" role="alert">
+        <div ref={outsideError} className="panel error" role="alert" aria-live="assertive" aria-atomic="true" tabIndex={-1}>
           <p>{registrationErrorMessage}</p>
           {profileClue ? <p><Link href="/profile">{t('Review your profile before trying again.')}</Link></p> : null}
           {retryable ? (
@@ -430,7 +461,7 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
               </div>
             ) : null}
             {requiresBlockAcknowledgement ? (
-              <section className={`panel error ${styles.personaConsentBlock}`} role="alert" aria-describedby={blockWarningHelpId}>
+              <section ref={warningError} className={`panel error ${styles.personaConsentBlock}`} role="alert" aria-describedby={blockWarningHelpId} tabIndex={-1}>
                 <p id={blockWarningHelpId}>{t(serverWarning
                   ? 'The server found that someone you blocked is confirmed for this event. Their identity is not shown.'
                   : 'Someone you blocked is confirmed for this event. Their identity is not shown.')}</p>
@@ -457,7 +488,7 @@ function RegistrationActionSession({ event, onOutcome }: { event: PublicEvent; o
               </section>
             ) : null}
             {error && !blockedWarningConflict ? (
-              <div className="panel error" role="alert" aria-live="assertive">
+              <div ref={inlineError} className="panel error" role="alert" aria-live="assertive" aria-atomic="true" tabIndex={-1}>
                 <p>{registrationErrorMessage}</p>
                 {profileClue ? <p><Link href="/profile">{t('Review your profile before trying again.')}</Link></p> : null}
               </div>

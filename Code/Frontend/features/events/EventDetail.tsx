@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { api } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+import { ApiError, api } from "@/lib/api";
 import { EventArtwork } from "@/app/event-artwork";
 import { FeaturedBadge } from "@/features/featured/FeaturedBadge";
 import { Feedback } from "@/components/feedback";
@@ -12,6 +12,7 @@ import { useApiResource } from "@/lib/use-api-resource";
 import { useSession } from "@/lib/session";
 import { useT } from "@/lib/i18n";
 import { usePreferences } from "@/lib/preferences";
+import { recoveryMessage } from "@/lib/recovery";
 import { formatDate, formatTime } from "@/lib/date";
 import type { PublicEvent } from "@/lib/types";
 import { EventSocial } from "@/features/communication/EventSocial";
@@ -40,24 +41,39 @@ export function EventDetail() {
   const searchParams = useSearchParams();
   const eventId = searchParams.get("eventId");
   const { token, version } = useSession();
+  const heading = useRef<HTMLHeadingElement>(null);
+  const retryingDetails = useRef(false);
   const eventResource = useApiResource<PublicEvent>(
     eventId ? "/events/" + encodeURIComponent(eventId) : null,
     token,
   );
   const [updatedEvent, setUpdatedEvent] = useState<PublicEvent | null>(null);
-  const [countsError, setCountsError] = useState(false);
+  const [countsError, setCountsError] = useState<ApiError | null>(null);
   const [planningRevision, setPlanningRevision] = useState(0);
   const event = updatedEvent?.id === eventId ? updatedEvent : eventResource.data;
   const tags = event ? publicEventTags(event) : [];
   const coarseArea = event ? publicEventArea(event) : null;
+  useEffect(() => {
+    if (!retryingDetails.current || eventResource.loading) return;
+    retryingDetails.current = false;
+    if (eventResource.data) heading.current?.focus();
+  }, [eventResource.data, eventResource.loading]);
+
+  function retryEventDetails() {
+    retryingDetails.current = true;
+    eventResource.reload();
+  }
+
   async function refreshCounts() {
     if (!eventId) return;
     try {
       const current = await api<PublicEvent>("/events/" + encodeURIComponent(eventId), {token});
       setUpdatedEvent(current);
       setPlanningRevision(value => value + 1);
-      setCountsError(false);
-    } catch { setCountsError(true); }
+      setCountsError(null);
+    } catch (error) {
+      setCountsError(error instanceof ApiError ? error : new ApiError(0, 'request_failed', 'Attendance counts could not refresh.'));
+    }
   }
 
   return (
@@ -67,7 +83,7 @@ export function EventDetail() {
           <Link href="/" className="text-action">{t("← Discover")}</Link>
         </nav>
         <p className="eyebrow">{t("Public event")}</p>
-        <h1>{event?.title ?? t("Event details")}</h1>
+        <h1 ref={heading} tabIndex={-1}>{event?.title ?? t("Event details")}</h1>
       </header>
 
       {!eventId ? (
@@ -76,7 +92,7 @@ export function EventDetail() {
           <Link className="button button-secondary" href="/">{t("Back to Discover")}</Link>
         </div>
       ) : (
-        <Feedback loading={eventResource.loading} error={eventResource.error} onRetry={eventResource.reload}>
+        <Feedback loading={eventResource.loading} error={eventResource.error} onRetry={retryEventDetails} focusError>
           {event && (
             <article className={`panel stack ${styles.detailPanel}`}>
               <div>
@@ -117,8 +133,10 @@ export function EventDetail() {
                 onReactionChanged={refreshCounts}
               />
               {countsError && (
-                <div className={styles.refreshNotice} role="status" aria-live="polite">
-                  <p>{t("Attendance counts could not refresh.")}</p>
+                <div className={styles.refreshNotice} role="status" aria-live="polite" aria-atomic="true">
+                  <p>{countsError.status === 429 || countsError.status === 503
+                    ? recoveryMessage(countsError, t)
+                    : t("Attendance counts could not refresh.")}</p>
                   <button
                     className="text-action"
                     type="button"

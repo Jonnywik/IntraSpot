@@ -395,3 +395,26 @@ Object.assign(messages, {
   "Your profile was saved, but the session could not be refreshed. {message}": { en: "Your profile was saved, but the session could not be refreshed. {message}", fil: "Na-save ang profile mo ngunit hindi ma-refresh ang session. {message}" },
   "The profile could not be saved. Retry when the local backend is ready.": { en: "The profile could not be saved. Retry when the local backend is ready.", fil: "Hindi ma-save ang profile. Subukan muli kapag handa na ang lokal na backend." },
 });
+
+Object.assign(messages, {
+  "Too many requests. Please wait before trying again.": {
+    en: "Too many requests. Please wait before trying again.",
+    fil: "Napakaraming kahilingan. Maghintay muna bago sumubok muli.",
+  },
+  "Too many requests. Please wait one second before trying again.": {
+    en: "Too many requests. Please wait one second before trying again.",
+    fil: "Napakaraming kahilingan. Maghintay nang isang segundo bago sumubok muli.",
+  },
+  "Too many requests. Please wait {seconds} seconds before trying again.": {
+    en: "Too many requests. Please wait {seconds} seconds before trying again.",
+    fil: "Napakaraming kahilingan. Maghintay nang {seconds} segundo bago sumubok muli.",
+  },
+  "Too many requests. You can try again now.": {
+    en: "Too many requests. You can try again now.",
+    fil: "Napakaraming kahilingan. Maaari ka nang sumubok muli ngayon.",
+  },
+  "The service is starting or temporarily unavailable. Please wait a moment, then retry.": {
+    en: "The service is starting or temporarily unavailable. Please wait a moment, then retry.",
+    fil: "Nagsisimula pa o pansamantalang hindi available ang serbisyo. Maghintay sandali at subukan muli.",
+  },
+});

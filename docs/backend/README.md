@@ -1,6 +1,8 @@
 # IntraSpot local MVP
 
-Current developer checkpoint: **Sprint 28**. Recovery, bounded retention and
+Current developer checkpoint: **Sprint 29**. Accessible recovery and rendered
+critical-flow checks are described in [Sprint 29](Sprint-29.md).
+Recovery, bounded retention and
 operator-mediated erasure are described in [Sprint 28](Sprint-28.md).
 Hosted configuration/CI is verified
 through `055cae5` (both GitHub jobs green); private media/accounting is described

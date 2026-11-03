@@ -256,6 +256,10 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
   const [submittedReconfirmations, setSubmittedReconfirmations] = useState<Record<string, number>>({});
   const mutation = useRef<AbortController | null>(null);
   const tabButtons = useRef<Partial<Record<RegistrationTab, HTMLButtonElement>>>({});
+  const registrationPanel = useRef<HTMLDivElement>(null);
+  const retryingRegistrations = useRef(false);
+  const withdrawSuccessStatus = useRef<HTMLParagraphElement>(null);
+  const reconfirmSuccessStatus = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     const firstUpdate = window.setTimeout(() => setNow(Date.now()), 0);
@@ -266,6 +270,20 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
       mutation.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (!retryingRegistrations.current || loading) return;
+    retryingRegistrations.current = false;
+    if (!error) registrationPanel.current?.focus();
+  }, [error, loading]);
+
+  useEffect(() => {
+    if (withdrawSuccess) withdrawSuccessStatus.current?.focus();
+  }, [withdrawSuccess]);
+
+  useEffect(() => {
+    if (reconfirmSuccess) reconfirmSuccessStatus.current?.focus();
+  }, [reconfirmSuccess]);
 
   async function withdraw(registration: AttendeeMyRegistration) {
     if (!token || mutation.current || !['confirmed', 'waitlisted', 'pending'].includes(registration.status)) return;
@@ -374,6 +392,11 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
   function refreshRegistration(registrationId: string) {
     setWithdrawError((current) => current?.id === registrationId ? null : current);
     setReconfirmError((current) => current?.id === registrationId ? null : current);
+    reload();
+  }
+
+  function retryRegistrations() {
+    retryingRegistrations.current = true;
     reload();
   }
 
@@ -507,8 +530,8 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
           </button>
         ))}
       </div>
-      {reconfirmSuccess ? <p className="panel muted" role="status">{reconfirmSuccess}</p> : null}
-      {withdrawSuccess ? <p className="panel success" role="status">{withdrawSuccess}</p> : null}
+      {reconfirmSuccess ? <p ref={reconfirmSuccessStatus} className="panel muted" role="status" aria-live="polite" aria-atomic="true" aria-label={reconfirmSuccess} tabIndex={0}>{reconfirmSuccess}</p> : null}
+      {withdrawSuccess ? <p ref={withdrawSuccessStatus} className="panel success" role="status" aria-live="polite" aria-atomic="true" aria-label={withdrawSuccess} tabIndex={0}>{withdrawSuccess}</p> : null}
       {tab === 'confirmed' && ownConfirmedConflicts.length ? (
         <aside className="panel muted" role="status">
           <p>{t('Schedule conflicts with your confirmed events:')}</p>
@@ -524,8 +547,8 @@ function MyEventsContent({initialTab}: {initialTab: RegistrationTab}) {
         </aside>
       ) : null}
 
-      <div id="registration-panel" className={attendeeStyles.registrationPanel} role="tabpanel" aria-labelledby={`registration-tab-${tab}`} tabIndex={0}>
-        <Feedback loading={loading} error={error ? new Error(t(error.message)) : null} onRetry={reload}>
+      <div ref={registrationPanel} id="registration-panel" className={attendeeStyles.registrationPanel} role="tabpanel" aria-labelledby={`registration-tab-${tab}`} tabIndex={0}>
+        <Feedback loading={loading} error={error} onRetry={retryRegistrations} focusError>
           <div className="stack">
             {visibleRegistrations.length
               ? view === 'list'
