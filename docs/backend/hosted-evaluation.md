@@ -5,6 +5,31 @@ empty Supabase project and never import either local development dataset.
 Provider configuration, actual TLS connectivity and live OAuth require separate
 available access; local protocol tests are not proof those settings were applied.
 
+## Render UAT alternative
+
+On 2026-11-03 the user approved Render Free instead of Koyeb after the new
+Koyeb account offered no free deployment. Render is an additional supported
+boundary; the local and Koyeb profiles remain available. Select
+`TRUSTED_PROXY=render` and the exact assigned HTTPS `*.onrender.com` API origin.
+Startup validates Render's documented web-service identity and matching external
+hostname/URL. Do not set provider identity variables yourself.
+
+Use the existing root Dockerfile, one worker, no persistent disk, manual deploys,
+and `/ready` as the HTTP health-check path. Retain Supabase for durable data and
+private media; do not provision a Render database. Keep the compute plan Free,
+do not add billing or upgrade automatically, and expect cold starts after idle.
+
+For this boundary only, the limiter consumes one valid `CF-Connecting-IP` header
+and ignores `X-Forwarded-For`. Missing or ambiguous connecting-IP headers fail
+closed. Before marking the host verified, check that Render's public ingress
+overwrites forged connecting-IP headers and that changing forwarded headers
+does not create extra IP-limit buckets. Local unit tests alone cannot prove the
+provider's live forwarding behavior.
+
+Current provisioning evidence and outstanding actions are tracked in
+[UAT provisioning](UAT-provisioning.md). A reserved hostname is not a deployed
+or verified application.
+
 ## Environment and database roles
 
 Runtime secrets are injected by the host, never placed in Git or a frontend

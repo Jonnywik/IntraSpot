@@ -80,6 +80,16 @@ def _client_ip(request: Request, trusted_proxy: str) -> str:
     peer_ip = _normalize_ip(client.host if client is not None else None)
     if trusted_proxy == "none":
         return peer_ip
+    if trusted_proxy == "render":
+        connecting_ips = []
+        for name, value in request.scope.get("headers", ()):
+            if not isinstance(name, bytes) or not isinstance(value, bytes):
+                raise ValueError("invalid raw header")
+            if name.lower() == b"cf-connecting-ip":
+                connecting_ips.append(value.decode("ascii"))
+        if len(connecting_ips) != 1:
+            raise ValueError("Render connecting IP header must appear once")
+        return _normalize_ip(connecting_ips[0])
     if trusted_proxy != "koyeb":
         raise ValueError("invalid trusted proxy")
 

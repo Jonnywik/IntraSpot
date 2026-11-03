@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     maintenance_interval_seconds: Literal[30] = 30
     rate_limit_enabled: bool = False
     rate_limit_secret: str | None = Field(default=None, repr=False)
-    trusted_proxy: Literal['none', 'koyeb'] = 'none'
+    trusted_proxy: Literal['none', 'koyeb', 'render'] = 'none'
     jwt_issuer: str = 'urn:intraspot:local'
     jwt_audience: str = 'intraspot-api'
     jwt_public_key_file: Path = ROOT / '.local/public.pem'
@@ -105,8 +105,8 @@ class Settings(BaseSettings):
         return self
 
     def _validate_hosted_boundary(self):
-        if not self.maintenance_enabled or not self.rate_limit_enabled or self.trusted_proxy != 'koyeb':
-            raise ValueError('Hosted evaluation requires maintenance, rate limiting and the Koyeb-only edge boundary')
+        if not self.maintenance_enabled or not self.rate_limit_enabled or self.trusted_proxy not in {'koyeb', 'render'}:
+            raise ValueError('Hosted evaluation requires maintenance, rate limiting and a supported edge boundary')
         if self.auth_provider != 'supabase' or self.fixture_auth:
             raise ValueError('Hosted configuration requires Supabase auth with fixture auth disabled')
         if self.media_provider != 'supabase' or not re.fullmatch(r'sb_secret_[A-Za-z0-9_-]{10,256}', self.supabase_storage_secret or ''):
@@ -124,6 +124,12 @@ class Settings(BaseSettings):
             raise ValueError('Use the public Supabase publishable key, never an admin key or legacy token')
         if not self.public_api_url or not _is_public_https_root(self.public_api_url):
             raise ValueError('Configure the public API as one exact HTTPS origin')
+        if self.trusted_proxy == 'render':
+            public_hostname = urlsplit(self.public_api_url).hostname
+            if not public_hostname or not re.fullmatch(
+                r'(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+onrender\.com', public_hostname
+            ):
+                raise ValueError('Render hosting requires its exact HTTPS onrender.com API origin')
         if (not self.cors_origins or len(set(self.cors_origins)) != len(self.cors_origins)
                 or any(not _is_public_https_root(origin) for origin in self.cors_origins)):
             raise ValueError('Hosted CORS requires exact public HTTPS frontend origins')
